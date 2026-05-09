@@ -447,7 +447,7 @@ export default function Transfers() {
                 <div className="space-y-3">{[...Array(3)].map((_, i) => <Skeleton key={i} className="h-16 w-full rounded-lg" />)}</div>
               ) : transfers && transfers.length > 0 ? (
                 <div className="space-y-2">
-                  {transfers.slice(0, 8).map(t => {
+                  {transfers.map(t => {
                     const from = accounts?.find(a => a.id === t.fromAccountId);
                     const to = accounts?.find(a => a.id === t.toAccountId);
                     return (
@@ -473,7 +473,12 @@ export default function Transfers() {
                               <span className="text-[10px] text-gray-400 font-mono">{t.referenceNumber}</span>
                             )}
                           </div>
-                          <p className="text-xs text-gray-400 mt-0.5">{scDate(t.date)}{t.memo ? ` · ${t.memo}` : ""}</p>
+                          <p className="text-xs text-gray-400 mt-0.5">
+                            {t.status === "reversed" && t.reversedAt
+                              ? `Reversed ${scDate(t.reversedAt.slice(0, 10))}`
+                              : scDate(t.date)}
+                            {t.memo ? ` · ${t.memo}` : ""}
+                          </p>
                         </div>
                         <div className="flex flex-col items-end gap-1 flex-shrink-0">
                           <span className="text-sm font-semibold text-[#1a2b5e]">{fmt(t.amount)}</span>

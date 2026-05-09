@@ -4,9 +4,13 @@ import { logger } from "./logger";
 const MEMBER_NAME = "Dax Emry Brooks";
 const MEMBER_EMAIL = "daxemry5855@gmail.com";
 
+function senderAddress(): string {
+  return process.env.GMAIL_USER ?? process.env.ADMIN_EMAIL ?? MEMBER_EMAIL;
+}
+
 function createTransporter() {
   const pass = process.env.GMAIL_APP_PASSWORD;
-  const user = process.env.GMAIL_USER ?? process.env.ADMIN_EMAIL ?? MEMBER_EMAIL;
+  const user = senderAddress();
   if (!pass) return null;
   return nodemailer.createTransport({
     service: "gmail",
@@ -106,7 +110,7 @@ export async function sendTransferConfirmation(opts: {
   `;
   try {
     await transporter.sendMail({
-      from: `Heritage Credit Union <${to}>`,
+      from: `Heritage Credit Union <${senderAddress()}>`,
       to,
       subject: `Transfer Initiated — ${fmt(opts.amount)} · Ref ${opts.referenceNumber}`,
       html: htmlWrapper("Transfer Confirmation Receipt", body),
@@ -146,7 +150,7 @@ export async function sendTransferReversalEmail(opts: {
   `;
   try {
     await transporter.sendMail({
-      from: `Heritage Credit Union <${to}>`,
+      from: `Heritage Credit Union <${senderAddress()}>`,
       to,
       subject: `Transfer Reversed — ${fmt(opts.amount)} Returned · Ref ${opts.referenceNumber}`,
       html: htmlWrapper("Transfer Reversal Confirmation", body),
@@ -185,7 +189,7 @@ export async function sendTransferAlert(opts: {
   `;
   try {
     await transporter.sendMail({
-      from: `Heritage Credit Union <${to}>`,
+      from: `Heritage Credit Union <${senderAddress()}>`,
       to,
       subject: `Transfer Alert — ${fmt(opts.amount)} ${opts.type === "internal" ? "between your accounts" : "sent to " + opts.toAccount}`,
       html: htmlWrapper("Transfer Confirmation", body),
@@ -209,7 +213,7 @@ export async function sendLoginAlert(opts: { ip?: string }) {
   `;
   try {
     await transporter.sendMail({
-      from: `Heritage Credit Union <${to}>`,
+      from: `Heritage Credit Union <${senderAddress()}>`,
       to,
       subject: "Sign-In Alert — Heritage Credit Union",
       html: htmlWrapper("New Sign-In Detected", body),
@@ -240,7 +244,7 @@ export async function sendBillPayAlert(opts: {
   `;
   try {
     await transporter.sendMail({
-      from: `Heritage Credit Union <${to}>`,
+      from: `Heritage Credit Union <${senderAddress()}>`,
       to,
       subject: `Bill Payment — ${fmt(opts.amount)} to ${opts.payeeName}`,
       html: htmlWrapper("Bill Payment Confirmation", body),
