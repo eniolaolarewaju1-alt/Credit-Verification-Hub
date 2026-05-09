@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   useGetMember,
   useGetAccounts,
@@ -6,7 +6,11 @@ import {
   useGetRecentTransactions,
   useGetLoans,
   useGetTransactions,
+  getGetAccountsQueryKey,
+  getGetAccountSummaryQueryKey,
+  getGetRecentTransactionsQueryKey,
 } from "@workspace/api-client-react";
+import { useQueryClient } from "@tanstack/react-query";
 import type { Account } from "@workspace/api-client-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
@@ -238,9 +242,19 @@ function FlipAccountCard({ account, onOpenModal }: { account: Account; onOpenMod
 
 export default function Home() {
   const { data: member, isLoading: isLoadingMember } = useGetMember();
+  const queryClient = useQueryClient();
   const { data: accounts, isLoading: isLoadingAccounts } = useGetAccounts();
   const { data: summary, isLoading: isLoadingSummary } = useGetAccountSummary();
   const { data: recentTx, isLoading: isLoadingTx } = useGetRecentTransactions();
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      void queryClient.invalidateQueries({ queryKey: getGetAccountsQueryKey() });
+      void queryClient.invalidateQueries({ queryKey: getGetAccountSummaryQueryKey() });
+      void queryClient.invalidateQueries({ queryKey: getGetRecentTransactionsQueryKey() });
+    }, 20_000);
+    return () => clearInterval(interval);
+  }, [queryClient]);
   const { data: loans } = useGetLoans();
   const { data: allTx } = useGetTransactions();
   const [detailAccount, setDetailAccount] = useState<Account | null>(null);
@@ -322,36 +336,55 @@ export default function Home() {
         )}
       </div>
 
-      {/* Stats Row */}
-      <div className="grid grid-cols-3 gap-4">
-        {isLoadingSummary ? (
-          Array.from({ length: 3 }).map((_, i) => <Skeleton key={i} className="h-24 rounded-xl" />)
-        ) : summary ? (
-          <>
-            <div className="bg-white rounded-xl border border-gray-100 p-4 shadow-sm">
-              <p className="text-xs text-gray-400 font-medium uppercase tracking-wide">Total Balance</p>
-              <p className="text-xl font-bold text-gray-900 mt-1">{formatCurrency(summary.totalBalance)}</p>
-              <p className="text-xs text-gray-400 mt-1">Across all accounts</p>
-            </div>
-            <div className="bg-white rounded-xl border border-gray-100 p-4 shadow-sm">
-              <div className="flex items-center gap-1.5 mb-1">
-                <TrendingUp className="w-3.5 h-3.5 text-green-500" />
-                <p className="text-xs text-gray-400 font-medium uppercase tracking-wide">Deposits This Month</p>
-              </div>
-              <p className="text-xl font-bold text-green-600">{formatCurrency(summary.monthlyDeposits)}</p>
-              <p className="text-xs text-green-500/70 mt-1">Income received</p>
-            </div>
-            <div className="bg-white rounded-xl border border-gray-100 p-4 shadow-sm">
-              <div className="flex items-center gap-1.5 mb-1">
-                <TrendingDown className="w-3.5 h-3.5 text-red-400" />
-                <p className="text-xs text-gray-400 font-medium uppercase tracking-wide">Spending This Month</p>
-              </div>
-              <p className="text-xl font-bold text-red-500">{formatCurrency(summary.monthlySpending)}</p>
-              <p className="text-xs text-red-400/70 mt-1">Total outflow</p>
-            </div>
-          </>
-        ) : null}
-      </div>
+      {/* Stats Row — falls back to accounts data if summary fetch fails */}
+      {(() => {
+        const fallbackTotal = accounts?.reduce((s, a) => s + a.balance, 0) ?? null;
+        const totalBalance = summary?.totalBalance ?? fallbackTotal;
+        const isLoading = isLoadingSummary && isLoadingAccounts;
+        return (
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            {isLoading ? (
+              Array.from({ length: 3 }).map((_, i) => <Skeleton key={i} className="h-24 rounded-xl" />)
+            ) : (
+              <>
+                <div className="bg-white rounded-xl border border-gray-100 p-4 shadow-sm">
+                  <p className="text-xs text-gray-400 font-medium uppercase tracking-wide">Total Balance</p>
+                  {totalBalance !== null ? (
+                    <p className="text-xl font-bold text-gray-900 mt-1">{formatCurrency(totalBalance)}</p>
+                  ) : (
+                    <Skeleton className="h-7 w-32 mt-1" />
+                  )}
+                  <p className="text-xs text-gray-400 mt-1">Across all accounts</p>
+                </div>
+                <div className="bg-white rounded-xl border border-gray-100 p-4 shadow-sm">
+                  <div className="flex items-center gap-1.5 mb-1">
+                    <TrendingUp className="w-3.5 h-3.5 text-green-500" />
+                    <p className="text-xs text-gray-400 font-medium uppercase tracking-wide">Deposits This Month</p>
+                  </div>
+                  {summary ? (
+                    <p className="text-xl font-bold text-green-600">{formatCurrency(summary.monthlyDeposits)}</p>
+                  ) : (
+                    <Skeleton className="h-7 w-24 mt-1" />
+                  )}
+                  <p className="text-xs text-green-500/70 mt-1">Income received</p>
+                </div>
+                <div className="bg-white rounded-xl border border-gray-100 p-4 shadow-sm">
+                  <div className="flex items-center gap-1.5 mb-1">
+                    <TrendingDown className="w-3.5 h-3.5 text-red-400" />
+                    <p className="text-xs text-gray-400 font-medium uppercase tracking-wide">Spending This Month</p>
+                  </div>
+                  {summary ? (
+                    <p className="text-xl font-bold text-red-500">{formatCurrency(summary.monthlySpending)}</p>
+                  ) : (
+                    <Skeleton className="h-7 w-24 mt-1" />
+                  )}
+                  <p className="text-xs text-red-400/70 mt-1">Total outflow</p>
+                </div>
+              </>
+            )}
+          </div>
+        );
+      })()}
 
       {/* Main content grid */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">

@@ -23,8 +23,10 @@ import Receipt from "@/pages/receipt";
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      retry: false,
-      refetchOnWindowFocus: false,
+      retry: 1,
+      retryDelay: 1000,
+      refetchOnWindowFocus: true,
+      staleTime: 15_000,
     },
   },
 });
