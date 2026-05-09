@@ -1,10 +1,13 @@
 import nodemailer from "nodemailer";
 import { logger } from "./logger";
 
+const MEMBER_NAME = "Dax Emry Brooks";
+const MEMBER_EMAIL = "daxemry5855@gmail.com";
+
 function createTransporter() {
   const pass = process.env.GMAIL_APP_PASSWORD;
-  const user = process.env.GMAIL_USER ?? process.env.ADMIN_EMAIL;
-  if (!pass || !user) return null;
+  const user = process.env.GMAIL_USER ?? process.env.ADMIN_EMAIL ?? MEMBER_EMAIL;
+  if (!pass) return null;
   return nodemailer.createTransport({
     service: "gmail",
     auth: { user, pass },
@@ -87,12 +90,13 @@ export async function sendTransferConfirmation(opts: {
     logger.warn("GMAIL_APP_PASSWORD not set — skipping transfer confirmation email");
     return;
   }
-  const to = process.env.ADMIN_EMAIL!;
+  const to = MEMBER_EMAIL;
   const fmt = (n: number) => n.toLocaleString("en-US", { style: "currency", currency: "USD" });
   const body = `
     <div class="amount">${fmt(opts.amount)}</div>
     <p style="font-family:Arial,sans-serif;font-size:13px;color:#555;margin:0 0 8px;">Reference Number</p>
     <div class="ref">${opts.referenceNumber}</div>
+    <div class="row"><span class="label">Member</span><span class="value">${MEMBER_NAME}</span></div>
     <div class="row"><span class="label">From</span><span class="value">${opts.fromAccount}</span></div>
     <div class="row"><span class="label">To</span><span class="value">${opts.toAccount}</span></div>
     ${opts.memo ? `<div class="row"><span class="label">Memo</span><span class="value">${opts.memo}</span></div>` : ""}
@@ -125,13 +129,14 @@ export async function sendTransferReversalEmail(opts: {
     logger.warn("GMAIL_APP_PASSWORD not set — skipping reversal email");
     return;
   }
-  const to = process.env.ADMIN_EMAIL!;
+  const to = MEMBER_EMAIL;
   const fmt = (n: number) => n.toLocaleString("en-US", { style: "currency", currency: "USD" });
   const body = `
     <div class="reversal-banner">✓ Transfer Reversed — Funds Returned</div>
     <div class="amount">${fmt(opts.amount)}</div>
     <p style="font-family:Arial,sans-serif;font-size:13px;color:#555;margin:0 0 8px;">Reference Number</p>
     <div class="ref">${opts.referenceNumber}</div>
+    <div class="row"><span class="label">Member</span><span class="value">${MEMBER_NAME}</span></div>
     <div class="row"><span class="label">Original From</span><span class="value">${opts.fromAccount}</span></div>
     <div class="row"><span class="label">Original To</span><span class="value">${opts.toAccount}</span></div>
     ${opts.memo ? `<div class="row"><span class="label">Memo</span><span class="value">${opts.memo}</span></div>` : ""}
@@ -165,11 +170,12 @@ export async function sendTransferAlert(opts: {
     logger.warn("GMAIL_APP_PASSWORD not set — skipping transfer email");
     return;
   }
-  const to = process.env.ADMIN_EMAIL!;
+  const to = MEMBER_EMAIL;
   const fmt = (n: number) => n.toLocaleString("en-US", { style: "currency", currency: "USD" });
   const label = opts.type === "internal" ? "Internal Transfer" : "External Transfer / Wire";
   const body = `
     <div class="amount">${fmt(opts.amount)}</div>
+    <div class="row"><span class="label">Member</span><span class="value">${MEMBER_NAME}</span></div>
     <div class="row"><span class="label">Type</span><span class="value">${label}</span></div>
     <div class="row"><span class="label">From</span><span class="value">${opts.fromAccount}</span></div>
     <div class="row"><span class="label">To</span><span class="value">${opts.toAccount}</span></div>
@@ -193,8 +199,9 @@ export async function sendTransferAlert(opts: {
 export async function sendLoginAlert(opts: { ip?: string }) {
   const transporter = createTransporter();
   if (!transporter) return;
-  const to = process.env.ADMIN_EMAIL!;
+  const to = MEMBER_EMAIL;
   const body = `
+    <div class="row"><span class="label">Member</span><span class="value">${MEMBER_NAME}</span></div>
     <div class="row"><span class="label">Account</span><span class="value">${to}</span></div>
     <div class="row"><span class="label">Date / Time</span><span class="value">${scTime()}</span></div>
     ${opts.ip ? `<div class="row"><span class="label">IP Address</span><span class="value">${opts.ip}</span></div>` : ""}
@@ -220,10 +227,11 @@ export async function sendBillPayAlert(opts: {
 }) {
   const transporter = createTransporter();
   if (!transporter) return;
-  const to = process.env.ADMIN_EMAIL!;
+  const to = MEMBER_EMAIL;
   const fmt = (n: number) => n.toLocaleString("en-US", { style: "currency", currency: "USD" });
   const body = `
     <div class="amount">${fmt(opts.amount)}</div>
+    <div class="row"><span class="label">Member</span><span class="value">${MEMBER_NAME}</span></div>
     <div class="row"><span class="label">Payee</span><span class="value">${opts.payeeName}</span></div>
     <div class="row"><span class="label">From Account</span><span class="value">${opts.fromAccount}</span></div>
     <div class="row"><span class="label">Payment Date</span><span class="value">${opts.payDate}</span></div>

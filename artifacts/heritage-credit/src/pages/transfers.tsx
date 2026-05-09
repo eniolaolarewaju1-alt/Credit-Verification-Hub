@@ -569,9 +569,14 @@ export default function Transfers() {
                         <AlertCircle className="w-3 h-3" /> Account number must be 8–17 digits
                       </p>
                     )}
-                    {directAccount.length >= 8 && (
+                    {directAccount.length >= 8 && routingLookup?.valid && (
                       <p className="text-xs text-green-600 flex items-center gap-1">
-                        <CheckCircle2 className="w-3 h-3" /> Account number format is valid
+                        <CheckCircle2 className="w-3 h-3" /> Account verified at {routingLookup.bankName}
+                      </p>
+                    )}
+                    {directAccount.length >= 8 && !routingLookup?.valid && (
+                      <p className="text-xs text-amber-600 flex items-center gap-1">
+                        <AlertCircle className="w-3 h-3" /> Enter a valid routing number above to verify account
                       </p>
                     )}
                   </div>

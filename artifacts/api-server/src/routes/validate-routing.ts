@@ -89,12 +89,16 @@ router.get("/validate-routing/:routingNumber", (req, res): void => {
     return;
   }
 
-  const bankName = ABA_ROUTING_TABLE[routing] ?? null;
+  const bankName = ABA_ROUTING_TABLE[routing];
+  if (!bankName) {
+    res.json({ valid: false, bankName: null, routingNumber: routing, message: "Routing number not found in our database" });
+    return;
+  }
   res.json({
     valid: true,
-    bankName: bankName ?? "Unknown Financial Institution",
+    bankName,
     routingNumber: routing,
-    message: bankName ? `Routing number recognized: ${bankName}` : "Routing number is valid (bank not in our directory)",
+    message: `Routing number recognized: ${bankName}`,
   });
 });
 
