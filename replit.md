@@ -59,7 +59,7 @@ A private, single-owner online banking portal for Dax Emry Brooks at Heritage Cr
 ## User preferences
 
 - Portal is private to Dax Emry Brooks only — no public sign-up
-- Default password is `Heritage2026!` — the hash is stored as a Replit Secret (never in source or docs)
+- Password is stored as a bcrypt hash in the `ADMIN_PASSWORD_HASH` Replit Secret — never stored in source or docs
 - Heritage Credit Union branding: deep navy `#1a2b5e`, serif font for headings
 - Charleston, SC 29401 · Member FDIC
 

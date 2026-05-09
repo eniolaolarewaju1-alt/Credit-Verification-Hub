@@ -138,10 +138,12 @@ function FlipAccountCard({ account, onOpenModal }: { account: Account; onOpenMod
     year: "numeric",
   });
 
-  const handleClick = () => setFlipped(v => !v);
-  const handleDoubleClick = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    onOpenModal(account);
+  const handleClick = () => {
+    if (flipped) {
+      onOpenModal(account);
+    } else {
+      setFlipped(true);
+    }
   };
 
   return (
@@ -149,9 +151,8 @@ function FlipAccountCard({ account, onOpenModal }: { account: Account; onOpenMod
       className="relative h-44 cursor-pointer"
       style={{ perspective: "1000px" }}
       onClick={handleClick}
-      onDoubleClick={handleDoubleClick}
       data-testid={`card-account-${account.id}`}
-      title="Click to flip · double-click for full account details"
+      title="Click to flip · click again to open full details"
     >
       <div
         className="relative w-full h-full transition-transform duration-500"

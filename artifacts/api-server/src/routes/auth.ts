@@ -5,25 +5,32 @@ import { logger } from "../lib/logger";
 const router: IRouter = Router();
 
 /**
- * Returns a bcrypt hash to compare against.
- * If ADMIN_PASSWORD_HASH is already a bcrypt hash, use it as-is.
- * If it looks like a plaintext password (no $2b$ prefix), hash it once at startup
- * and cache the result in memory so every login attempt uses proper bcrypt comparison.
+ * Resolve the stored ADMIN_PASSWORD_HASH into a bcrypt hash that can be used
+ * for timing-safe comparison via bcrypt.compare().
+ *
+ * - If the stored value is already a bcrypt hash (starts with $2b$, $2a$, $2y$),
+ *   it is used as-is.
+ * - If the stored value is plaintext, it is hashed once at startup (cost 12) and
+ *   the hash is cached in memory for the lifetime of this process.  The plaintext
+ *   value never leaves the process; all subsequent comparisons use bcrypt.compare().
+ *
+ * This means all login attempts always go through bcrypt.compare() — providing
+ * timing-safe, constant-time verification regardless of how the secret was stored.
  */
-let _cachedHash: string | null = null;
+let _resolvedHash: string | null = null;
 
-async function getAdminHash(stored: string): Promise<string> {
+async function resolveAdminHash(stored: string): Promise<string> {
   if (stored.startsWith("$2b$") || stored.startsWith("$2a$") || stored.startsWith("$2y$")) {
     return stored;
   }
-  if (!_cachedHash) {
+  if (!_resolvedHash) {
     logger.warn(
-      "ADMIN_PASSWORD_HASH appears to be a plaintext password — hashing it in memory. " +
-      "For security, replace the secret value with a bcrypt hash."
+      "ADMIN_PASSWORD_HASH is not a bcrypt hash — hashing it once at startup. " +
+        "For best practice, update the secret to a pre-computed bcrypt hash.",
     );
-    _cachedHash = await bcrypt.hash(stored, 12);
+    _resolvedHash = await bcrypt.hash(stored, 12);
   }
-  return _cachedHash;
+  return _resolvedHash;
 }
 
 router.post("/auth/login", async (req, res): Promise<void> => {
@@ -48,14 +55,8 @@ router.post("/auth/login", async (req, res): Promise<void> => {
     return;
   }
 
-  // Compare against stored credential. If plaintext, we hash it once in memory and compare.
-  let valid: boolean;
-  if (adminCredential.startsWith("$2b$") || adminCredential.startsWith("$2a$") || adminCredential.startsWith("$2y$")) {
-    valid = await bcrypt.compare(password, adminCredential);
-  } else {
-    // Plaintext stored — compare directly (secure enough for single-owner portal)
-    valid = password === adminCredential;
-  }
+  const hashToCompare = await resolveAdminHash(adminCredential);
+  const valid = await bcrypt.compare(password, hashToCompare);
 
   if (!valid) {
     res.status(401).json({ error: "Invalid email or password" });
