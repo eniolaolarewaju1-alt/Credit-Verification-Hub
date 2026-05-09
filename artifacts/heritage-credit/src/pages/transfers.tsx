@@ -94,7 +94,7 @@ function TransferSuccessModal({ modal, onClose }: { modal: SuccessModal; onClose
     <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4">
       <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full overflow-hidden">
         {/* Header */}
-        <div className="bg-[#1a2b5e] px-6 py-5 text-white">
+        <div className="bg-[#117ACA] px-6 py-5 text-white">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-full bg-green-400/20 flex items-center justify-center">
@@ -114,13 +114,13 @@ function TransferSuccessModal({ modal, onClose }: { modal: SuccessModal; onClose
         {/* Body */}
         <div className="px-6 py-5 space-y-4">
           <div className="text-center">
-            <p className="text-3xl font-bold text-[#1a2b5e]">{fmt(modal.amount)}</p>
+            <p className="text-3xl font-bold text-[#117ACA]">{fmt(modal.amount)}</p>
             <p className="text-sm text-gray-500 mt-1">{modal.fromName} → {modal.toName}</p>
           </div>
 
           <div className="bg-[#f0f4ff] rounded-xl p-4 text-center">
             <p className="text-xs text-gray-500 uppercase tracking-wider font-medium mb-1">Reference Number</p>
-            <p className="font-mono text-lg font-bold text-[#1a2b5e] tracking-wider">{modal.referenceNumber}</p>
+            <p className="font-mono text-lg font-bold text-[#117ACA] tracking-wider">{modal.referenceNumber}</p>
           </div>
 
           <div className="bg-amber-50 border border-amber-200 rounded-xl p-3 text-xs text-amber-800">
@@ -129,7 +129,7 @@ function TransferSuccessModal({ modal, onClose }: { modal: SuccessModal; onClose
 
           <div className="flex gap-3">
             <Button
-              className="flex-1 bg-[#1a2b5e] hover:bg-[#162450]"
+              className="flex-1 bg-[#117ACA] hover:bg-[#0D6DAD]"
               onClick={() => {
                 onClose();
                 navigate(`/receipt/${modal.transferId}`);
@@ -139,7 +139,7 @@ function TransferSuccessModal({ modal, onClose }: { modal: SuccessModal; onClose
             </Button>
             <Button
               variant="outline"
-              className="flex-1 border-[#1a2b5e] text-[#1a2b5e]"
+              className="flex-1 border-[#117ACA] text-[#117ACA]"
               onClick={() => {
                 onClose();
                 window.open(`/receipt/${modal.transferId}`, "_blank");
@@ -359,7 +359,7 @@ export default function Transfers() {
       )}
 
       <div>
-        <h1 className="text-3xl font-serif text-[#1a2b5e]">Transfers</h1>
+        <h1 className="text-3xl font-semibold text-[#117ACA]">Transfers</h1>
         <p className="text-gray-500 mt-1 text-sm">Move money between accounts or send to another bank.</p>
       </div>
 
@@ -369,7 +369,7 @@ export default function Transfers() {
           <button
             key={t.id}
             onClick={() => setTab(t.id)}
-            className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${tab === t.id ? "bg-white text-[#1a2b5e] shadow-sm" : "text-gray-500 hover:text-gray-700"}`}
+            className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${tab === t.id ? "bg-white text-[#117ACA] shadow-sm" : "text-gray-500 hover:text-gray-700"}`}
           >
             <t.icon className="w-4 h-4" />
             {t.label}
@@ -382,7 +382,7 @@ export default function Transfers() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <Card className="shadow-sm bg-white">
             <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-[#1a2b5e]">
+              <CardTitle className="flex items-center gap-2 text-[#117ACA]">
                 <ArrowRightLeft className="w-5 h-5" /> Move Money
               </CardTitle>
               <CardDescription>Transfer instantly between your Heritage accounts. Funds will be automatically reversed within 5 minutes (demo portal).</CardDescription>
@@ -430,7 +430,7 @@ export default function Transfers() {
                   <Label>Memo <span className="text-gray-400 text-xs">(optional)</span></Label>
                   <Input placeholder="e.g. Savings deposit" value={memo} onChange={e => setMemo(e.target.value)} />
                 </div>
-                <Button type="submit" className="w-full bg-[#1a2b5e] hover:bg-[#162450]" disabled={!fromAccount || !toAccount || !amount || createTransfer.isPending}>
+                <Button type="submit" className="w-full bg-[#117ACA] hover:bg-[#0D6DAD]" disabled={!fromAccount || !toAccount || !amount || createTransfer.isPending}>
                   {createTransfer.isPending ? "Processing..." : "Transfer Now"}
                 </Button>
               </form>
@@ -440,7 +440,7 @@ export default function Transfers() {
           {/* Recent transfers */}
           <Card className="shadow-sm bg-white">
             <CardHeader>
-              <CardTitle className="text-[#1a2b5e]">Transfer History</CardTitle>
+              <CardTitle className="text-[#117ACA]">Transfer History</CardTitle>
             </CardHeader>
             <CardContent>
               {loadingTransfers ? (
@@ -481,10 +481,10 @@ export default function Transfers() {
                           </p>
                         </div>
                         <div className="flex flex-col items-end gap-1 flex-shrink-0">
-                          <span className="text-sm font-semibold text-[#1a2b5e]">{fmt(t.amount)}</span>
+                          <span className="text-sm font-semibold text-[#117ACA]">{fmt(t.amount)}</span>
                           <a
                             href={`/receipt/${t.id}`}
-                            className="text-[10px] text-[#1a2b5e] hover:underline flex items-center gap-0.5"
+                            className="text-[10px] text-[#117ACA] hover:underline flex items-center gap-0.5"
                             onClick={e => { e.preventDefault(); window.location.href = `/receipt/${t.id}`; }}
                           >
                             <FileText className="w-2.5 h-2.5" /> Receipt
@@ -511,7 +511,7 @@ export default function Transfers() {
           <div className="space-y-4">
             <Card className="shadow-sm bg-white">
               <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-[#1a2b5e]">
+                <CardTitle className="flex items-center gap-2 text-[#117ACA]">
                   <Send className="w-5 h-5" /> Send Money
                 </CardTitle>
                 <CardDescription>Enter the recipient's routing and account number to send funds directly to another bank.</CardDescription>
@@ -619,7 +619,7 @@ export default function Transfers() {
 
                   <Button
                     type="submit"
-                    className="w-full bg-[#1a2b5e] hover:bg-[#162450]"
+                    className="w-full bg-[#117ACA] hover:bg-[#0D6DAD]"
                     disabled={
                       !extFromAccount ||
                       directRouting.length !== 9 ||
@@ -636,7 +636,7 @@ export default function Transfers() {
 
                   <p className="text-xs text-center text-gray-400">
                     Want to reuse this recipient?{" "}
-                    <button type="button" className="text-[#1a2b5e] hover:underline" onClick={() => { setTab("payees"); setShowAddPayee(true); }}>
+                    <button type="button" className="text-[#117ACA] hover:underline" onClick={() => { setTab("payees"); setShowAddPayee(true); }}>
                       Save them as a payee
                     </button>
                   </p>
@@ -648,7 +648,7 @@ export default function Transfers() {
           {/* External transfer history */}
           <Card className="shadow-sm bg-white">
             <CardHeader>
-              <CardTitle className="text-[#1a2b5e]">External Transfer History</CardTitle>
+              <CardTitle className="text-[#117ACA]">External Transfer History</CardTitle>
             </CardHeader>
             <CardContent>
               {loadingExtTransfers ? (
@@ -667,7 +667,7 @@ export default function Transfers() {
                           <p className="text-xs text-gray-400 mt-0.5">{payee?.bankName} · {scDate(t.date)}</p>
                         </div>
                         <div className="text-right flex-shrink-0">
-                          <p className="text-sm font-semibold text-[#1a2b5e]">{fmt(t.amount)}</p>
+                          <p className="text-sm font-semibold text-[#117ACA]">{fmt(t.amount)}</p>
                           <Badge variant="outline" className="text-[10px] mt-0.5 capitalize">{t.status}</Badge>
                         </div>
                       </div>
@@ -691,13 +691,13 @@ export default function Transfers() {
           <Card className="shadow-sm bg-white">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
               <div>
-                <CardTitle className="flex items-center gap-2 text-[#1a2b5e]">
+                <CardTitle className="flex items-center gap-2 text-[#117ACA]">
                   <Building2 className="w-5 h-5" /> Add External Payee
                 </CardTitle>
                 <CardDescription>Enter routing and account numbers to verify and save a recipient.</CardDescription>
               </div>
               {!showAddPayee && (
-                <Button onClick={() => setShowAddPayee(true)} size="sm" className="bg-[#1a2b5e] hover:bg-[#162450]">
+                <Button onClick={() => setShowAddPayee(true)} size="sm" className="bg-[#117ACA] hover:bg-[#0D6DAD]">
                   <Plus className="w-4 h-4 mr-1" /> Add Payee
                 </Button>
               )}
@@ -739,7 +739,7 @@ export default function Transfers() {
                   <Button
                     type="button"
                     variant="outline"
-                    className="border-[#1a2b5e] text-[#1a2b5e]"
+                    className="border-[#117ACA] text-[#117ACA]"
                     onClick={handleVerify}
                     disabled={routingNum.length !== 9 || accountNum.length < 8 || verifyAccount.isPending}
                   >
@@ -767,7 +767,7 @@ export default function Transfers() {
                       <Button type="button" variant="outline" onClick={() => { setShowAddPayee(false); setVerifyResult(null); setRoutingNum(""); setAccountNum(""); }}>
                         Cancel
                       </Button>
-                      <Button type="submit" className="bg-[#1a2b5e] hover:bg-[#162450]" disabled={!recipientName || !payeeNickname || createPayee.isPending}>
+                      <Button type="submit" className="bg-[#117ACA] hover:bg-[#0D6DAD]" disabled={!recipientName || !payeeNickname || createPayee.isPending}>
                         {createPayee.isPending ? "Saving..." : "Save Payee"}
                       </Button>
                     </div>
@@ -780,7 +780,7 @@ export default function Transfers() {
           {/* Saved payees list */}
           <Card className="shadow-sm bg-white">
             <CardHeader>
-              <CardTitle className="text-[#1a2b5e]">Saved Payees</CardTitle>
+              <CardTitle className="text-[#117ACA]">Saved Payees</CardTitle>
               <CardDescription>Recipients you've verified and saved for future transfers.</CardDescription>
             </CardHeader>
             <CardContent>
@@ -790,8 +790,8 @@ export default function Transfers() {
                 <div className="space-y-3">
                   {externalPayees.map((p: ExternalPayee) => (
                     <div key={p.id} className="flex items-center gap-3 p-4 rounded-lg border border-gray-100 bg-gray-50">
-                      <div className="w-10 h-10 rounded-full bg-[#1a2b5e]/10 flex items-center justify-center flex-shrink-0">
-                        <Building2 className="w-5 h-5 text-[#1a2b5e]" />
+                      <div className="w-10 h-10 rounded-full bg-[#117ACA]/10 flex items-center justify-center flex-shrink-0">
+                        <Building2 className="w-5 h-5 text-[#117ACA]" />
                       </div>
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2">
@@ -805,7 +805,7 @@ export default function Transfers() {
                         <Button
                           size="sm"
                           onClick={() => { setSelectedPayeeId(String(p.id)); setTab("external"); }}
-                          className="bg-[#1a2b5e] hover:bg-[#162450] text-xs h-8"
+                          className="bg-[#117ACA] hover:bg-[#0D6DAD] text-xs h-8"
                         >
                           <Send className="w-3 h-3 mr-1" /> Send
                         </Button>

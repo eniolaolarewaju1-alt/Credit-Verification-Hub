@@ -56,7 +56,7 @@ function SessionTimeoutModal({ onDismiss, onLogout }: { onDismiss: () => void; o
           </button>
           <button
             onClick={onDismiss}
-            className="flex-1 bg-[#1a2b5e] text-white py-2 rounded-lg text-sm font-medium hover:bg-[#162450] transition-colors"
+            className="flex-1 bg-[#117ACA] text-white py-2 rounded-lg text-sm font-medium hover:bg-[#0D6DAD] transition-colors"
           >
             Stay Signed In
           </button>
@@ -79,7 +79,7 @@ function AuthGuard({ children }: { children: React.ReactNode }) {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-[#0f1f4a] flex items-center justify-center">
+      <div className="min-h-screen bg-[#0A2240] flex items-center justify-center">
         <div className="text-white/60 text-sm">Loading...</div>
       </div>
     );

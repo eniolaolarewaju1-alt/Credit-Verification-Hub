@@ -110,7 +110,7 @@ function NotificationsDropdown() {
             <Link
               href="/transactions"
               onClick={() => setOpen(false)}
-              className="text-xs text-[#1a2b5e] font-medium hover:underline"
+              className="text-xs text-[#117ACA] font-medium hover:underline"
             >
               View all transactions →
             </Link>
@@ -156,7 +156,7 @@ function SidebarContent({
           <Building2 className="w-4 h-4 text-white" />
         </div>
         <div>
-          <div className="font-serif font-bold text-base text-white leading-none">Heritage</div>
+          <div className="font-bold text-base text-white leading-none">Heritage</div>
           <div className="text-[10px] text-white/50 mt-0.5 tracking-wide">Credit Union</div>
         </div>
       </div>
@@ -315,7 +315,7 @@ export function Layout({ children }: { children: ReactNode }) {
             </button>
 
             <div className="min-w-0">
-              <h2 className="text-base font-semibold text-[#1a2b5e] truncate">
+              <h2 className="text-base font-semibold text-[#117ACA] truncate">
                 {PAGE_TITLES[location] ?? "Heritage Credit Union"}
               </h2>
               <p className="text-[11px] text-gray-400 mt-0.5 hidden sm:block">{scDateTime()}</p>
@@ -327,7 +327,7 @@ export function Layout({ children }: { children: ReactNode }) {
             {member && (
               <div className="flex items-center gap-2 pl-3 border-l border-gray-200">
                 <Avatar className="w-8 h-8">
-                  <AvatarFallback className="bg-[#1a2b5e] text-white text-xs font-semibold">
+                  <AvatarFallback className="bg-[#117ACA] text-white text-xs font-semibold">
                     {member.firstName[0]}{member.lastName[0]}
                   </AvatarFallback>
                 </Avatar>

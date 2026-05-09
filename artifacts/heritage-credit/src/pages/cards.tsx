@@ -43,7 +43,7 @@ export default function Cards() {
   return (
     <div className="max-w-5xl mx-auto px-6 py-8 space-y-6">
       <div>
-        <h1 className="text-2xl font-serif font-semibold text-[#1a2b5e]" data-testid="text-page-title">Cards</h1>
+        <h1 className="text-2xl font-semibold text-[#117ACA]" data-testid="text-page-title">Cards</h1>
         <p className="text-sm text-gray-400 mt-1">Manage your Heritage Credit Union credit and debit cards.</p>
       </div>
 
@@ -70,15 +70,15 @@ export default function Cards() {
                 <div className={`m-5 h-48 rounded-xl p-5 relative overflow-hidden text-white flex flex-col justify-between ${isFrozen
                   ? "bg-gradient-to-br from-gray-400 to-gray-500"
                   : isCredit
-                    ? "bg-gradient-to-br from-[#1a2b5e] to-[#2d4a9e]"
-                    : "bg-gradient-to-br from-[#1e3a6e] to-[#0f1f4a]"
+                    ? "bg-gradient-to-br from-[#117ACA] to-[#0a5a9c]"
+                    : "bg-gradient-to-br from-[#0D3460] to-[#0A2240]"
                   } shadow-lg`}>
                   <div className="absolute inset-0">
                     <div className="absolute -top-12 -right-12 w-40 h-40 rounded-full bg-white/5" />
                     <div className="absolute -bottom-8 -left-8 w-32 h-32 rounded-full bg-white/5" />
                   </div>
                   <div className="relative z-10 flex justify-between items-start">
-                    <div className="font-serif font-bold text-base text-white/90 tracking-wide">Heritage</div>
+                    <div className="font-bold text-base text-white/90 tracking-wide">Heritage</div>
                     <div className="flex items-center gap-2">
                       {isFrozen && (
                         <div className="flex items-center gap-1.5 bg-black/25 px-2.5 py-1 rounded-full text-xs backdrop-blur-sm">
@@ -121,12 +121,12 @@ export default function Cards() {
                   </div>
 
                   {isCredit && card.rewardsPoints !== undefined && card.rewardsPoints !== null && (
-                    <div className="flex items-center justify-between bg-gradient-to-r from-[#1a2b5e]/5 to-[#1a2b5e]/10 p-3 rounded-xl border border-[#1a2b5e]/10">
+                    <div className="flex items-center justify-between bg-gradient-to-r from-[#117ACA]/5 to-[#117ACA]/10 p-3 rounded-xl border border-[#117ACA]/10">
                       <div className="flex items-center gap-2">
-                        <Gift className="w-4 h-4 text-[#1a2b5e]" />
-                        <span className="text-sm font-medium text-[#1a2b5e]">Rewards Points</span>
+                        <Gift className="w-4 h-4 text-[#117ACA]" />
+                        <span className="text-sm font-medium text-[#117ACA]">Rewards Points</span>
                       </div>
-                      <span className="font-bold text-[#1a2b5e]">{card.rewardsPoints.toLocaleString()} pts</span>
+                      <span className="font-bold text-[#117ACA]">{card.rewardsPoints.toLocaleString()} pts</span>
                     </div>
                   )}
 

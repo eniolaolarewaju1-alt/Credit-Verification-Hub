@@ -66,10 +66,10 @@ export default function BillPay() {
     <div className="max-w-5xl mx-auto px-6 py-8 space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-serif font-semibold text-[#1a2b5e]" data-testid="text-page-title">Bill Pay</h1>
+          <h1 className="text-2xl font-semibold text-[#117ACA]" data-testid="text-page-title">Bill Pay</h1>
           <p className="text-sm text-gray-400 mt-1">Manage and pay your bills securely.</p>
         </div>
-        <Button className="bg-[#1a2b5e] hover:bg-[#162450]">Add Payee</Button>
+        <Button className="bg-[#117ACA] hover:bg-[#0D6DAD]">Add Payee</Button>
       </div>
 
       <div className="space-y-3">
@@ -130,7 +130,7 @@ export default function BillPay() {
                   <Button
                     onClick={() => handleOpenPayment(bill)}
                     data-testid={`button-pay-${bill.id}`}
-                    className="bg-[#1a2b5e] hover:bg-[#162450]"
+                    className="bg-[#117ACA] hover:bg-[#0D6DAD]"
                     disabled={isLoadingAccounts}
                   >
                     Pay Now
@@ -183,7 +183,7 @@ export default function BillPay() {
             </div>
             <DialogFooter>
               <Button type="button" variant="outline" onClick={() => setSelectedBill(null)}>Cancel</Button>
-              <Button type="submit" disabled={payBill.isPending} className="bg-[#1a2b5e] hover:bg-[#162450]">
+              <Button type="submit" disabled={payBill.isPending} className="bg-[#117ACA] hover:bg-[#0D6DAD]">
                 {payBill.isPending ? "Processing..." : "Schedule Payment"}
               </Button>
             </DialogFooter>

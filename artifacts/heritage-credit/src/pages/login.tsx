@@ -26,14 +26,14 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen bg-[#0f1f4a] flex flex-col items-center justify-center p-4">
+    <div className="min-h-screen bg-[#0A2240] flex flex-col items-center justify-center p-4">
       <div className="w-full max-w-md">
         {/* Logo */}
         <div className="text-center mb-8">
           <div className="inline-flex items-center justify-center w-16 h-16 bg-white/10 rounded-2xl mb-4 border border-white/20">
             <Building2 className="w-8 h-8 text-white" />
           </div>
-          <h1 className="text-3xl font-serif font-bold text-white tracking-tight">Heritage Credit</h1>
+          <h1 className="text-3xl font-bold text-white tracking-tight">Heritage Credit</h1>
           <p className="text-white/60 text-sm mt-1 tracking-wide uppercase">South Carolina's Trusted Credit Union</p>
         </div>
 
@@ -69,7 +69,7 @@ export default function Login() {
                   required
                   autoComplete="email"
                   data-testid="input-email"
-                  className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#1a2b5e] focus:border-transparent transition-all placeholder:text-gray-400"
+                  className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#117ACA] focus:border-transparent transition-all placeholder:text-gray-400"
                 />
               </div>
             </div>
@@ -89,7 +89,7 @@ export default function Login() {
                   required
                   autoComplete="current-password"
                   data-testid="input-password"
-                  className="w-full pl-10 pr-10 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#1a2b5e] focus:border-transparent transition-all placeholder:text-gray-400"
+                  className="w-full pl-10 pr-10 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#117ACA] focus:border-transparent transition-all placeholder:text-gray-400"
                 />
                 <button
                   type="button"
@@ -105,7 +105,7 @@ export default function Login() {
               type="submit"
               disabled={isLoading}
               data-testid="button-sign-in"
-              className="w-full bg-[#1a2b5e] hover:bg-[#162450] text-white font-semibold py-2.5 rounded-lg text-sm transition-colors mt-2 disabled:opacity-60 disabled:cursor-not-allowed"
+              className="w-full bg-[#117ACA] hover:bg-[#0D6DAD] text-white font-semibold py-2.5 rounded-lg text-sm transition-colors mt-2 disabled:opacity-60 disabled:cursor-not-allowed"
             >
               {isLoading ? "Signing in..." : "Sign In"}
             </button>

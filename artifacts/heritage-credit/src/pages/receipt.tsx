@@ -81,7 +81,7 @@ export default function Receipt() {
       <div className="mb-6 flex gap-3 print:hidden">
         <button
           onClick={() => window.print()}
-          className="flex items-center gap-2 bg-[#1a2b5e] text-white px-5 py-2.5 rounded-lg font-medium text-sm hover:bg-[#162450] transition-colors shadow"
+          className="flex items-center gap-2 bg-[#117ACA] text-white px-5 py-2.5 rounded-lg font-medium text-sm hover:bg-[#0D6DAD] transition-colors shadow"
         >
           <Printer className="w-4 h-4" />
           Print Receipt
@@ -97,26 +97,26 @@ export default function Receipt() {
       {/* Receipt card */}
       <div className="bg-white w-full max-w-lg rounded-2xl shadow-xl overflow-hidden print:shadow-none print:rounded-none print:max-w-full">
         {/* Header */}
-        <div className="bg-[#1a2b5e] px-8 py-6 text-white">
+        <div className="bg-[#117ACA] px-8 py-6 text-white">
           <div className="flex items-center gap-3 mb-1">
             <div className="w-9 h-9 rounded-lg bg-white/10 flex items-center justify-center">
               <Building2 className="w-5 h-5 text-white" />
             </div>
             <div>
-              <p className="font-serif font-bold text-xl leading-none">Heritage Credit Union</p>
+              <p className="font-bold text-xl leading-none">Heritage Credit Union</p>
               <p className="text-white/60 text-xs mt-0.5">Charleston, SC 29401 · Member FDIC</p>
             </div>
           </div>
           <div className="mt-5">
             <p className="text-white/60 text-xs uppercase tracking-widest font-medium">Transfer Receipt</p>
-            <p className="font-serif text-3xl font-bold mt-1">{fmt(receipt.amount)}</p>
+            <p className="text-3xl font-bold mt-1">{fmt(receipt.amount)}</p>
           </div>
         </div>
 
         {/* Reference block */}
         <div className="px-8 py-5 bg-[#f0f4ff] border-b border-blue-100">
           <p className="text-xs text-gray-500 uppercase tracking-wider font-medium mb-1">Reference Number</p>
-          <p className="font-mono text-lg font-bold text-[#1a2b5e] tracking-wider">{receipt.referenceNumber}</p>
+          <p className="font-mono text-lg font-bold text-[#117ACA] tracking-wider">{receipt.referenceNumber}</p>
         </div>
 
         {/* Details */}

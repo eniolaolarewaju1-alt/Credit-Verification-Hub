@@ -78,22 +78,22 @@
   --elevate-1: rgba(0,0,0, .03);
   --elevate-2: rgba(0,0,0, .08);
 
-  --background: 0 0% 98%;
-  --foreground: 222 47% 11%;
+  --background: 210 20% 97%;
+  --foreground: 214 40% 12%;
   
-  --border: 214 32% 91%;
-  --input: 214 32% 91%;
-  --ring: 225 56% 23%;
+  --border: 214 18% 88%;
+  --input: 214 18% 88%;
+  --ring: 207 84% 43%;
 
   --card: 0 0% 100%;
-  --card-foreground: 222 47% 11%;
+  --card-foreground: 214 40% 12%;
   --card-border: 214 32% 91%;
 
   --popover: 0 0% 100%;
-  --popover-foreground: 222 47% 11%;
+  --popover-foreground: 214 40% 12%;
   --popover-border: 214 32% 91%;
 
-  --primary: 225 56% 23%;
+  --primary: 207 84% 43%;
   --primary-foreground: 0 0% 100%;
 
   --secondary: 210 40% 96.1%;
@@ -111,25 +111,25 @@
   --success: 142 76% 36%;
   --success-foreground: 0 0% 100%;
 
-  --sidebar: 225 56% 23%;
+  --sidebar: 214 73% 14%;
   --sidebar-foreground: 0 0% 100%;
-  --sidebar-border: 225 56% 18%;
+  --sidebar-border: 214 73% 10%;
   --sidebar-primary: 0 0% 100%;
   --sidebar-primary-foreground: 225 56% 23%;
-  --sidebar-accent: 225 56% 30%;
+  --sidebar-accent: 214 60% 21%;
   --sidebar-accent-foreground: 0 0% 100%;
-  --sidebar-ring: 225 56% 40%;
+  --sidebar-ring: 207 84% 43%;
 
-  --chart-1: 225 56% 23%;
+  --chart-1: 207 84% 43%;
   --chart-2: 173 58% 39%;
   --chart-3: 197 37% 24%;
   --chart-4: 43 74% 66%;
   --chart-5: 27 87% 67%;
 
-  --app-font-sans: 'Inter', system-ui, sans-serif;
-  --app-font-serif: Georgia, serif;
+  --app-font-sans: 'Inter', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+  --app-font-serif: 'Inter', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
   --app-font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
-  --radius: 0.5rem;
+  --radius: 0.375rem;
 }
 
 .dark {

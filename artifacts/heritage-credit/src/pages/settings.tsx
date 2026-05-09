@@ -13,7 +13,7 @@ export default function Settings() {
   return (
     <div className="max-w-4xl mx-auto p-8 space-y-8">
       <div>
-        <h1 className="text-3xl font-serif text-primary" data-testid="text-page-title">Settings & Profile</h1>
+        <h1 className="text-3xl font-semibold text-primary" data-testid="text-page-title">Settings & Profile</h1>
         <p className="text-muted-foreground mt-1">Manage your personal information and preferences.</p>
       </div>
 

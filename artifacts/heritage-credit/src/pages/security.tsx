@@ -14,7 +14,7 @@ export default function Security() {
   return (
     <div className="max-w-5xl mx-auto p-8 space-y-8">
       <div>
-        <h1 className="text-3xl font-serif text-primary" data-testid="text-page-title">Security Center</h1>
+        <h1 className="text-3xl font-semibold text-primary" data-testid="text-page-title">Security Center</h1>
         <p className="text-muted-foreground mt-1">Keep your account safe and monitor activity.</p>
       </div>
 

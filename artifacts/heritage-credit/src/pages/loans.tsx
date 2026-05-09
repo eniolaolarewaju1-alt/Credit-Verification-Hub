@@ -23,7 +23,7 @@ export default function Loans() {
   return (
     <div className="max-w-6xl mx-auto p-8 space-y-6">
       <div>
-        <h1 className="text-3xl font-serif text-primary" data-testid="text-page-title">Loans & Lines of Credit</h1>
+        <h1 className="text-3xl font-semibold text-primary" data-testid="text-page-title">Loans & Lines of Credit</h1>
         <p className="text-muted-foreground mt-1">Track your progress and manage payments.</p>
       </div>
 
