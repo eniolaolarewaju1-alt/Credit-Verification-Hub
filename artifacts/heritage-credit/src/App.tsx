@@ -18,6 +18,7 @@ import Statements from "@/pages/statements";
 import Settings from "@/pages/settings";
 import Security from "@/pages/security";
 import NotFound from "@/pages/not-found";
+import Receipt from "@/pages/receipt";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -106,20 +107,25 @@ function Router() {
       <Route path="/login" component={Login} />
       <Route>
         <AuthGuard>
-          <Layout>
-            <Switch>
-              <Route path="/" component={Home} />
-              <Route path="/transactions" component={Transactions} />
-              <Route path="/transfers" component={Transfers} />
-              <Route path="/bill-pay" component={BillPay} />
-              <Route path="/loans" component={Loans} />
-              <Route path="/cards" component={Cards} />
-              <Route path="/statements" component={Statements} />
-              <Route path="/settings" component={Settings} />
-              <Route path="/security" component={Security} />
-              <Route component={NotFound} />
-            </Switch>
-          </Layout>
+          <Switch>
+            <Route path="/receipt/:transferId" component={Receipt} />
+            <Route>
+              <Layout>
+                <Switch>
+                  <Route path="/" component={Home} />
+                  <Route path="/transactions" component={Transactions} />
+                  <Route path="/transfers" component={Transfers} />
+                  <Route path="/bill-pay" component={BillPay} />
+                  <Route path="/loans" component={Loans} />
+                  <Route path="/cards" component={Cards} />
+                  <Route path="/statements" component={Statements} />
+                  <Route path="/settings" component={Settings} />
+                  <Route path="/security" component={Security} />
+                  <Route component={NotFound} />
+                </Switch>
+              </Layout>
+            </Route>
+          </Switch>
         </AuthGuard>
       </Route>
     </Switch>

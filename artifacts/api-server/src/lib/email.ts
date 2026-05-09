@@ -43,12 +43,16 @@ function htmlWrapper(title: string, body: string): string {
     .row:last-of-type { border-bottom: none; }
     .label { color: #888; }
     .value { color: #111; font-weight: 600; }
-    .amount { color: #1a2b5e; font-size: 22px; font-weight: 700; margin: 16px 0; font-family: Arial, sans-serif; }
+    .amount { color: #1a2b5e; font-size: 24px; font-weight: 700; margin: 16px 0 20px; font-family: Arial, sans-serif; }
+    .ref { font-family: monospace; background: #f0f4ff; border: 1px solid #c7d4ff; padding: 8px 14px; border-radius: 6px; font-size: 15px; color: #1a2b5e; font-weight: 700; display: inline-block; margin: 4px 0 16px; }
     .footer { padding: 16px 28px; background: #f8f9fc; font-family: Arial, sans-serif; font-size: 11px; color: #aaa; border-top: 1px solid #ececec; }
     .badge { display: inline-block; padding: 3px 10px; border-radius: 20px; font-size: 12px; font-family: Arial, sans-serif; font-weight: 600; }
     .badge-success { background: #dcfce7; color: #166534; }
     .badge-pending { background: #fef9c3; color: #854d0e; }
+    .badge-reversed { background: #dbeafe; color: #1e40af; }
     .alert { background: #fff7ed; border-left: 4px solid #ea580c; padding: 12px 16px; border-radius: 6px; font-size: 13px; font-family: Arial, sans-serif; margin-top: 12px; color: #7c2d12; }
+    .note { background: #f0f9ff; border-left: 4px solid #0284c7; padding: 12px 16px; border-radius: 6px; font-size: 13px; font-family: Arial, sans-serif; margin-top: 12px; color: #0c4a6e; }
+    .reversal-banner { background: #dbeafe; border-radius: 8px; padding: 14px 18px; margin-bottom: 16px; font-family: Arial, sans-serif; font-size: 14px; color: #1e40af; font-weight: 600; }
   </style>
 </head>
 <body>
@@ -69,6 +73,83 @@ function htmlWrapper(title: string, body: string): string {
   </div>
 </body>
 </html>`;
+}
+
+export async function sendTransferConfirmation(opts: {
+  referenceNumber: string;
+  fromAccount: string;
+  toAccount: string;
+  amount: number;
+  memo?: string;
+}) {
+  const transporter = createTransporter();
+  if (!transporter) {
+    logger.warn("GMAIL_APP_PASSWORD not set — skipping transfer confirmation email");
+    return;
+  }
+  const to = process.env.ADMIN_EMAIL!;
+  const fmt = (n: number) => n.toLocaleString("en-US", { style: "currency", currency: "USD" });
+  const body = `
+    <div class="amount">${fmt(opts.amount)}</div>
+    <p style="font-family:Arial,sans-serif;font-size:13px;color:#555;margin:0 0 8px;">Reference Number</p>
+    <div class="ref">${opts.referenceNumber}</div>
+    <div class="row"><span class="label">From</span><span class="value">${opts.fromAccount}</span></div>
+    <div class="row"><span class="label">To</span><span class="value">${opts.toAccount}</span></div>
+    ${opts.memo ? `<div class="row"><span class="label">Memo</span><span class="value">${opts.memo}</span></div>` : ""}
+    <div class="row"><span class="label">Status</span><span class="value"><span class="badge badge-pending">Pending Reversal</span></span></div>
+    <div class="row"><span class="label">Date / Time</span><span class="value">${scTime()}</span></div>
+    <div class="note">This is a demo transfer. The funds will be automatically returned to your account within 5 minutes. No real money has moved.</div>
+  `;
+  try {
+    await transporter.sendMail({
+      from: `Heritage Credit Union <${to}>`,
+      to,
+      subject: `Transfer Initiated — ${fmt(opts.amount)} · Ref ${opts.referenceNumber}`,
+      html: htmlWrapper("Transfer Confirmation Receipt", body),
+    });
+    logger.info({ to, ref: opts.referenceNumber }, "Transfer confirmation email sent");
+  } catch (err) {
+    logger.error(err, "Failed to send transfer confirmation email");
+  }
+}
+
+export async function sendTransferReversalEmail(opts: {
+  referenceNumber: string;
+  fromAccount: string;
+  toAccount: string;
+  amount: number;
+  memo?: string;
+}) {
+  const transporter = createTransporter();
+  if (!transporter) {
+    logger.warn("GMAIL_APP_PASSWORD not set — skipping reversal email");
+    return;
+  }
+  const to = process.env.ADMIN_EMAIL!;
+  const fmt = (n: number) => n.toLocaleString("en-US", { style: "currency", currency: "USD" });
+  const body = `
+    <div class="reversal-banner">✓ Transfer Reversed — Funds Returned</div>
+    <div class="amount">${fmt(opts.amount)}</div>
+    <p style="font-family:Arial,sans-serif;font-size:13px;color:#555;margin:0 0 8px;">Reference Number</p>
+    <div class="ref">${opts.referenceNumber}</div>
+    <div class="row"><span class="label">Original From</span><span class="value">${opts.fromAccount}</span></div>
+    <div class="row"><span class="label">Original To</span><span class="value">${opts.toAccount}</span></div>
+    ${opts.memo ? `<div class="row"><span class="label">Memo</span><span class="value">${opts.memo}</span></div>` : ""}
+    <div class="row"><span class="label">Status</span><span class="value"><span class="badge badge-reversed">Reversed</span></span></div>
+    <div class="row"><span class="label">Reversed At</span><span class="value">${scTime()}</span></div>
+    <div class="note">Your funds have been returned to <strong>${opts.fromAccount}</strong>. This demo transfer has been fully reversed and your balance has been restored.</div>
+  `;
+  try {
+    await transporter.sendMail({
+      from: `Heritage Credit Union <${to}>`,
+      to,
+      subject: `Transfer Reversed — ${fmt(opts.amount)} Returned · Ref ${opts.referenceNumber}`,
+      html: htmlWrapper("Transfer Reversal Confirmation", body),
+    });
+    logger.info({ to, ref: opts.referenceNumber }, "Transfer reversal email sent");
+  } catch (err) {
+    logger.error(err, "Failed to send reversal email");
+  }
 }
 
 export async function sendTransferAlert(opts: {

@@ -154,8 +154,16 @@ export const GetTransfersResponseItem = zod.object({
   toAccountId: zod.number(),
   amount: zod.number(),
   date: zod.string(),
-  status: zod.enum(["pending", "completed", "failed"]),
+  status: zod.enum([
+    "pending",
+    "pending_reversal",
+    "completed",
+    "reversed",
+    "failed",
+  ]),
   memo: zod.string(),
+  referenceNumber: zod.string(),
+  reversedAt: zod.coerce.date().nullish(),
 });
 export const GetTransfersResponse = zod.array(GetTransfersResponseItem);
 
@@ -167,6 +175,25 @@ export const CreateTransferBody = zod.object({
   toAccountId: zod.number(),
   amount: zod.number(),
   memo: zod.string().optional(),
+});
+
+/**
+ * @summary Get receipt data for a transfer
+ */
+export const GetTransferReceiptParams = zod.object({
+  transferId: zod.coerce.number(),
+});
+
+export const GetTransferReceiptResponse = zod.object({
+  id: zod.number(),
+  referenceNumber: zod.string(),
+  date: zod.string(),
+  amount: zod.number(),
+  fromAccount: zod.string(),
+  toAccount: zod.string(),
+  status: zod.string(),
+  memo: zod.string(),
+  reversedAt: zod.string().nullish(),
 });
 
 /**

@@ -97,7 +97,9 @@ export type TransferStatus =
 
 export const TransferStatus = {
   pending: "pending",
+  pending_reversal: "pending_reversal",
   completed: "completed",
+  reversed: "reversed",
   failed: "failed",
 } as const;
 
@@ -109,6 +111,22 @@ export interface Transfer {
   date: string;
   status: TransferStatus;
   memo: string;
+  referenceNumber: string;
+  /** @nullable */
+  reversedAt?: string | null;
+}
+
+export interface TransferReceipt {
+  id: number;
+  referenceNumber: string;
+  date: string;
+  amount: number;
+  fromAccount: string;
+  toAccount: string;
+  status: string;
+  memo: string;
+  /** @nullable */
+  reversedAt?: string | null;
 }
 
 export interface TransferInput {

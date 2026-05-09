@@ -39,6 +39,7 @@ import type {
   Transaction,
   Transfer,
   TransferInput,
+  TransferReceipt,
   UpdateCardStatusBody,
   VerifyAccountBody,
   VerifyAccountResult,
@@ -989,6 +990,95 @@ export const useCreateTransfer = <
 > => {
   return useMutation(getCreateTransferMutationOptions(options));
 };
+
+/**
+ * @summary Get receipt data for a transfer
+ */
+export const getGetTransferReceiptUrl = (transferId: number) => {
+  return `/api/transfers/${transferId}/receipt`;
+};
+
+export const getTransferReceipt = async (
+  transferId: number,
+  options?: RequestInit,
+): Promise<TransferReceipt> => {
+  return customFetch<TransferReceipt>(getGetTransferReceiptUrl(transferId), {
+    ...options,
+    method: "GET",
+  });
+};
+
+export const getGetTransferReceiptQueryKey = (transferId: number) => {
+  return [`/api/transfers/${transferId}/receipt`] as const;
+};
+
+export const getGetTransferReceiptQueryOptions = <
+  TData = Awaited<ReturnType<typeof getTransferReceipt>>,
+  TError = ErrorType<ErrorResponse>,
+>(
+  transferId: number,
+  options?: {
+    query?: UseQueryOptions<
+      Awaited<ReturnType<typeof getTransferReceipt>>,
+      TError,
+      TData
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey =
+    queryOptions?.queryKey ?? getGetTransferReceiptQueryKey(transferId);
+
+  const queryFn: QueryFunction<
+    Awaited<ReturnType<typeof getTransferReceipt>>
+  > = ({ signal }) =>
+    getTransferReceipt(transferId, { signal, ...requestOptions });
+
+  return {
+    queryKey,
+    queryFn,
+    enabled: !!transferId,
+    ...queryOptions,
+  } as UseQueryOptions<
+    Awaited<ReturnType<typeof getTransferReceipt>>,
+    TError,
+    TData
+  > & { queryKey: QueryKey };
+};
+
+export type GetTransferReceiptQueryResult = NonNullable<
+  Awaited<ReturnType<typeof getTransferReceipt>>
+>;
+export type GetTransferReceiptQueryError = ErrorType<ErrorResponse>;
+
+/**
+ * @summary Get receipt data for a transfer
+ */
+
+export function useGetTransferReceipt<
+  TData = Awaited<ReturnType<typeof getTransferReceipt>>,
+  TError = ErrorType<ErrorResponse>,
+>(
+  transferId: number,
+  options?: {
+    query?: UseQueryOptions<
+      Awaited<ReturnType<typeof getTransferReceipt>>,
+      TError,
+      TData
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+  const queryOptions = getGetTransferReceiptQueryOptions(transferId, options);
+
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
+    queryKey: QueryKey;
+  };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
 
 /**
  * @summary List saved external payees

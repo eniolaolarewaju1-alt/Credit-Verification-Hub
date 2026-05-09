@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useLocation } from "wouter";
 import {
   useGetAccounts,
   useGetTransfers,
@@ -13,6 +14,7 @@ import {
   getGetAccountsQueryKey,
   getGetExternalPayeesQueryKey,
   getGetExternalTransfersQueryKey,
+  getGetRecentTransactionsQueryKey,
 } from "@workspace/api-client-react";
 import type { ExternalPayee } from "@workspace/api-client-react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -31,37 +33,129 @@ import {
   Send,
   Plus,
   Trash2,
-  ShieldCheck,
   AlertCircle,
-  ChevronRight,
+  RotateCcw,
+  Printer,
+  FileText,
+  X,
 } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
-
-const ROUTING_BANK_MAP: Record<string, string> = {
-  "021000021": "JPMorgan Chase",
-  "021000089": "Citibank",
-  "026009593": "Bank of America",
-  "121000248": "Wells Fargo",
-  "053000219": "Truist Bank",
-  "053101121": "First Citizens Bank",
-  "053207766": "South State Bank",
-  "253270635": "SC Federal Credit Union",
-  "053100300": "TD Bank",
-  "267084131": "Navy Federal Credit Union",
-};
 
 function fmt(n: number) {
   return n.toLocaleString("en-US", { style: "currency", currency: "USD" });
 }
 
 function scDate(iso: string) {
-  return new Date(iso).toLocaleDateString("en-US", {
+  return new Date(iso + "T12:00:00").toLocaleDateString("en-US", {
     timeZone: "America/New_York",
     month: "short",
     day: "numeric",
     year: "numeric",
   });
+}
+
+function StatusBadge({ status }: { status: string }) {
+  if (status === "reversed") {
+    return (
+      <Badge className="text-[10px] bg-blue-100 text-blue-700 hover:bg-blue-100 border-0 gap-1">
+        <RotateCcw className="w-2.5 h-2.5" /> Reversed
+      </Badge>
+    );
+  }
+  if (status === "pending_reversal") {
+    return (
+      <Badge className="text-[10px] bg-amber-100 text-amber-700 hover:bg-amber-100 border-0 gap-1">
+        <Clock className="w-2.5 h-2.5" /> Pending Reversal
+      </Badge>
+    );
+  }
+  return (
+    <Badge className="text-[10px] bg-green-100 text-green-700 hover:bg-green-100 border-0 gap-1">
+      <CheckCircle2 className="w-2.5 h-2.5" /> Completed
+    </Badge>
+  );
+}
+
+interface SuccessModal {
+  referenceNumber: string;
+  transferId: number;
+  amount: number;
+  fromName: string;
+  toName: string;
+}
+
+function TransferSuccessModal({ modal, onClose }: { modal: SuccessModal; onClose: () => void }) {
+  const [, navigate] = useLocation();
+  return (
+    <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4">
+      <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full overflow-hidden">
+        {/* Header */}
+        <div className="bg-[#1a2b5e] px-6 py-5 text-white">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-full bg-green-400/20 flex items-center justify-center">
+                <CheckCircle2 className="w-5 h-5 text-green-300" />
+              </div>
+              <div>
+                <p className="font-semibold text-base">Transfer Initiated</p>
+                <p className="text-white/60 text-xs">Demo portal — reversal in ~5 min</p>
+              </div>
+            </div>
+            <button onClick={onClose} className="text-white/50 hover:text-white transition-colors">
+              <X className="w-5 h-5" />
+            </button>
+          </div>
+        </div>
+
+        {/* Body */}
+        <div className="px-6 py-5 space-y-4">
+          <div className="text-center">
+            <p className="text-3xl font-bold text-[#1a2b5e]">{fmt(modal.amount)}</p>
+            <p className="text-sm text-gray-500 mt-1">{modal.fromName} → {modal.toName}</p>
+          </div>
+
+          <div className="bg-[#f0f4ff] rounded-xl p-4 text-center">
+            <p className="text-xs text-gray-500 uppercase tracking-wider font-medium mb-1">Reference Number</p>
+            <p className="font-mono text-lg font-bold text-[#1a2b5e] tracking-wider">{modal.referenceNumber}</p>
+          </div>
+
+          <div className="bg-amber-50 border border-amber-200 rounded-xl p-3 text-xs text-amber-800">
+            <strong>Demo Notice:</strong> This transfer will be automatically reversed in approximately 5 minutes and your balance will be restored. A Gmail confirmation will be sent to <strong>daxemry5855@gmail.com</strong>.
+          </div>
+
+          <div className="flex gap-3">
+            <Button
+              className="flex-1 bg-[#1a2b5e] hover:bg-[#162450]"
+              onClick={() => {
+                onClose();
+                navigate(`/receipt/${modal.transferId}`);
+              }}
+            >
+              <FileText className="w-4 h-4 mr-2" /> View Receipt
+            </Button>
+            <Button
+              variant="outline"
+              className="flex-1 border-[#1a2b5e] text-[#1a2b5e]"
+              onClick={() => {
+                onClose();
+                window.open(`/receipt/${modal.transferId}`, "_blank");
+              }}
+            >
+              <Printer className="w-4 h-4 mr-2" /> Print
+            </Button>
+          </div>
+
+          <button
+            onClick={onClose}
+            className="w-full text-sm text-gray-400 hover:text-gray-600 transition-colors"
+          >
+            Close
+          </button>
+        </div>
+      </div>
+    </div>
+  );
 }
 
 type Tab = "internal" | "external" | "payees";
@@ -70,6 +164,7 @@ export default function Transfers() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [tab, setTab] = useState<Tab>("internal");
+  const [successModal, setSuccessModal] = useState<SuccessModal | null>(null);
 
   // Internal transfer state
   const [fromAccount, setFromAccount] = useState("");
@@ -104,6 +199,12 @@ export default function Transfers() {
 
   const eligibleAccounts = accounts?.filter(a => a.type === "checking" || a.type === "savings") ?? [];
 
+  function invalidateAll() {
+    queryClient.invalidateQueries({ queryKey: getGetTransfersQueryKey() });
+    queryClient.invalidateQueries({ queryKey: getGetAccountsQueryKey() });
+    queryClient.invalidateQueries({ queryKey: getGetRecentTransactionsQueryKey() });
+  }
+
   // ── Internal Transfer ──────────────────────────────────────────────
   function handleInternalTransfer(e: React.FormEvent) {
     e.preventDefault();
@@ -116,12 +217,23 @@ export default function Transfers() {
       toast({ title: "Invalid amount", variant: "destructive" });
       return;
     }
-    createTransfer.mutate({ data: { fromAccountId: parseInt(fromAccount), toAccountId: parseInt(toAccount), amount: amt, memo: memo || undefined } }, {
-      onSuccess: () => {
-        toast({ title: "Transfer Complete", description: `${fmt(amt)} moved successfully.` });
+
+    const fromAcc = accounts?.find(a => a.id === parseInt(fromAccount));
+    const toAcc = accounts?.find(a => a.id === parseInt(toAccount));
+
+    createTransfer.mutate({
+      data: { fromAccountId: parseInt(fromAccount), toAccountId: parseInt(toAccount), amount: amt, memo: memo || undefined },
+    }, {
+      onSuccess: (transfer) => {
         setAmount(""); setMemo("");
-        queryClient.invalidateQueries({ queryKey: getGetTransfersQueryKey() });
-        queryClient.invalidateQueries({ queryKey: getGetAccountsQueryKey() });
+        invalidateAll();
+        setSuccessModal({
+          referenceNumber: transfer.referenceNumber,
+          transferId: transfer.id,
+          amount: transfer.amount,
+          fromName: fromAcc?.nickname ?? "Account",
+          toName: toAcc?.nickname ?? "Account",
+        });
       },
       onError: (err: Error) => toast({ title: "Transfer Failed", description: err.message, variant: "destructive" }),
     });
@@ -148,7 +260,7 @@ export default function Transfers() {
         accountNumber: accountNum,
         bankName: verifyResult.bankName,
         accountType: "checking",
-      }
+      },
     }, {
       onSuccess: () => {
         toast({ title: "Payee Saved", description: `${recipientName} added to your payees.` });
@@ -166,7 +278,7 @@ export default function Transfers() {
     const amt = parseFloat(extAmount);
     if (!extFromAccount || !selectedPayeeId || isNaN(amt) || amt <= 0) return;
     createExternalTransfer.mutate({
-      data: { fromAccountId: parseInt(extFromAccount), externalPayeeId: parseInt(selectedPayeeId), amount: amt, memo: extMemo || undefined }
+      data: { fromAccountId: parseInt(extFromAccount), externalPayeeId: parseInt(selectedPayeeId), amount: amt, memo: extMemo || undefined },
     }, {
       onSuccess: () => {
         toast({ title: "Transfer Initiated", description: `${fmt(amt)} is being sent. You'll receive a Gmail confirmation.` });
@@ -195,6 +307,10 @@ export default function Transfers() {
 
   return (
     <div className="max-w-6xl mx-auto p-8 space-y-6">
+      {successModal && (
+        <TransferSuccessModal modal={successModal} onClose={() => setSuccessModal(null)} />
+      )}
+
       <div>
         <h1 className="text-3xl font-serif text-[#1a2b5e]">Transfers</h1>
         <p className="text-gray-500 mt-1 text-sm">Move money between accounts or send to another bank.</p>
@@ -222,7 +338,7 @@ export default function Transfers() {
               <CardTitle className="flex items-center gap-2 text-[#1a2b5e]">
                 <ArrowRightLeft className="w-5 h-5" /> Move Money
               </CardTitle>
-              <CardDescription>Transfer instantly between your Heritage accounts.</CardDescription>
+              <CardDescription>Transfer instantly between your Heritage accounts. Funds will be automatically reversed within 5 minutes (demo portal).</CardDescription>
             </CardHeader>
             <CardContent>
               <form onSubmit={handleInternalTransfer} className="space-y-5">
@@ -249,7 +365,7 @@ export default function Transfers() {
                       <SelectContent>
                         {eligibleAccounts.map(a => (
                           <SelectItem key={a.id} value={String(a.id)}>
-                            {a.nickname} (...{a.maskedNumber})
+                            {a.nickname} (···{a.maskedNumber})
                           </SelectItem>
                         ))}
                       </SelectContent>
@@ -274,22 +390,29 @@ export default function Transfers() {
             </CardContent>
           </Card>
 
+          {/* Recent transfers */}
           <Card className="shadow-sm bg-white">
             <CardHeader>
-              <CardTitle className="text-[#1a2b5e]">Recent Transfers</CardTitle>
+              <CardTitle className="text-[#1a2b5e]">Transfer History</CardTitle>
             </CardHeader>
             <CardContent>
               {loadingTransfers ? (
                 <div className="space-y-3">{[...Array(3)].map((_, i) => <Skeleton key={i} className="h-16 w-full rounded-lg" />)}</div>
               ) : transfers && transfers.length > 0 ? (
-                <div className="space-y-3">
-                  {transfers.slice(0, 6).map(t => {
+                <div className="space-y-2">
+                  {transfers.slice(0, 8).map(t => {
                     const from = accounts?.find(a => a.id === t.fromAccountId);
                     const to = accounts?.find(a => a.id === t.toAccountId);
                     return (
-                      <div key={t.id} className="flex items-center gap-3 p-3 rounded-lg border border-gray-100 bg-gray-50">
-                        <div className="w-8 h-8 rounded-full bg-white border flex items-center justify-center flex-shrink-0">
-                          <CheckCircle2 className="w-4 h-4 text-green-500" />
+                      <div key={t.id} className="flex items-start gap-3 p-3 rounded-lg border border-gray-100 bg-gray-50 hover:bg-gray-100 transition-colors">
+                        <div className="w-8 h-8 rounded-full bg-white border flex items-center justify-center flex-shrink-0 mt-0.5">
+                          {t.status === "reversed" ? (
+                            <RotateCcw className="w-4 h-4 text-blue-500" />
+                          ) : t.status === "pending_reversal" ? (
+                            <Clock className="w-4 h-4 text-amber-500" />
+                          ) : (
+                            <CheckCircle2 className="w-4 h-4 text-green-500" />
+                          )}
                         </div>
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-1 text-sm font-medium text-gray-800 truncate">
@@ -297,9 +420,24 @@ export default function Transfers() {
                             <ArrowRight className="w-3 h-3 flex-shrink-0 text-gray-400" />
                             <span className="truncate">{to?.nickname ?? "Account"}</span>
                           </div>
+                          <div className="flex items-center gap-2 mt-1 flex-wrap">
+                            <StatusBadge status={t.status} />
+                            {t.referenceNumber && (
+                              <span className="text-[10px] text-gray-400 font-mono">{t.referenceNumber}</span>
+                            )}
+                          </div>
                           <p className="text-xs text-gray-400 mt-0.5">{scDate(t.date)}{t.memo ? ` · ${t.memo}` : ""}</p>
                         </div>
-                        <span className="text-sm font-semibold text-[#1a2b5e] flex-shrink-0">{fmt(t.amount)}</span>
+                        <div className="flex flex-col items-end gap-1 flex-shrink-0">
+                          <span className="text-sm font-semibold text-[#1a2b5e]">{fmt(t.amount)}</span>
+                          <a
+                            href={`/receipt/${t.id}`}
+                            className="text-[10px] text-[#1a2b5e] hover:underline flex items-center gap-0.5"
+                            onClick={e => { e.preventDefault(); window.location.href = `/receipt/${t.id}`; }}
+                          >
+                            <FileText className="w-2.5 h-2.5" /> Receipt
+                          </a>
+                        </div>
                       </div>
                     );
                   })}
@@ -319,7 +457,6 @@ export default function Transfers() {
       {tab === "external" && (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <div className="space-y-4">
-            {/* Send money form */}
             <Card className="shadow-sm bg-white">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2 text-[#1a2b5e]">
@@ -395,7 +532,7 @@ export default function Transfers() {
             </Card>
           </div>
 
-          {/* Recent external transfers */}
+          {/* External transfer history */}
           <Card className="shadow-sm bg-white">
             <CardHeader>
               <CardTitle className="text-[#1a2b5e]">External Transfer History</CardTitle>
@@ -438,7 +575,6 @@ export default function Transfers() {
       {/* ── My Payees ── */}
       {tab === "payees" && (
         <div className="space-y-4">
-          {/* Add new payee */}
           <Card className="shadow-sm bg-white">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
               <div>
@@ -455,7 +591,6 @@ export default function Transfers() {
             </CardHeader>
             {showAddPayee && (
               <CardContent>
-                {/* Step 1: verify */}
                 <div className="space-y-4 mb-6">
                   <p className="text-sm font-medium text-gray-700">Step 1 — Verify account</p>
                   <div className="grid grid-cols-2 gap-3">
@@ -467,41 +602,38 @@ export default function Transfers() {
                         maxLength={9}
                         onChange={e => { setRoutingNum(e.target.value.replace(/\D/g, "")); setVerifyResult(null); }}
                       />
-                      {routingNum && ROUTING_BANK_MAP[routingNum] && (
-                        <p className="text-xs text-green-600 flex items-center gap-1"><CheckCircle2 className="w-3 h-3" />{ROUTING_BANK_MAP[routingNum]}</p>
-                      )}
                     </div>
                     <div className="space-y-1.5">
                       <Label>Account Number</Label>
                       <Input
-                        placeholder="Account number"
+                        placeholder="8–17 digits"
                         value={accountNum}
                         onChange={e => { setAccountNum(e.target.value.replace(/\D/g, "")); setVerifyResult(null); }}
                       />
                     </div>
                   </div>
+
+                  {verifyResult && (
+                    <div className={`flex items-center gap-2 p-3 rounded-lg text-sm ${verifyResult.verified ? "bg-green-50 text-green-700 border border-green-200" : "bg-red-50 text-red-700 border border-red-200"}`}>
+                      {verifyResult.verified ? (
+                        <><CheckCircle2 className="w-4 h-4 flex-shrink-0" /> Account verified at <strong>{verifyResult.bankName}</strong></>
+                      ) : (
+                        <><AlertCircle className="w-4 h-4 flex-shrink-0" /> {verifyResult.message ?? "Invalid routing or account number"}</>
+                      )}
+                    </div>
+                  )}
+
                   <Button
                     type="button"
                     variant="outline"
-                    onClick={handleVerify}
-                    disabled={routingNum.length !== 9 || accountNum.length < 4 || verifyAccount.isPending}
                     className="border-[#1a2b5e] text-[#1a2b5e]"
+                    onClick={handleVerify}
+                    disabled={routingNum.length !== 9 || accountNum.length < 8 || verifyAccount.isPending}
                   >
-                    {verifyAccount.isPending ? "Verifying..." : "Verify Account"}
-                    <ChevronRight className="w-4 h-4 ml-1" />
+                    {verifyAccount.isPending ? "Verifying…" : "Verify Account"}
                   </Button>
-
-                  {verifyResult && (
-                    <div className={`rounded-lg p-3 flex items-center gap-2 ${verifyResult.verified ? "bg-green-50 border border-green-200" : "bg-red-50 border border-red-200"}`}>
-                      {verifyResult.verified
-                        ? <ShieldCheck className="w-4 h-4 text-green-600 flex-shrink-0" />
-                        : <AlertCircle className="w-4 h-4 text-red-500 flex-shrink-0" />}
-                      <p className={`text-sm font-medium ${verifyResult.verified ? "text-green-700" : "text-red-600"}`}>{verifyResult.message}</p>
-                    </div>
-                  )}
                 </div>
 
-                {/* Step 2: save payee */}
                 {verifyResult?.verified && (
                   <form onSubmit={handleSavePayee} className="space-y-4 border-t pt-4">
                     <p className="text-sm font-medium text-gray-700">Step 2 — Save recipient</p>

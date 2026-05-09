@@ -240,6 +240,31 @@ paths:
               schema:
                 $ref: "#/components/schemas/Transfer"
 
+  /transfers/{transferId}/receipt:
+    get:
+      operationId: getTransferReceipt
+      tags: [transfers]
+      summary: Get receipt data for a transfer
+      parameters:
+        - name: transferId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Transfer receipt
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TransferReceipt"
+        "404":
+          description: Transfer not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
   /external-payees:
     get:
       operationId: getExternalPayees
@@ -583,7 +608,7 @@ components:
 
     Transfer:
       type: object
-      required: [id, fromAccountId, toAccountId, amount, date, status, memo]
+      required: [id, fromAccountId, toAccountId, amount, date, status, memo, referenceNumber]
       properties:
         id:
           type: integer
@@ -597,9 +622,37 @@ components:
           type: string
         status:
           type: string
-          enum: [pending, completed, failed]
+          enum: [pending, pending_reversal, completed, reversed, failed]
         memo:
           type: string
+        referenceNumber:
+          type: string
+        reversedAt:
+          type: ["string", "null"]
+          format: date-time
+
+    TransferReceipt:
+      type: object
+      required: [id, referenceNumber, date, amount, fromAccount, toAccount, status, memo]
+      properties:
+        id:
+          type: integer
+        referenceNumber:
+          type: string
+        date:
+          type: string
+        amount:
+          type: number
+        fromAccount:
+          type: string
+        toAccount:
+          type: string
+        status:
+          type: string
+        memo:
+          type: string
+        reversedAt:
+          type: ["string", "null"]
 
     TransferInput:
       type: object

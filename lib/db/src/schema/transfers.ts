@@ -8,8 +8,10 @@ export const transfersTable = pgTable("transfers", {
   toAccountId: integer("to_account_id").notNull(),
   amount: numeric("amount", { precision: 12, scale: 2 }).notNull(),
   date: text("date").notNull(),
-  status: text("status").notNull().default("completed"),
+  status: text("status").notNull().default("pending_reversal"),
   memo: text("memo").notNull().default(""),
+  referenceNumber: text("reference_number").notNull().default(""),
+  reversedAt: timestamp("reversed_at", { withTimezone: true }),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 });
 
