@@ -11,30 +11,32 @@ function generateOtp(): string {
 }
 
 router.post("/auth/otp/send", async (req, res): Promise<void> => {
-  const pendingEmail = (req.session as { pendingOtpEmail?: string }).pendingOtpEmail;
-  if (!pendingEmail) {
-    res.status(401).json({ error: "No pending login session. Please log in first." });
+  const { email } = req.body as { email?: string };
+  const adminEmail = process.env.ADMIN_EMAIL;
+
+  if (!email || !adminEmail || email.toLowerCase() !== adminEmail.toLowerCase()) {
+    res.status(401).json({ error: "Invalid request." });
     return;
   }
 
   const code = generateOtp();
-  const expiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10 min
+  const expiresAt = new Date(Date.now() + 10 * 60 * 1000);
 
   await db.delete(otpCodesTable).where(lt(otpCodesTable.expiresAt, new Date()));
   await db.insert(otpCodesTable).values({ code, expiresAt });
 
   await sendOtpEmail({ code, expiresAt });
-  req.log.info({ email: pendingEmail }, "OTP sent");
+  req.log.info({ email }, "OTP resent");
 
   res.json({ message: "Verification code sent to your email" });
 });
 
 router.post("/auth/otp/verify", async (req, res): Promise<void> => {
-  const { code } = req.body as { code?: string };
-  const pendingEmail = (req.session as { pendingOtpEmail?: string }).pendingOtpEmail;
+  const { code, email } = req.body as { code?: string; email?: string };
+  const adminEmail = process.env.ADMIN_EMAIL;
 
-  if (!pendingEmail) {
-    res.status(401).json({ error: "No pending login session" });
+  if (!email || !adminEmail || email.toLowerCase() !== adminEmail.toLowerCase()) {
+    res.status(401).json({ error: "Invalid request." });
     return;
   }
   if (!code) {
@@ -55,11 +57,10 @@ router.post("/auth/otp/verify", async (req, res): Promise<void> => {
 
   await db.update(otpCodesTable).set({ used: true }).where(eq(otpCodesTable.id, otpRow.id));
 
-  (req.session as { userId?: string; pendingOtpEmail?: string }).userId = pendingEmail;
-  (req.session as { pendingOtpEmail?: string }).pendingOtpEmail = undefined;
+  (req.session as { userId?: string }).userId = email;
 
-  logger.info({ email: pendingEmail }, "OTP verified — user logged in");
-  res.json({ email: pendingEmail });
+  logger.info({ email }, "OTP verified — user logged in");
+  res.json({ email });
 });
 
 export default router;

@@ -43,7 +43,15 @@ export default function Login() {
 
   const handleResend = async () => {
     setResendLoading(true); setOtpError("");
-    try { await fetch("/api/auth/otp/send", { method: "POST", credentials: "include" }); startResendCooldown(); }
+    try {
+      await fetch("/api/auth/otp/send", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ email }),
+      });
+      startResendCooldown();
+    }
     finally { setResendLoading(false); }
   };
 
@@ -54,7 +62,7 @@ export default function Login() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
-        body: JSON.stringify({ code: otp }),
+        body: JSON.stringify({ code: otp, email }),
       });
       const data = await r.json() as { email?: string; error?: string };
       if (!r.ok) { setOtpError(data.error ?? "Invalid code. Please try again."); return; }

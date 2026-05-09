@@ -60,7 +60,6 @@ router.post("/auth/login", async (req, res): Promise<void> => {
   const hasEmail = !!process.env.GMAIL_APP_PASSWORD;
 
   if (hasEmail) {
-    (req.session as { pendingOtpEmail?: string }).pendingOtpEmail = email;
     const code = generateOtp();
     const expiresAt = new Date(Date.now() + 10 * 60 * 1000);
     await db.delete(otpCodesTable).where(lt(otpCodesTable.expiresAt, new Date()));
