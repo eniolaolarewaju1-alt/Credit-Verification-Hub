@@ -129,7 +129,7 @@ function AccountDetailsModal({ account, onClose }: { account: Account; onClose: 
   );
 }
 
-function FlipAccountCard({ account }: { account: Account }) {
+function FlipAccountCard({ account, onOpenModal }: { account: Account; onOpenModal: (a: Account) => void }) {
   const [flipped, setFlipped] = useState(false);
   const isChecking = account.type === "checking";
 
