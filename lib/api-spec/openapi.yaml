@@ -17,6 +17,10 @@ tags:
     description: Transaction operations
   - name: transfers
     description: Transfer operations
+  - name: external-payees
+    description: External payee management
+  - name: external-transfers
+    description: External transfer operations
   - name: bills
     description: Bill pay operations
   - name: loans
@@ -208,7 +212,7 @@ paths:
     get:
       operationId: getTransfers
       tags: [transfers]
-      summary: List transfers
+      summary: List internal transfers
       responses:
         "200":
           description: List of transfers
@@ -221,7 +225,7 @@ paths:
     post:
       operationId: createTransfer
       tags: [transfers]
-      summary: Create a new transfer
+      summary: Create an internal transfer
       requestBody:
         required: true
         content:
@@ -235,6 +239,108 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Transfer"
+
+  /external-payees:
+    get:
+      operationId: getExternalPayees
+      tags: [external-payees]
+      summary: List saved external payees
+      responses:
+        "200":
+          description: List of external payees
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ExternalPayee"
+    post:
+      operationId: createExternalPayee
+      tags: [external-payees]
+      summary: Save a new external payee
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ExternalPayeeInput"
+      responses:
+        "201":
+          description: Payee saved
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ExternalPayee"
+
+  /external-payees/verify:
+    post:
+      operationId: verifyExternalAccount
+      tags: [external-payees]
+      summary: Verify a routing and account number
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/VerifyAccountBody"
+      responses:
+        "200":
+          description: Verification result
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VerifyAccountResult"
+
+  /external-payees/{payeeId}:
+    delete:
+      operationId: deleteExternalPayee
+      tags: [external-payees]
+      summary: Remove a saved payee
+      parameters:
+        - name: payeeId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Payee removed
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+
+  /external-transfers:
+    get:
+      operationId: getExternalTransfers
+      tags: [external-transfers]
+      summary: List external transfers
+      responses:
+        "200":
+          description: List of external transfers
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ExternalTransfer"
+    post:
+      operationId: createExternalTransfer
+      tags: [external-transfers]
+      summary: Send money to an external account
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ExternalTransferInput"
+      responses:
+        "201":
+          description: External transfer initiated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ExternalTransfer"
 
   /bills:
     get:
@@ -502,6 +608,103 @@ components:
         fromAccountId:
           type: integer
         toAccountId:
+          type: integer
+        amount:
+          type: number
+        memo:
+          type: string
+
+    ExternalPayee:
+      type: object
+      required: [id, nickname, recipientName, routingNumber, accountNumber, bankName, accountType, createdAt]
+      properties:
+        id:
+          type: integer
+        nickname:
+          type: string
+        recipientName:
+          type: string
+        routingNumber:
+          type: string
+        accountNumber:
+          type: string
+        bankName:
+          type: string
+        accountType:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+
+    ExternalPayeeInput:
+      type: object
+      required: [nickname, recipientName, routingNumber, accountNumber]
+      properties:
+        nickname:
+          type: string
+        recipientName:
+          type: string
+        routingNumber:
+          type: string
+        accountNumber:
+          type: string
+        bankName:
+          type: string
+        accountType:
+          type: string
+
+    VerifyAccountBody:
+      type: object
+      required: [routingNumber, accountNumber]
+      properties:
+        routingNumber:
+          type: string
+        accountNumber:
+          type: string
+
+    VerifyAccountResult:
+      type: object
+      required: [verified, bankName, routingNumber]
+      properties:
+        verified:
+          type: boolean
+        bankName:
+          type: string
+        routingNumber:
+          type: string
+        message:
+          type: string
+
+    ExternalTransfer:
+      type: object
+      required: [id, fromAccountId, externalPayeeId, amount, memo, status, date, createdAt]
+      properties:
+        id:
+          type: integer
+        fromAccountId:
+          type: integer
+        externalPayeeId:
+          type: integer
+        amount:
+          type: number
+        memo:
+          type: string
+        status:
+          type: string
+          enum: [pending, processing, completed, failed]
+        date:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+
+    ExternalTransferInput:
+      type: object
+      required: [fromAccountId, externalPayeeId, amount]
+      properties:
+        fromAccountId:
+          type: integer
+        externalPayeeId:
           type: integer
         amount:
           type: number

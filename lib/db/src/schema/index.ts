@@ -2,6 +2,8 @@ export * from "./members";
 export * from "./accounts";
 export * from "./transactions";
 export * from "./transfers";
+export * from "./external-payees";
+export * from "./external-transfers";
 export * from "./bills";
 export * from "./loans";
 export * from "./cards";

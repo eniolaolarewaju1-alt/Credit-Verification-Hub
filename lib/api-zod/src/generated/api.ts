@@ -146,7 +146,7 @@ export const GetRecentTransactionsResponse = zod.array(
 );
 
 /**
- * @summary List transfers
+ * @summary List internal transfers
  */
 export const GetTransfersResponseItem = zod.object({
   id: zod.number(),
@@ -160,11 +160,93 @@ export const GetTransfersResponseItem = zod.object({
 export const GetTransfersResponse = zod.array(GetTransfersResponseItem);
 
 /**
- * @summary Create a new transfer
+ * @summary Create an internal transfer
  */
 export const CreateTransferBody = zod.object({
   fromAccountId: zod.number(),
   toAccountId: zod.number(),
+  amount: zod.number(),
+  memo: zod.string().optional(),
+});
+
+/**
+ * @summary List saved external payees
+ */
+export const GetExternalPayeesResponseItem = zod.object({
+  id: zod.number(),
+  nickname: zod.string(),
+  recipientName: zod.string(),
+  routingNumber: zod.string(),
+  accountNumber: zod.string(),
+  bankName: zod.string(),
+  accountType: zod.string(),
+  createdAt: zod.coerce.date(),
+});
+export const GetExternalPayeesResponse = zod.array(
+  GetExternalPayeesResponseItem,
+);
+
+/**
+ * @summary Save a new external payee
+ */
+export const CreateExternalPayeeBody = zod.object({
+  nickname: zod.string(),
+  recipientName: zod.string(),
+  routingNumber: zod.string(),
+  accountNumber: zod.string(),
+  bankName: zod.string().optional(),
+  accountType: zod.string().optional(),
+});
+
+/**
+ * @summary Verify a routing and account number
+ */
+export const VerifyExternalAccountBody = zod.object({
+  routingNumber: zod.string(),
+  accountNumber: zod.string(),
+});
+
+export const VerifyExternalAccountResponse = zod.object({
+  verified: zod.boolean(),
+  bankName: zod.string(),
+  routingNumber: zod.string(),
+  message: zod.string().optional(),
+});
+
+/**
+ * @summary Remove a saved payee
+ */
+export const DeleteExternalPayeeParams = zod.object({
+  payeeId: zod.coerce.number(),
+});
+
+export const DeleteExternalPayeeResponse = zod.object({
+  message: zod.string(),
+});
+
+/**
+ * @summary List external transfers
+ */
+export const GetExternalTransfersResponseItem = zod.object({
+  id: zod.number(),
+  fromAccountId: zod.number(),
+  externalPayeeId: zod.number(),
+  amount: zod.number(),
+  memo: zod.string(),
+  status: zod.enum(["pending", "processing", "completed", "failed"]),
+  date: zod.string(),
+  createdAt: zod.coerce.date(),
+});
+export const GetExternalTransfersResponse = zod.array(
+  GetExternalTransfersResponseItem,
+);
+
+/**
+ * @summary Send money to an external account
+ */
+export const CreateExternalTransferBody = zod.object({
+  fromAccountId: zod.number(),
+  externalPayeeId: zod.number(),
   amount: zod.number(),
   memo: zod.string().optional(),
 });

@@ -25,6 +25,10 @@ import type {
   BillPayment,
   Card,
   ErrorResponse,
+  ExternalPayee,
+  ExternalPayeeInput,
+  ExternalTransfer,
+  ExternalTransferInput,
   GetTransactionsParams,
   HealthStatus,
   Loan,
@@ -36,6 +40,8 @@ import type {
   Transfer,
   TransferInput,
   UpdateCardStatusBody,
+  VerifyAccountBody,
+  VerifyAccountResult,
 } from "./api.schemas";
 
 import { customFetch } from "../custom-fetch";
@@ -824,7 +830,7 @@ export function useGetRecentTransactions<
 }
 
 /**
- * @summary List transfers
+ * @summary List internal transfers
  */
 export const getGetTransfersUrl = () => {
   return `/api/transfers`;
@@ -875,7 +881,7 @@ export type GetTransfersQueryResult = NonNullable<
 export type GetTransfersQueryError = ErrorType<unknown>;
 
 /**
- * @summary List transfers
+ * @summary List internal transfers
  */
 
 export function useGetTransfers<
@@ -899,7 +905,7 @@ export function useGetTransfers<
 }
 
 /**
- * @summary Create a new transfer
+ * @summary Create an internal transfer
  */
 export const getCreateTransferUrl = () => {
   return `/api/transfers`;
@@ -962,7 +968,7 @@ export type CreateTransferMutationBody = BodyType<TransferInput>;
 export type CreateTransferMutationError = ErrorType<unknown>;
 
 /**
- * @summary Create a new transfer
+ * @summary Create an internal transfer
  */
 export const useCreateTransfer = <
   TError = ErrorType<unknown>,
@@ -982,6 +988,499 @@ export const useCreateTransfer = <
   TContext
 > => {
   return useMutation(getCreateTransferMutationOptions(options));
+};
+
+/**
+ * @summary List saved external payees
+ */
+export const getGetExternalPayeesUrl = () => {
+  return `/api/external-payees`;
+};
+
+export const getExternalPayees = async (
+  options?: RequestInit,
+): Promise<ExternalPayee[]> => {
+  return customFetch<ExternalPayee[]>(getGetExternalPayeesUrl(), {
+    ...options,
+    method: "GET",
+  });
+};
+
+export const getGetExternalPayeesQueryKey = () => {
+  return [`/api/external-payees`] as const;
+};
+
+export const getGetExternalPayeesQueryOptions = <
+  TData = Awaited<ReturnType<typeof getExternalPayees>>,
+  TError = ErrorType<unknown>,
+>(options?: {
+  query?: UseQueryOptions<
+    Awaited<ReturnType<typeof getExternalPayees>>,
+    TError,
+    TData
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey = queryOptions?.queryKey ?? getGetExternalPayeesQueryKey();
+
+  const queryFn: QueryFunction<
+    Awaited<ReturnType<typeof getExternalPayees>>
+  > = ({ signal }) => getExternalPayees({ signal, ...requestOptions });
+
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof getExternalPayees>>,
+    TError,
+    TData
+  > & { queryKey: QueryKey };
+};
+
+export type GetExternalPayeesQueryResult = NonNullable<
+  Awaited<ReturnType<typeof getExternalPayees>>
+>;
+export type GetExternalPayeesQueryError = ErrorType<unknown>;
+
+/**
+ * @summary List saved external payees
+ */
+
+export function useGetExternalPayees<
+  TData = Awaited<ReturnType<typeof getExternalPayees>>,
+  TError = ErrorType<unknown>,
+>(options?: {
+  query?: UseQueryOptions<
+    Awaited<ReturnType<typeof getExternalPayees>>,
+    TError,
+    TData
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+  const queryOptions = getGetExternalPayeesQueryOptions(options);
+
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
+    queryKey: QueryKey;
+  };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+/**
+ * @summary Save a new external payee
+ */
+export const getCreateExternalPayeeUrl = () => {
+  return `/api/external-payees`;
+};
+
+export const createExternalPayee = async (
+  externalPayeeInput: ExternalPayeeInput,
+  options?: RequestInit,
+): Promise<ExternalPayee> => {
+  return customFetch<ExternalPayee>(getCreateExternalPayeeUrl(), {
+    ...options,
+    method: "POST",
+    headers: { "Content-Type": "application/json", ...options?.headers },
+    body: JSON.stringify(externalPayeeInput),
+  });
+};
+
+export const getCreateExternalPayeeMutationOptions = <
+  TError = ErrorType<unknown>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof createExternalPayee>>,
+    TError,
+    { data: BodyType<ExternalPayeeInput> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof createExternalPayee>>,
+  TError,
+  { data: BodyType<ExternalPayeeInput> },
+  TContext
+> => {
+  const mutationKey = ["createExternalPayee"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof createExternalPayee>>,
+    { data: BodyType<ExternalPayeeInput> }
+  > = (props) => {
+    const { data } = props ?? {};
+
+    return createExternalPayee(data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type CreateExternalPayeeMutationResult = NonNullable<
+  Awaited<ReturnType<typeof createExternalPayee>>
+>;
+export type CreateExternalPayeeMutationBody = BodyType<ExternalPayeeInput>;
+export type CreateExternalPayeeMutationError = ErrorType<unknown>;
+
+/**
+ * @summary Save a new external payee
+ */
+export const useCreateExternalPayee = <
+  TError = ErrorType<unknown>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof createExternalPayee>>,
+    TError,
+    { data: BodyType<ExternalPayeeInput> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof createExternalPayee>>,
+  TError,
+  { data: BodyType<ExternalPayeeInput> },
+  TContext
+> => {
+  return useMutation(getCreateExternalPayeeMutationOptions(options));
+};
+
+/**
+ * @summary Verify a routing and account number
+ */
+export const getVerifyExternalAccountUrl = () => {
+  return `/api/external-payees/verify`;
+};
+
+export const verifyExternalAccount = async (
+  verifyAccountBody: VerifyAccountBody,
+  options?: RequestInit,
+): Promise<VerifyAccountResult> => {
+  return customFetch<VerifyAccountResult>(getVerifyExternalAccountUrl(), {
+    ...options,
+    method: "POST",
+    headers: { "Content-Type": "application/json", ...options?.headers },
+    body: JSON.stringify(verifyAccountBody),
+  });
+};
+
+export const getVerifyExternalAccountMutationOptions = <
+  TError = ErrorType<unknown>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof verifyExternalAccount>>,
+    TError,
+    { data: BodyType<VerifyAccountBody> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof verifyExternalAccount>>,
+  TError,
+  { data: BodyType<VerifyAccountBody> },
+  TContext
+> => {
+  const mutationKey = ["verifyExternalAccount"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof verifyExternalAccount>>,
+    { data: BodyType<VerifyAccountBody> }
+  > = (props) => {
+    const { data } = props ?? {};
+
+    return verifyExternalAccount(data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type VerifyExternalAccountMutationResult = NonNullable<
+  Awaited<ReturnType<typeof verifyExternalAccount>>
+>;
+export type VerifyExternalAccountMutationBody = BodyType<VerifyAccountBody>;
+export type VerifyExternalAccountMutationError = ErrorType<unknown>;
+
+/**
+ * @summary Verify a routing and account number
+ */
+export const useVerifyExternalAccount = <
+  TError = ErrorType<unknown>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof verifyExternalAccount>>,
+    TError,
+    { data: BodyType<VerifyAccountBody> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof verifyExternalAccount>>,
+  TError,
+  { data: BodyType<VerifyAccountBody> },
+  TContext
+> => {
+  return useMutation(getVerifyExternalAccountMutationOptions(options));
+};
+
+/**
+ * @summary Remove a saved payee
+ */
+export const getDeleteExternalPayeeUrl = (payeeId: number) => {
+  return `/api/external-payees/${payeeId}`;
+};
+
+export const deleteExternalPayee = async (
+  payeeId: number,
+  options?: RequestInit,
+): Promise<SuccessResponse> => {
+  return customFetch<SuccessResponse>(getDeleteExternalPayeeUrl(payeeId), {
+    ...options,
+    method: "DELETE",
+  });
+};
+
+export const getDeleteExternalPayeeMutationOptions = <
+  TError = ErrorType<unknown>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof deleteExternalPayee>>,
+    TError,
+    { payeeId: number },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof deleteExternalPayee>>,
+  TError,
+  { payeeId: number },
+  TContext
+> => {
+  const mutationKey = ["deleteExternalPayee"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof deleteExternalPayee>>,
+    { payeeId: number }
+  > = (props) => {
+    const { payeeId } = props ?? {};
+
+    return deleteExternalPayee(payeeId, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type DeleteExternalPayeeMutationResult = NonNullable<
+  Awaited<ReturnType<typeof deleteExternalPayee>>
+>;
+
+export type DeleteExternalPayeeMutationError = ErrorType<unknown>;
+
+/**
+ * @summary Remove a saved payee
+ */
+export const useDeleteExternalPayee = <
+  TError = ErrorType<unknown>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof deleteExternalPayee>>,
+    TError,
+    { payeeId: number },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof deleteExternalPayee>>,
+  TError,
+  { payeeId: number },
+  TContext
+> => {
+  return useMutation(getDeleteExternalPayeeMutationOptions(options));
+};
+
+/**
+ * @summary List external transfers
+ */
+export const getGetExternalTransfersUrl = () => {
+  return `/api/external-transfers`;
+};
+
+export const getExternalTransfers = async (
+  options?: RequestInit,
+): Promise<ExternalTransfer[]> => {
+  return customFetch<ExternalTransfer[]>(getGetExternalTransfersUrl(), {
+    ...options,
+    method: "GET",
+  });
+};
+
+export const getGetExternalTransfersQueryKey = () => {
+  return [`/api/external-transfers`] as const;
+};
+
+export const getGetExternalTransfersQueryOptions = <
+  TData = Awaited<ReturnType<typeof getExternalTransfers>>,
+  TError = ErrorType<unknown>,
+>(options?: {
+  query?: UseQueryOptions<
+    Awaited<ReturnType<typeof getExternalTransfers>>,
+    TError,
+    TData
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey = queryOptions?.queryKey ?? getGetExternalTransfersQueryKey();
+
+  const queryFn: QueryFunction<
+    Awaited<ReturnType<typeof getExternalTransfers>>
+  > = ({ signal }) => getExternalTransfers({ signal, ...requestOptions });
+
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof getExternalTransfers>>,
+    TError,
+    TData
+  > & { queryKey: QueryKey };
+};
+
+export type GetExternalTransfersQueryResult = NonNullable<
+  Awaited<ReturnType<typeof getExternalTransfers>>
+>;
+export type GetExternalTransfersQueryError = ErrorType<unknown>;
+
+/**
+ * @summary List external transfers
+ */
+
+export function useGetExternalTransfers<
+  TData = Awaited<ReturnType<typeof getExternalTransfers>>,
+  TError = ErrorType<unknown>,
+>(options?: {
+  query?: UseQueryOptions<
+    Awaited<ReturnType<typeof getExternalTransfers>>,
+    TError,
+    TData
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+  const queryOptions = getGetExternalTransfersQueryOptions(options);
+
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
+    queryKey: QueryKey;
+  };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+/**
+ * @summary Send money to an external account
+ */
+export const getCreateExternalTransferUrl = () => {
+  return `/api/external-transfers`;
+};
+
+export const createExternalTransfer = async (
+  externalTransferInput: ExternalTransferInput,
+  options?: RequestInit,
+): Promise<ExternalTransfer> => {
+  return customFetch<ExternalTransfer>(getCreateExternalTransferUrl(), {
+    ...options,
+    method: "POST",
+    headers: { "Content-Type": "application/json", ...options?.headers },
+    body: JSON.stringify(externalTransferInput),
+  });
+};
+
+export const getCreateExternalTransferMutationOptions = <
+  TError = ErrorType<unknown>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof createExternalTransfer>>,
+    TError,
+    { data: BodyType<ExternalTransferInput> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof createExternalTransfer>>,
+  TError,
+  { data: BodyType<ExternalTransferInput> },
+  TContext
+> => {
+  const mutationKey = ["createExternalTransfer"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof createExternalTransfer>>,
+    { data: BodyType<ExternalTransferInput> }
+  > = (props) => {
+    const { data } = props ?? {};
+
+    return createExternalTransfer(data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type CreateExternalTransferMutationResult = NonNullable<
+  Awaited<ReturnType<typeof createExternalTransfer>>
+>;
+export type CreateExternalTransferMutationBody =
+  BodyType<ExternalTransferInput>;
+export type CreateExternalTransferMutationError = ErrorType<unknown>;
+
+/**
+ * @summary Send money to an external account
+ */
+export const useCreateExternalTransfer = <
+  TError = ErrorType<unknown>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof createExternalTransfer>>,
+    TError,
+    { data: BodyType<ExternalTransferInput> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof createExternalTransfer>>,
+  TError,
+  { data: BodyType<ExternalTransferInput> },
+  TContext
+> => {
+  return useMutation(getCreateExternalTransferMutationOptions(options));
 };
 
 /**

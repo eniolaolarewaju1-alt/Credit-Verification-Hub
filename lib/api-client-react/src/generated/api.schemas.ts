@@ -118,6 +118,66 @@ export interface TransferInput {
   memo?: string;
 }
 
+export interface ExternalPayee {
+  id: number;
+  nickname: string;
+  recipientName: string;
+  routingNumber: string;
+  accountNumber: string;
+  bankName: string;
+  accountType: string;
+  createdAt: string;
+}
+
+export interface ExternalPayeeInput {
+  nickname: string;
+  recipientName: string;
+  routingNumber: string;
+  accountNumber: string;
+  bankName?: string;
+  accountType?: string;
+}
+
+export interface VerifyAccountBody {
+  routingNumber: string;
+  accountNumber: string;
+}
+
+export interface VerifyAccountResult {
+  verified: boolean;
+  bankName: string;
+  routingNumber: string;
+  message?: string;
+}
+
+export type ExternalTransferStatus =
+  (typeof ExternalTransferStatus)[keyof typeof ExternalTransferStatus];
+
+export const ExternalTransferStatus = {
+  pending: "pending",
+  processing: "processing",
+  completed: "completed",
+  failed: "failed",
+} as const;
+
+export interface ExternalTransfer {
+  id: number;
+  fromAccountId: number;
+  externalPayeeId: number;
+  amount: number;
+  memo: string;
+  status: ExternalTransferStatus;
+  date: string;
+  createdAt: string;
+}
+
+export interface ExternalTransferInput {
+  fromAccountId: number;
+  externalPayeeId: number;
+  amount: number;
+  memo?: string;
+}
+
 export interface Bill {
   id: number;
   payeeName: string;
