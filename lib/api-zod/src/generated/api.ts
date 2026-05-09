@@ -8,11 +8,36 @@
 import * as zod from "zod";
 
 /**
- * Returns server health status
  * @summary Health check
  */
 export const HealthCheckResponse = zod.object({
   status: zod.string(),
+});
+
+/**
+ * @summary Sign in with email and password
+ */
+export const LoginBody = zod.object({
+  email: zod.string(),
+  password: zod.string(),
+});
+
+export const LoginResponse = zod.object({
+  email: zod.string(),
+});
+
+/**
+ * @summary Get currently authenticated user
+ */
+export const GetMeResponse = zod.object({
+  email: zod.string(),
+});
+
+/**
+ * @summary Sign out
+ */
+export const LogoutResponse = zod.object({
+  message: zod.string(),
 });
 
 /**
@@ -49,7 +74,7 @@ export const GetAccountsResponseItem = zod.object({
 export const GetAccountsResponse = zod.array(GetAccountsResponseItem);
 
 /**
- * @summary Get account summary (balances, deposits, spending, status)
+ * @summary Get account summary
  */
 export const GetAccountSummaryResponse = zod.object({
   totalBalance: zod.number(),
@@ -79,7 +104,7 @@ export const GetAccountResponse = zod.object({
 });
 
 /**
- * @summary List transactions (optionally filtered by account)
+ * @summary List transactions
  */
 export const GetTransactionsQueryParams = zod.object({
   accountId: zod.coerce.number().optional(),
@@ -101,7 +126,7 @@ export const GetTransactionsResponseItem = zod.object({
 export const GetTransactionsResponse = zod.array(GetTransactionsResponseItem);
 
 /**
- * @summary Get recent transactions across all accounts
+ * @summary Get recent transactions
  */
 export const GetRecentTransactionsResponseItem = zod.object({
   id: zod.number(),
@@ -202,6 +227,30 @@ export const GetCardsResponseItem = zod.object({
   rewardsPoints: zod.number().nullish(),
 });
 export const GetCardsResponse = zod.array(GetCardsResponseItem);
+
+/**
+ * @summary Update card status (freeze/unfreeze)
+ */
+export const UpdateCardStatusParams = zod.object({
+  cardId: zod.coerce.number(),
+});
+
+export const UpdateCardStatusBody = zod.object({
+  status: zod.enum(["active", "frozen", "cancelled"]),
+});
+
+export const UpdateCardStatusResponse = zod.object({
+  id: zod.number(),
+  type: zod.enum(["debit", "credit", "prepaid"]),
+  maskedNumber: zod.string(),
+  cardholderName: zod.string(),
+  expiryDate: zod.string(),
+  status: zod.enum(["active", "frozen", "cancelled"]),
+  creditLimit: zod.number().nullable(),
+  currentBalance: zod.number(),
+  availableCredit: zod.number().nullable(),
+  rewardsPoints: zod.number().nullish(),
+});
 
 /**
  * @summary List statements

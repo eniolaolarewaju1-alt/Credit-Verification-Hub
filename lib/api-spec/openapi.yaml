@@ -9,6 +9,8 @@ servers:
 tags:
   - name: health
     description: Health operations
+  - name: auth
+    description: Authentication operations
   - name: accounts
     description: Account operations
   - name: transactions
@@ -31,7 +33,6 @@ paths:
       operationId: healthCheck
       tags: [health]
       summary: Health check
-      description: Returns server health status
       responses:
         "200":
           description: Healthy
@@ -39,6 +40,63 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+
+  /auth/login:
+    post:
+      operationId: login
+      tags: [auth]
+      summary: Sign in with email and password
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LoginBody"
+      responses:
+        "200":
+          description: Authenticated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthUser"
+        "401":
+          description: Invalid credentials
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /auth/me:
+    get:
+      operationId: getMe
+      tags: [auth]
+      summary: Get currently authenticated user
+      responses:
+        "200":
+          description: Current session user
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthUser"
+        "401":
+          description: Not authenticated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /auth/logout:
+    post:
+      operationId: logout
+      tags: [auth]
+      summary: Sign out
+      responses:
+        "200":
+          description: Signed out
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
 
   /member:
     get:
@@ -72,7 +130,7 @@ paths:
     get:
       operationId: getAccountSummary
       tags: [accounts]
-      summary: Get account summary (balances, deposits, spending, status)
+      summary: Get account summary
       responses:
         "200":
           description: Account summary
@@ -104,7 +162,7 @@ paths:
     get:
       operationId: getTransactions
       tags: [transactions]
-      summary: List transactions (optionally filtered by account)
+      summary: List transactions
       parameters:
         - name: accountId
           in: query
@@ -135,7 +193,7 @@ paths:
     get:
       operationId: getRecentTransactions
       tags: [transactions]
-      summary: Get recent transactions across all accounts
+      summary: Get recent transactions
       responses:
         "200":
           description: Recent transactions
@@ -185,7 +243,7 @@ paths:
       summary: List bill payees
       responses:
         "200":
-          description: List of bills/payees
+          description: List of bills
           content:
             application/json:
               schema:
@@ -240,6 +298,31 @@ paths:
                 items:
                   $ref: "#/components/schemas/Card"
 
+  /cards/{cardId}/status:
+    patch:
+      operationId: updateCardStatus
+      tags: [cards]
+      summary: Update card status (freeze/unfreeze)
+      parameters:
+        - name: cardId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateCardStatusBody"
+      responses:
+        "200":
+          description: Card updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Card"
+
   /statements:
     get:
       operationId: getStatements
@@ -264,6 +347,38 @@ components:
           type: string
       required:
         - status
+
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+      required:
+        - error
+
+    SuccessResponse:
+      type: object
+      properties:
+        message:
+          type: string
+      required:
+        - message
+
+    LoginBody:
+      type: object
+      required: [email, password]
+      properties:
+        email:
+          type: string
+        password:
+          type: string
+
+    AuthUser:
+      type: object
+      required: [email]
+      properties:
+        email:
+          type: string
 
     Member:
       type: object
@@ -497,6 +612,14 @@ components:
           type: ["number", "null"]
         rewardsPoints:
           type: ["integer", "null"]
+
+    UpdateCardStatusBody:
+      type: object
+      required: [status]
+      properties:
+        status:
+          type: string
+          enum: [active, frozen, cancelled]
 
     Statement:
       type: object

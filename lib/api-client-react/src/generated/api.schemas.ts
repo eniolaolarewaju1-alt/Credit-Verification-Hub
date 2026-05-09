@@ -9,6 +9,23 @@ export interface HealthStatus {
   status: string;
 }
 
+export interface ErrorResponse {
+  error: string;
+}
+
+export interface SuccessResponse {
+  message: string;
+}
+
+export interface LoginBody {
+  email: string;
+  password: string;
+}
+
+export interface AuthUser {
+  email: string;
+}
+
 export interface Member {
   id: number;
   firstName: string;
@@ -183,6 +200,19 @@ export interface Card {
   availableCredit: number | null;
   /** @nullable */
   rewardsPoints?: number | null;
+}
+
+export type UpdateCardStatusBodyStatus =
+  (typeof UpdateCardStatusBodyStatus)[keyof typeof UpdateCardStatusBodyStatus];
+
+export const UpdateCardStatusBodyStatus = {
+  active: "active",
+  frozen: "frozen",
+  cancelled: "cancelled",
+} as const;
+
+export interface UpdateCardStatusBody {
+  status: UpdateCardStatusBodyStatus;
 }
 
 export interface Statement {

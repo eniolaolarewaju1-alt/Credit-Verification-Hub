@@ -19,18 +19,23 @@ import type {
 import type {
   Account,
   AccountSummary,
+  AuthUser,
   Bill,
   BillPayInput,
   BillPayment,
   Card,
+  ErrorResponse,
   GetTransactionsParams,
   HealthStatus,
   Loan,
+  LoginBody,
   Member,
   Statement,
+  SuccessResponse,
   Transaction,
   Transfer,
   TransferInput,
+  UpdateCardStatusBody,
 } from "./api.schemas";
 
 import { customFetch } from "../custom-fetch";
@@ -43,7 +48,6 @@ type Awaited<O> = O extends AwaitedInput<infer T> ? T : never;
 type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
 
 /**
- * Returns server health status
  * @summary Health check
  */
 export const getHealthCheckUrl = () => {
@@ -117,6 +121,236 @@ export function useHealthCheck<
 
   return { ...query, queryKey: queryOptions.queryKey };
 }
+
+/**
+ * @summary Sign in with email and password
+ */
+export const getLoginUrl = () => {
+  return `/api/auth/login`;
+};
+
+export const login = async (
+  loginBody: LoginBody,
+  options?: RequestInit,
+): Promise<AuthUser> => {
+  return customFetch<AuthUser>(getLoginUrl(), {
+    ...options,
+    method: "POST",
+    headers: { "Content-Type": "application/json", ...options?.headers },
+    body: JSON.stringify(loginBody),
+  });
+};
+
+export const getLoginMutationOptions = <
+  TError = ErrorType<ErrorResponse>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof login>>,
+    TError,
+    { data: BodyType<LoginBody> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof login>>,
+  TError,
+  { data: BodyType<LoginBody> },
+  TContext
+> => {
+  const mutationKey = ["login"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof login>>,
+    { data: BodyType<LoginBody> }
+  > = (props) => {
+    const { data } = props ?? {};
+
+    return login(data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type LoginMutationResult = NonNullable<
+  Awaited<ReturnType<typeof login>>
+>;
+export type LoginMutationBody = BodyType<LoginBody>;
+export type LoginMutationError = ErrorType<ErrorResponse>;
+
+/**
+ * @summary Sign in with email and password
+ */
+export const useLogin = <
+  TError = ErrorType<ErrorResponse>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof login>>,
+    TError,
+    { data: BodyType<LoginBody> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof login>>,
+  TError,
+  { data: BodyType<LoginBody> },
+  TContext
+> => {
+  return useMutation(getLoginMutationOptions(options));
+};
+
+/**
+ * @summary Get currently authenticated user
+ */
+export const getGetMeUrl = () => {
+  return `/api/auth/me`;
+};
+
+export const getMe = async (options?: RequestInit): Promise<AuthUser> => {
+  return customFetch<AuthUser>(getGetMeUrl(), {
+    ...options,
+    method: "GET",
+  });
+};
+
+export const getGetMeQueryKey = () => {
+  return [`/api/auth/me`] as const;
+};
+
+export const getGetMeQueryOptions = <
+  TData = Awaited<ReturnType<typeof getMe>>,
+  TError = ErrorType<ErrorResponse>,
+>(options?: {
+  query?: UseQueryOptions<Awaited<ReturnType<typeof getMe>>, TError, TData>;
+  request?: SecondParameter<typeof customFetch>;
+}) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey = queryOptions?.queryKey ?? getGetMeQueryKey();
+
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof getMe>>> = ({
+    signal,
+  }) => getMe({ signal, ...requestOptions });
+
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof getMe>>,
+    TError,
+    TData
+  > & { queryKey: QueryKey };
+};
+
+export type GetMeQueryResult = NonNullable<Awaited<ReturnType<typeof getMe>>>;
+export type GetMeQueryError = ErrorType<ErrorResponse>;
+
+/**
+ * @summary Get currently authenticated user
+ */
+
+export function useGetMe<
+  TData = Awaited<ReturnType<typeof getMe>>,
+  TError = ErrorType<ErrorResponse>,
+>(options?: {
+  query?: UseQueryOptions<Awaited<ReturnType<typeof getMe>>, TError, TData>;
+  request?: SecondParameter<typeof customFetch>;
+}): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+  const queryOptions = getGetMeQueryOptions(options);
+
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
+    queryKey: QueryKey;
+  };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+/**
+ * @summary Sign out
+ */
+export const getLogoutUrl = () => {
+  return `/api/auth/logout`;
+};
+
+export const logout = async (
+  options?: RequestInit,
+): Promise<SuccessResponse> => {
+  return customFetch<SuccessResponse>(getLogoutUrl(), {
+    ...options,
+    method: "POST",
+  });
+};
+
+export const getLogoutMutationOptions = <
+  TError = ErrorType<unknown>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof logout>>,
+    TError,
+    void,
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof logout>>,
+  TError,
+  void,
+  TContext
+> => {
+  const mutationKey = ["logout"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof logout>>,
+    void
+  > = () => {
+    return logout(requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type LogoutMutationResult = NonNullable<
+  Awaited<ReturnType<typeof logout>>
+>;
+
+export type LogoutMutationError = ErrorType<unknown>;
+
+/**
+ * @summary Sign out
+ */
+export const useLogout = <
+  TError = ErrorType<unknown>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof logout>>,
+    TError,
+    void,
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof logout>>,
+  TError,
+  void,
+  TContext
+> => {
+  return useMutation(getLogoutMutationOptions(options));
+};
 
 /**
  * @summary Get member profile
@@ -259,7 +493,7 @@ export function useGetAccounts<
 }
 
 /**
- * @summary Get account summary (balances, deposits, spending, status)
+ * @summary Get account summary
  */
 export const getGetAccountSummaryUrl = () => {
   return `/api/accounts/summary`;
@@ -310,7 +544,7 @@ export type GetAccountSummaryQueryResult = NonNullable<
 export type GetAccountSummaryQueryError = ErrorType<unknown>;
 
 /**
- * @summary Get account summary (balances, deposits, spending, status)
+ * @summary Get account summary
  */
 
 export function useGetAccountSummary<
@@ -421,7 +655,7 @@ export function useGetAccount<
 }
 
 /**
- * @summary List transactions (optionally filtered by account)
+ * @summary List transactions
  */
 export const getGetTransactionsUrl = (params?: GetTransactionsParams) => {
   const normalizedParams = new URLSearchParams();
@@ -488,7 +722,7 @@ export type GetTransactionsQueryResult = NonNullable<
 export type GetTransactionsQueryError = ErrorType<unknown>;
 
 /**
- * @summary List transactions (optionally filtered by account)
+ * @summary List transactions
  */
 
 export function useGetTransactions<
@@ -515,7 +749,7 @@ export function useGetTransactions<
 }
 
 /**
- * @summary Get recent transactions across all accounts
+ * @summary Get recent transactions
  */
 export const getGetRecentTransactionsUrl = () => {
   return `/api/transactions/recent`;
@@ -566,7 +800,7 @@ export type GetRecentTransactionsQueryResult = NonNullable<
 export type GetRecentTransactionsQueryError = ErrorType<unknown>;
 
 /**
- * @summary Get recent transactions across all accounts
+ * @summary Get recent transactions
  */
 
 export function useGetRecentTransactions<
@@ -1030,6 +1264,93 @@ export function useGetCards<
 
   return { ...query, queryKey: queryOptions.queryKey };
 }
+
+/**
+ * @summary Update card status (freeze/unfreeze)
+ */
+export const getUpdateCardStatusUrl = (cardId: number) => {
+  return `/api/cards/${cardId}/status`;
+};
+
+export const updateCardStatus = async (
+  cardId: number,
+  updateCardStatusBody: UpdateCardStatusBody,
+  options?: RequestInit,
+): Promise<Card> => {
+  return customFetch<Card>(getUpdateCardStatusUrl(cardId), {
+    ...options,
+    method: "PATCH",
+    headers: { "Content-Type": "application/json", ...options?.headers },
+    body: JSON.stringify(updateCardStatusBody),
+  });
+};
+
+export const getUpdateCardStatusMutationOptions = <
+  TError = ErrorType<unknown>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof updateCardStatus>>,
+    TError,
+    { cardId: number; data: BodyType<UpdateCardStatusBody> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof updateCardStatus>>,
+  TError,
+  { cardId: number; data: BodyType<UpdateCardStatusBody> },
+  TContext
+> => {
+  const mutationKey = ["updateCardStatus"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof updateCardStatus>>,
+    { cardId: number; data: BodyType<UpdateCardStatusBody> }
+  > = (props) => {
+    const { cardId, data } = props ?? {};
+
+    return updateCardStatus(cardId, data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type UpdateCardStatusMutationResult = NonNullable<
+  Awaited<ReturnType<typeof updateCardStatus>>
+>;
+export type UpdateCardStatusMutationBody = BodyType<UpdateCardStatusBody>;
+export type UpdateCardStatusMutationError = ErrorType<unknown>;
+
+/**
+ * @summary Update card status (freeze/unfreeze)
+ */
+export const useUpdateCardStatus = <
+  TError = ErrorType<unknown>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof updateCardStatus>>,
+    TError,
+    { cardId: number; data: BodyType<UpdateCardStatusBody> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof updateCardStatus>>,
+  TError,
+  { cardId: number; data: BodyType<UpdateCardStatusBody> },
+  TContext
+> => {
+  return useMutation(getUpdateCardStatusMutationOptions(options));
+};
 
 /**
  * @summary List statements

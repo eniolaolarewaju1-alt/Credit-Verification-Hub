@@ -1,28 +1,110 @@
-import { ReactNode } from "react";
+import { useState, useRef, useEffect, type ReactNode } from "react";
 import { Link, useLocation } from "wouter";
-import { 
-  Building2, 
-  Home, 
-  ListOrdered, 
-  ArrowRightLeft, 
-  Receipt, 
-  Landmark, 
-  CreditCard, 
-  FileText, 
-  Settings, 
+import {
+  Building2,
+  LayoutDashboard,
+  ListOrdered,
+  ArrowRightLeft,
+  Receipt,
+  Landmark,
+  CreditCard,
+  FileText,
+  Settings,
   ShieldCheck,
-  LogOut
+  LogOut,
+  Bell,
+  TrendingUp,
+  TrendingDown,
+  AlertCircle,
 } from "lucide-react";
-import { useGetMember } from "@workspace/api-client-react";
+import { useGetMember, useGetRecentTransactions } from "@workspace/api-client-react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useAuth } from "@/contexts/auth";
+
+function getGreeting() {
+  const h = new Date().getHours();
+  if (h < 12) return "Good morning";
+  if (h < 17) return "Good afternoon";
+  return "Good evening";
+}
+
+function NotificationsDropdown() {
+  const { data: recentTx } = useGetRecentTransactions();
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    function handle(e: MouseEvent) {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+    }
+    document.addEventListener("mousedown", handle);
+    return () => document.removeEventListener("mousedown", handle);
+  }, []);
+
+  const notifications = (recentTx ?? []).slice(0, 5).map(tx => ({
+    id: tx.id,
+    icon: tx.type === "credit" ? TrendingUp : TrendingDown,
+    color: tx.type === "credit" ? "text-green-500" : "text-red-500",
+    bg: tx.type === "credit" ? "bg-green-50" : "bg-red-50",
+    title: tx.description,
+    desc: `${tx.type === "credit" ? "+" : "-"}$${Math.abs(tx.amount).toFixed(2)} · ${new Date(tx.date).toLocaleDateString(undefined, { month: "short", day: "numeric" })}`,
+  }));
+
+  return (
+    <div className="relative" ref={ref}>
+      <button
+        onClick={() => setOpen(v => !v)}
+        data-testid="button-notifications"
+        className="relative flex items-center justify-center w-8 h-8 rounded-lg hover:bg-sidebar-accent transition-colors text-sidebar-foreground/70 hover:text-sidebar-foreground"
+      >
+        <Bell className="w-4 h-4" />
+        {notifications.length > 0 && (
+          <span className="absolute top-0.5 right-0.5 w-2 h-2 bg-red-400 rounded-full" />
+        )}
+      </button>
+
+      {open && (
+        <div className="absolute left-full top-0 ml-2 w-80 bg-white rounded-xl shadow-2xl border border-gray-200 z-50 overflow-hidden">
+          <div className="px-4 py-3 border-b border-gray-100 flex items-center justify-between">
+            <span className="font-semibold text-gray-900 text-sm">Recent Activity</span>
+            <span className="text-xs text-gray-400">{notifications.length} alerts</span>
+          </div>
+          {notifications.length === 0 ? (
+            <div className="px-4 py-6 text-center text-gray-400 text-sm">No recent activity</div>
+          ) : (
+            <div className="divide-y divide-gray-50">
+              {notifications.map(n => (
+                <div key={n.id} className="px-4 py-3 flex items-start gap-3 hover:bg-gray-50 transition-colors">
+                  <div className={`w-8 h-8 rounded-full ${n.bg} flex items-center justify-center flex-shrink-0`}>
+                    <n.icon className={`w-3.5 h-3.5 ${n.color}`} />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm text-gray-800 font-medium truncate">{n.title}</p>
+                    <p className="text-xs text-gray-500 mt-0.5">{n.desc}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+          <div className="px-4 py-2.5 border-t border-gray-100">
+            <Link href="/transactions" onClick={() => setOpen(false)} className="text-xs text-[#1a2b5e] font-medium hover:underline">
+              View all transactions
+            </Link>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
 
 export function Layout({ children }: { children: ReactNode }) {
   const [location] = useLocation();
   const { data: member, isLoading } = useGetMember();
+  const { logout } = useAuth();
 
   const navItems = [
-    { href: "/", label: "Overview", icon: Home },
+    { href: "/", label: "Overview", icon: LayoutDashboard },
     { href: "/transactions", label: "Transactions", icon: ListOrdered },
     { href: "/transfers", label: "Transfers", icon: ArrowRightLeft },
     { href: "/bill-pay", label: "Bill Pay", icon: Receipt },
@@ -35,68 +117,93 @@ export function Layout({ children }: { children: ReactNode }) {
 
   return (
     <div className="flex min-h-[100dvh] w-full">
-      <aside className="w-[180px] bg-sidebar text-sidebar-foreground flex flex-col fixed inset-y-0 left-0 z-50 overflow-y-auto">
-        <div className="p-4 flex items-center gap-2 font-serif font-bold text-lg text-sidebar-primary border-b border-sidebar-border">
-          <Building2 className="w-5 h-5 text-sidebar-primary" />
-          <span>Heritage</span>
+      <aside className="w-[200px] bg-sidebar text-sidebar-foreground flex flex-col fixed inset-y-0 left-0 z-50 overflow-y-auto">
+        {/* Logo */}
+        <div className="px-5 py-5 flex items-center gap-2.5 border-b border-sidebar-border">
+          <div className="w-8 h-8 rounded-lg bg-white/10 flex items-center justify-center">
+            <Building2 className="w-4 h-4 text-white" />
+          </div>
+          <div>
+            <div className="font-serif font-bold text-base text-white leading-none">Heritage</div>
+            <div className="text-[10px] text-white/50 mt-0.5 tracking-wide">Credit Union</div>
+          </div>
         </div>
-        
-        <div className="p-4 border-b border-sidebar-border">
+
+        {/* Member info */}
+        <div className="px-4 py-4 border-b border-sidebar-border">
           {isLoading || !member ? (
             <div className="flex items-center gap-3">
-              <Skeleton className="w-10 h-10 rounded-full bg-sidebar-accent" />
-              <div className="flex-1 space-y-2">
-                <Skeleton className="h-4 w-20 bg-sidebar-accent" />
-                <Skeleton className="h-3 w-16 bg-sidebar-accent" />
+              <Skeleton className="w-9 h-9 rounded-full bg-sidebar-accent" />
+              <div className="flex-1 space-y-1.5">
+                <Skeleton className="h-3 w-20 bg-sidebar-accent" />
+                <Skeleton className="h-2.5 w-16 bg-sidebar-accent" />
               </div>
             </div>
           ) : (
             <div className="flex items-center gap-3">
-              <Avatar className="w-10 h-10 border border-sidebar-border">
-                <AvatarFallback className="bg-sidebar-accent text-sidebar-foreground">
+              <Avatar className="w-9 h-9 border border-white/20 flex-shrink-0">
+                <AvatarFallback className="bg-white/15 text-white text-xs font-semibold">
                   {member.firstName[0]}{member.lastName[0]}
                 </AvatarFallback>
               </Avatar>
-              <div className="flex flex-col">
-                <span className="text-sm font-medium leading-none">{member.firstName} {member.lastName}</span>
-                <span className="text-xs text-sidebar-primary mt-1">Member</span>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-medium text-white leading-none truncate">{member.firstName} {member.lastName}</p>
+                <p className="text-[11px] text-white/50 mt-1">#{member.memberNumber}</p>
               </div>
             </div>
           )}
         </div>
 
-        <nav className="flex-1 p-2 space-y-1">
+        {/* Greeting */}
+        {member && (
+          <div className="px-4 py-3 border-b border-sidebar-border/50">
+            <p className="text-[11px] text-white/40">{getGreeting()},</p>
+            <p className="text-[12px] text-white/70 font-medium">{member.firstName}</p>
+          </div>
+        )}
+
+        {/* Nav */}
+        <nav className="flex-1 px-2 py-3 space-y-0.5">
           {navItems.map((item) => {
             const isActive = location === item.href;
             return (
-              <Link 
-                key={item.href} 
+              <Link
+                key={item.href}
                 href={item.href}
-                className={`flex items-center gap-3 px-3 py-2 rounded-md text-sm transition-colors ${
-                  isActive 
-                    ? "bg-sidebar-primary text-sidebar-primary-foreground font-medium" 
-                    : "text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
-                }`}
+                data-testid={`nav-${item.label.toLowerCase().replace(" ", "-")}`}
+                className={`flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm transition-colors ${isActive
+                  ? "bg-white/15 text-white font-medium"
+                  : "text-white/65 hover:bg-white/10 hover:text-white"
+                  }`}
               >
-                <item.icon className="w-4 h-4" />
-                {item.label}
+                <item.icon className="w-4 h-4 flex-shrink-0" />
+                <span className="truncate">{item.label}</span>
               </Link>
             );
           })}
         </nav>
 
-        <div className="p-4 border-t border-sidebar-border">
-          <button className="flex items-center gap-3 px-3 py-2 w-full rounded-md text-sm text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground transition-colors">
+        {/* Bottom */}
+        <div className="px-3 py-3 border-t border-sidebar-border space-y-1">
+          <div className="flex items-center gap-2 px-2">
+            <NotificationsDropdown />
+            <span className="text-[11px] text-white/40 flex-1">Activity alerts</span>
+          </div>
+          <button
+            onClick={logout}
+            data-testid="button-logout"
+            className="flex items-center gap-2.5 px-3 py-2 w-full rounded-lg text-sm text-white/60 hover:bg-white/10 hover:text-white transition-colors"
+          >
             <LogOut className="w-4 h-4" />
             Sign Out
           </button>
-          <div className="mt-4 text-[10px] text-center text-sidebar-foreground/60 leading-tight">
-            South Carolina's Trusted<br/>Credit Union
+          <div className="px-3 pt-2 text-[10px] text-white/30 text-center leading-tight">
+            South Carolina's Trusted<br />Credit Union
           </div>
         </div>
       </aside>
 
-      <main className="flex-1 ml-[180px] bg-background">
+      <main className="flex-1 ml-[200px] bg-background">
         {children}
       </main>
     </div>
