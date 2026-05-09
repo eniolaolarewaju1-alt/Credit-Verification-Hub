@@ -51,7 +51,7 @@ router.post("/external-payees/verify", async (req, res): Promise<void> => {
     return;
   }
 
-  if (accountNumber.length < 4 || accountNumber.length > 17 || !/^\d+$/.test(accountNumber)) {
+  if (accountNumber.length < 8 || accountNumber.length > 17 || !/^\d+$/.test(accountNumber)) {
     res.json({ verified: false, bankName: "", routingNumber, message: "Invalid account number format" });
     return;
   }

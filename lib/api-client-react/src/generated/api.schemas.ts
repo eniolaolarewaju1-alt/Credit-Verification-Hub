@@ -168,6 +168,13 @@ export interface VerifyAccountResult {
   message?: string;
 }
 
+export interface RoutingLookupResult {
+  valid: boolean;
+  bankName?: string | null;
+  routingNumber: string;
+  message: string;
+}
+
 export type ExternalTransferStatus =
   (typeof ExternalTransferStatus)[keyof typeof ExternalTransferStatus];
 

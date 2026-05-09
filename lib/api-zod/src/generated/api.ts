@@ -252,6 +252,20 @@ export const DeleteExternalPayeeResponse = zod.object({
 });
 
 /**
+ * @summary Look up an ABA routing number (checksum + known bank directory)
+ */
+export const GetValidateRoutingParams = zod.object({
+  routingNumber: zod.coerce.string(),
+});
+
+export const GetValidateRoutingResponse = zod.object({
+  valid: zod.boolean(),
+  bankName: zod.string().nullish(),
+  routingNumber: zod.string(),
+  message: zod.string(),
+});
+
+/**
  * @summary List external transfers
  */
 export const GetExternalTransfersResponseItem = zod.object({

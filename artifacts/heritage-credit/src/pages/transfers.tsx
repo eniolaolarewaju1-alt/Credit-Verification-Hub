@@ -10,11 +10,14 @@ import {
   useCreateExternalTransfer,
   useVerifyExternalAccount,
   useDeleteExternalPayee,
+  useGetValidateRouting,
   getGetTransfersQueryKey,
   getGetAccountsQueryKey,
   getGetExternalPayeesQueryKey,
   getGetExternalTransfersQueryKey,
   getGetRecentTransactionsQueryKey,
+  getGetAccountSummaryQueryKey,
+  getGetValidateRoutingQueryKey,
 } from "@workspace/api-client-react";
 import type { ExternalPayee } from "@workspace/api-client-react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -178,13 +181,18 @@ export default function Transfers() {
   const [extAmount, setExtAmount] = useState("");
   const [extMemo, setExtMemo] = useState("");
 
-  // New payee / verify state
+  // New payee / verify state (My Payees tab)
   const [showAddPayee, setShowAddPayee] = useState(false);
   const [routingNum, setRoutingNum] = useState("");
   const [accountNum, setAccountNum] = useState("");
   const [recipientName, setRecipientName] = useState("");
   const [payeeNickname, setPayeeNickname] = useState("");
   const [verifyResult, setVerifyResult] = useState<{ verified: boolean; bankName: string; message?: string } | null>(null);
+
+  // Direct "Send to Someone" form state
+  const [directRouting, setDirectRouting] = useState("");
+  const [directAccount, setDirectAccount] = useState("");
+  const [directRecipientName, setDirectRecipientName] = useState("");
 
   const { data: accounts, isLoading: loadingAccounts } = useGetAccounts();
   const { data: transfers, isLoading: loadingTransfers } = useGetTransfers();
@@ -197,12 +205,20 @@ export default function Transfers() {
   const createPayee = useCreateExternalPayee();
   const deletePayee = useDeleteExternalPayee();
 
+  const { data: routingLookup } = useGetValidateRouting(directRouting, {
+    query: {
+      queryKey: getGetValidateRoutingQueryKey(directRouting),
+      enabled: directRouting.length === 9,
+    },
+  });
+
   const eligibleAccounts = accounts?.filter(a => a.type === "checking" || a.type === "savings") ?? [];
 
   function invalidateAll() {
     queryClient.invalidateQueries({ queryKey: getGetTransfersQueryKey() });
     queryClient.invalidateQueries({ queryKey: getGetAccountsQueryKey() });
     queryClient.invalidateQueries({ queryKey: getGetRecentTransactionsQueryKey() });
+    queryClient.invalidateQueries({ queryKey: getGetAccountSummaryQueryKey() });
   }
 
   // ── Internal Transfer ──────────────────────────────────────────────
@@ -272,7 +288,7 @@ export default function Transfers() {
     });
   }
 
-  // ── External Transfer ──────────────────────────────────────────────
+  // ── External Transfer (saved payee) ───────────────────────────────
   function handleExternalTransfer(e: React.FormEvent) {
     e.preventDefault();
     const amt = parseFloat(extAmount);
@@ -285,9 +301,40 @@ export default function Transfers() {
         setExtAmount(""); setExtMemo(""); setSelectedPayeeId("");
         queryClient.invalidateQueries({ queryKey: getGetExternalTransfersQueryKey() });
         queryClient.invalidateQueries({ queryKey: getGetAccountsQueryKey() });
+        queryClient.invalidateQueries({ queryKey: getGetAccountSummaryQueryKey() });
       },
       onError: (err: Error) => toast({ title: "Transfer Failed", description: err.message, variant: "destructive" }),
     });
+  }
+
+  // ── Direct External Send (routing + account entry) ─────────────────
+  async function handleDirectExternalTransfer(e: React.FormEvent) {
+    e.preventDefault();
+    const amt = parseFloat(extAmount);
+    if (!extFromAccount || directRouting.length !== 9 || directAccount.length < 8 || !directRecipientName || isNaN(amt) || amt <= 0) return;
+    try {
+      const payee = await createPayee.mutateAsync({
+        data: {
+          nickname: directRecipientName,
+          recipientName: directRecipientName,
+          routingNumber: directRouting,
+          accountNumber: directAccount,
+          bankName: routingLookup?.bankName ?? "Financial Institution",
+          accountType: "checking",
+        },
+      });
+      await createExternalTransfer.mutateAsync({
+        data: { fromAccountId: parseInt(extFromAccount), externalPayeeId: payee.id, amount: amt, memo: extMemo || undefined },
+      });
+      toast({ title: "Transfer Initiated", description: `${fmt(amt)} is being sent to ${directRecipientName}. You'll receive a Gmail confirmation.` });
+      setDirectRouting(""); setDirectAccount(""); setDirectRecipientName(""); setExtAmount(""); setExtMemo("");
+      queryClient.invalidateQueries({ queryKey: getGetExternalTransfersQueryKey() });
+      queryClient.invalidateQueries({ queryKey: getGetAccountsQueryKey() });
+      queryClient.invalidateQueries({ queryKey: getGetAccountSummaryQueryKey() });
+      queryClient.invalidateQueries({ queryKey: getGetExternalPayeesQueryKey() });
+    } catch (err) {
+      toast({ title: "Transfer Failed", description: (err as Error).message, variant: "destructive" });
+    }
   }
 
   function handleDeletePayee(id: number, name: string) {
@@ -462,72 +509,128 @@ export default function Transfers() {
                 <CardTitle className="flex items-center gap-2 text-[#1a2b5e]">
                   <Send className="w-5 h-5" /> Send Money
                 </CardTitle>
-                <CardDescription>Send funds to someone at another bank using their account number.</CardDescription>
+                <CardDescription>Enter the recipient's routing and account number to send funds directly to another bank.</CardDescription>
               </CardHeader>
               <CardContent>
-                {!externalPayees || externalPayees.length === 0 ? (
-                  <div className="text-center py-8">
-                    <Building2 className="w-10 h-10 mx-auto mb-3 text-gray-200" />
-                    <p className="text-sm text-gray-500 mb-4">You haven't added any payees yet.</p>
-                    <Button variant="outline" onClick={() => { setShowAddPayee(true); setTab("payees"); }} className="border-[#1a2b5e] text-[#1a2b5e]">
-                      <Plus className="w-4 h-4 mr-2" /> Add a Payee
-                    </Button>
+                <form onSubmit={handleDirectExternalTransfer} className="space-y-4">
+                  {/* From Account */}
+                  <div className="space-y-2">
+                    <Label>From Account</Label>
+                    {loadingAccounts ? <Skeleton className="h-10 w-full" /> : (
+                      <Select value={extFromAccount} onValueChange={setExtFromAccount} required>
+                        <SelectTrigger><SelectValue placeholder="Select source account" /></SelectTrigger>
+                        <SelectContent>
+                          {eligibleAccounts.map(a => (
+                            <SelectItem key={a.id} value={String(a.id)}>
+                              {a.nickname} — {fmt(a.availableBalance)} available
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    )}
                   </div>
-                ) : (
-                  <form onSubmit={handleExternalTransfer} className="space-y-5">
-                    <div className="space-y-2">
-                      <Label>From Account</Label>
-                      {loadingAccounts ? <Skeleton className="h-10 w-full" /> : (
-                        <Select value={extFromAccount} onValueChange={setExtFromAccount} required>
-                          <SelectTrigger><SelectValue placeholder="Select source account" /></SelectTrigger>
-                          <SelectContent>
-                            {eligibleAccounts.map(a => (
-                              <SelectItem key={a.id} value={String(a.id)}>
-                                {a.nickname} — {fmt(a.availableBalance)} available
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      )}
+
+                  {/* Routing Number with live ABA lookup */}
+                  <div className="space-y-1.5">
+                    <Label>Routing Number (ABA)</Label>
+                    <Input
+                      placeholder="9-digit routing number"
+                      value={directRouting}
+                      maxLength={9}
+                      onChange={e => setDirectRouting(e.target.value.replace(/\D/g, "").slice(0, 9))}
+                    />
+                    {directRouting.length === 9 && (
+                      routingLookup === undefined ? (
+                        <p className="text-xs text-gray-400 flex items-center gap-1">
+                          <Clock className="w-3 h-3" /> Checking routing number…
+                        </p>
+                      ) : routingLookup.valid ? (
+                        <p className="text-xs text-green-600 flex items-center gap-1">
+                          <CheckCircle2 className="w-3 h-3" /> {routingLookup.bankName ?? "Valid routing number"}
+                        </p>
+                      ) : (
+                        <p className="text-xs text-red-500 flex items-center gap-1">
+                          <AlertCircle className="w-3 h-3" /> Invalid routing number
+                        </p>
+                      )
+                    )}
+                  </div>
+
+                  {/* Account Number */}
+                  <div className="space-y-1.5">
+                    <Label>Account Number</Label>
+                    <Input
+                      placeholder="8–17 digit account number"
+                      value={directAccount}
+                      onChange={e => setDirectAccount(e.target.value.replace(/\D/g, "").slice(0, 17))}
+                    />
+                    {directAccount.length > 0 && directAccount.length < 8 && (
+                      <p className="text-xs text-red-500 flex items-center gap-1">
+                        <AlertCircle className="w-3 h-3" /> Account number must be 8–17 digits
+                      </p>
+                    )}
+                    {directAccount.length >= 8 && (
+                      <p className="text-xs text-green-600 flex items-center gap-1">
+                        <CheckCircle2 className="w-3 h-3" /> Account number format is valid
+                      </p>
+                    )}
+                  </div>
+
+                  {/* Recipient Name */}
+                  <div className="space-y-1.5">
+                    <Label>Recipient Name</Label>
+                    <Input
+                      placeholder="Full name of recipient"
+                      value={directRecipientName}
+                      onChange={e => setDirectRecipientName(e.target.value)}
+                      required
+                    />
+                  </div>
+
+                  {/* Amount */}
+                  <div className="space-y-1.5">
+                    <Label>Amount</Label>
+                    <div className="relative">
+                      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 font-medium">$</span>
+                      <Input type="number" step="0.01" min="0.01" placeholder="0.00" value={extAmount} onChange={e => setExtAmount(e.target.value)} className="pl-7" required />
                     </div>
-                    <div className="space-y-2">
-                      <Label>Send To</Label>
-                      {loadingPayees ? <Skeleton className="h-10 w-full" /> : (
-                        <Select value={selectedPayeeId} onValueChange={setSelectedPayeeId} required>
-                          <SelectTrigger><SelectValue placeholder="Select recipient" /></SelectTrigger>
-                          <SelectContent>
-                            {externalPayees?.map((p: ExternalPayee) => (
-                              <SelectItem key={p.id} value={String(p.id)}>
-                                {p.nickname} — {p.recipientName} @ {p.bankName}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      )}
-                      <button type="button" onClick={() => { setShowAddPayee(true); setTab("payees"); }} className="text-xs text-[#1a2b5e] hover:underline flex items-center gap-1 mt-1">
-                        <Plus className="w-3 h-3" /> Add new payee
-                      </button>
-                    </div>
-                    <div className="space-y-2">
-                      <Label>Amount</Label>
-                      <div className="relative">
-                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 font-medium">$</span>
-                        <Input type="number" step="0.01" min="0.01" placeholder="0.00" value={extAmount} onChange={e => setExtAmount(e.target.value)} className="pl-7" required />
-                      </div>
-                    </div>
-                    <div className="space-y-2">
-                      <Label>Memo <span className="text-gray-400 text-xs">(optional)</span></Label>
-                      <Input placeholder="e.g. Rent for June" value={extMemo} onChange={e => setExtMemo(e.target.value)} />
-                    </div>
-                    <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 flex items-start gap-2">
-                      <AlertCircle className="w-4 h-4 text-amber-600 flex-shrink-0 mt-0.5" />
-                      <p className="text-xs text-amber-700">External transfers typically process in 1–3 business days. You'll receive a Gmail confirmation at <strong>daxemry5855@gmail.com</strong>.</p>
-                    </div>
-                    <Button type="submit" className="w-full bg-[#1a2b5e] hover:bg-[#162450]" disabled={!extFromAccount || !selectedPayeeId || !extAmount || createExternalTransfer.isPending}>
-                      {createExternalTransfer.isPending ? "Sending..." : "Send Money"}
-                    </Button>
-                  </form>
-                )}
+                  </div>
+
+                  {/* Memo */}
+                  <div className="space-y-1.5">
+                    <Label>Memo <span className="text-gray-400 text-xs">(optional)</span></Label>
+                    <Input placeholder="e.g. Rent for June" value={extMemo} onChange={e => setExtMemo(e.target.value)} />
+                  </div>
+
+                  <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 flex items-start gap-2">
+                    <AlertCircle className="w-4 h-4 text-amber-600 flex-shrink-0 mt-0.5" />
+                    <p className="text-xs text-amber-700">External transfers typically process in 1–3 business days. You'll receive a Gmail confirmation at <strong>daxemry5855@gmail.com</strong>.</p>
+                  </div>
+
+                  <Button
+                    type="submit"
+                    className="w-full bg-[#1a2b5e] hover:bg-[#162450]"
+                    disabled={
+                      !extFromAccount ||
+                      directRouting.length !== 9 ||
+                      !routingLookup?.valid ||
+                      directAccount.length < 8 ||
+                      !directRecipientName.trim() ||
+                      !extAmount ||
+                      createExternalTransfer.isPending ||
+                      createPayee.isPending
+                    }
+                  >
+                    {(createExternalTransfer.isPending || createPayee.isPending) ? "Sending…" : "Send Money"}
+                  </Button>
+
+                  <p className="text-xs text-center text-gray-400">
+                    Want to reuse this recipient?{" "}
+                    <button type="button" className="text-[#1a2b5e] hover:underline" onClick={() => { setTab("payees"); setShowAddPayee(true); }}>
+                      Save them as a payee
+                    </button>
+                  </p>
+                </form>
               </CardContent>
             </Card>
           </div>

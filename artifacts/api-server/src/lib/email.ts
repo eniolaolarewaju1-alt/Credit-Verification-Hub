@@ -3,7 +3,7 @@ import { logger } from "./logger";
 
 function createTransporter() {
   const pass = process.env.GMAIL_APP_PASSWORD;
-  const user = process.env.ADMIN_EMAIL;
+  const user = process.env.GMAIL_USER ?? process.env.ADMIN_EMAIL;
   if (!pass || !user) return null;
   return nodemailer.createTransport({
     service: "gmail",

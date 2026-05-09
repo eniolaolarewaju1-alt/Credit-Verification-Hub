@@ -335,6 +335,25 @@ paths:
               schema:
                 $ref: "#/components/schemas/SuccessResponse"
 
+  /validate-routing/{routingNumber}:
+    get:
+      operationId: getValidateRouting
+      tags: [external-payees]
+      summary: Look up an ABA routing number (checksum + known bank directory)
+      parameters:
+        - name: routingNumber
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Routing lookup result
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RoutingLookupResult"
+
   /external-transfers:
     get:
       operationId: getExternalTransfers
@@ -723,6 +742,20 @@ components:
           type: boolean
         bankName:
           type: string
+        routingNumber:
+          type: string
+        message:
+          type: string
+
+    RoutingLookupResult:
+      type: object
+      required: [valid, routingNumber, message]
+      properties:
+        valid:
+          type: boolean
+        bankName:
+          type: string
+          nullable: true
         routingNumber:
           type: string
         message:

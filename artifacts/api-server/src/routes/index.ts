@@ -11,6 +11,7 @@ import billsRouter from "./bills";
 import loansRouter from "./loans";
 import cardsRouter from "./cards";
 import statementsRouter from "./statements";
+import validateRoutingRouter from "./validate-routing";
 import { requireAuth } from "../middleware/requireAuth";
 
 const router: IRouter = Router();
@@ -30,5 +31,6 @@ router.use(billsRouter);
 router.use(loansRouter);
 router.use(cardsRouter);
 router.use(statementsRouter);
+router.use(validateRoutingRouter);
 
 export default router;

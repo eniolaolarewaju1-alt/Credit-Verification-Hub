@@ -34,6 +34,7 @@ import type {
   Loan,
   LoginBody,
   Member,
+  RoutingLookupResult,
   Statement,
   SuccessResponse,
   Transaction,
@@ -1410,6 +1411,101 @@ export const useDeleteExternalPayee = <
 > => {
   return useMutation(getDeleteExternalPayeeMutationOptions(options));
 };
+
+/**
+ * @summary Look up an ABA routing number (checksum + known bank directory)
+ */
+export const getGetValidateRoutingUrl = (routingNumber: string) => {
+  return `/api/validate-routing/${routingNumber}`;
+};
+
+export const getValidateRouting = async (
+  routingNumber: string,
+  options?: RequestInit,
+): Promise<RoutingLookupResult> => {
+  return customFetch<RoutingLookupResult>(
+    getGetValidateRoutingUrl(routingNumber),
+    {
+      ...options,
+      method: "GET",
+    },
+  );
+};
+
+export const getGetValidateRoutingQueryKey = (routingNumber: string) => {
+  return [`/api/validate-routing/${routingNumber}`] as const;
+};
+
+export const getGetValidateRoutingQueryOptions = <
+  TData = Awaited<ReturnType<typeof getValidateRouting>>,
+  TError = ErrorType<unknown>,
+>(
+  routingNumber: string,
+  options?: {
+    query?: UseQueryOptions<
+      Awaited<ReturnType<typeof getValidateRouting>>,
+      TError,
+      TData
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey =
+    queryOptions?.queryKey ?? getGetValidateRoutingQueryKey(routingNumber);
+
+  const queryFn: QueryFunction<
+    Awaited<ReturnType<typeof getValidateRouting>>
+  > = ({ signal }) =>
+    getValidateRouting(routingNumber, { signal, ...requestOptions });
+
+  return {
+    queryKey,
+    queryFn,
+    enabled: !!routingNumber,
+    ...queryOptions,
+  } as UseQueryOptions<
+    Awaited<ReturnType<typeof getValidateRouting>>,
+    TError,
+    TData
+  > & { queryKey: QueryKey };
+};
+
+export type GetValidateRoutingQueryResult = NonNullable<
+  Awaited<ReturnType<typeof getValidateRouting>>
+>;
+export type GetValidateRoutingQueryError = ErrorType<unknown>;
+
+/**
+ * @summary Look up an ABA routing number (checksum + known bank directory)
+ */
+
+export function useGetValidateRouting<
+  TData = Awaited<ReturnType<typeof getValidateRouting>>,
+  TError = ErrorType<unknown>,
+>(
+  routingNumber: string,
+  options?: {
+    query?: UseQueryOptions<
+      Awaited<ReturnType<typeof getValidateRouting>>,
+      TError,
+      TData
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+  const queryOptions = getGetValidateRoutingQueryOptions(
+    routingNumber,
+    options,
+  );
+
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
+    queryKey: QueryKey;
+  };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
 
 /**
  * @summary List external transfers
