@@ -4,33 +4,10 @@ import { logger } from "../lib/logger";
 
 const router: IRouter = Router();
 
-/**
- * Resolve the stored ADMIN_PASSWORD_HASH into a bcrypt hash that can be used
- * for timing-safe comparison via bcrypt.compare().
- *
- * - If the stored value is already a bcrypt hash (starts with $2b$, $2a$, $2y$),
- *   it is used as-is.
- * - If the stored value is plaintext, it is hashed once at startup (cost 12) and
- *   the hash is cached in memory for the lifetime of this process.  The plaintext
- *   value never leaves the process; all subsequent comparisons use bcrypt.compare().
- *
- * This means all login attempts always go through bcrypt.compare() — providing
- * timing-safe, constant-time verification regardless of how the secret was stored.
- */
-let _resolvedHash: string | null = null;
+const BCRYPT_PREFIXES = ["$2b$", "$2a$", "$2y$"];
 
-async function resolveAdminHash(stored: string): Promise<string> {
-  if (stored.startsWith("$2b$") || stored.startsWith("$2a$") || stored.startsWith("$2y$")) {
-    return stored;
-  }
-  if (!_resolvedHash) {
-    logger.warn(
-      "ADMIN_PASSWORD_HASH is not a bcrypt hash — hashing it once at startup. " +
-        "For best practice, update the secret to a pre-computed bcrypt hash.",
-    );
-    _resolvedHash = await bcrypt.hash(stored, 12);
-  }
-  return _resolvedHash;
+function isBcryptHash(value: string): boolean {
+  return BCRYPT_PREFIXES.some(p => value.startsWith(p));
 }
 
 router.post("/auth/login", async (req, res): Promise<void> => {
@@ -42,10 +19,16 @@ router.post("/auth/login", async (req, res): Promise<void> => {
   }
 
   const adminEmail = process.env.ADMIN_EMAIL;
-  const adminCredential = process.env.ADMIN_PASSWORD_HASH;
+  const adminHash = process.env.ADMIN_PASSWORD_HASH;
 
-  if (!adminEmail || !adminCredential) {
-    req.log.error("ADMIN_EMAIL or ADMIN_PASSWORD_HASH not configured");
+  if (!adminEmail || !adminHash) {
+    logger.error("ADMIN_EMAIL or ADMIN_PASSWORD_HASH env vars are not set");
+    res.status(500).json({ error: "Server configuration error" });
+    return;
+  }
+
+  if (!isBcryptHash(adminHash)) {
+    logger.error("ADMIN_PASSWORD_HASH is not a valid bcrypt hash — update the secret with a bcrypt hash");
     res.status(500).json({ error: "Server configuration error" });
     return;
   }
@@ -55,9 +38,7 @@ router.post("/auth/login", async (req, res): Promise<void> => {
     return;
   }
 
-  const hashToCompare = await resolveAdminHash(adminCredential);
-  const valid = await bcrypt.compare(password, hashToCompare);
-
+  const valid = await bcrypt.compare(password, adminHash);
   if (!valid) {
     res.status(401).json({ error: "Invalid email or password" });
     return;

@@ -68,8 +68,6 @@ function getGreeting() {
 }
 
 function AccountDetailsModal({ account, onClose }: { account: Account; onClose: () => void }) {
-  const fullAccount = account.maskedNumber.replace(/[*• ]/g, "").trim();
-
   return (
     <div className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center p-4" onClick={onClose}>
       <div className="bg-white rounded-2xl shadow-2xl w-full max-w-sm p-6" onClick={e => e.stopPropagation()}>
@@ -102,9 +100,7 @@ function AccountDetailsModal({ account, onClose }: { account: Account; onClose: 
             </div>
             <div className="bg-gray-50 rounded-xl p-3">
               <p className="text-xs text-gray-500 mb-1">Account Number</p>
-              <p className="font-mono font-semibold text-sm text-gray-800">
-                {fullAccount.length > 0 ? fullAccount : account.maskedNumber}
-              </p>
+              <p className="font-mono font-semibold text-sm text-gray-800">{account.maskedNumber}</p>
             </div>
           </div>
 
