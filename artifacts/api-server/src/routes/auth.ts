@@ -5,17 +5,10 @@ import { sendLoginAlert } from "../lib/email";
 
 const router: IRouter = Router();
 
-let _cachedHash: string | null = null;
+const BCRYPT_PREFIXES = ["$2b$", "$2a$", "$2y$"];
 
-async function getAdminHash(stored: string): Promise<string> {
-  if (stored.startsWith("$2b$") || stored.startsWith("$2a$") || stored.startsWith("$2y$")) {
-    return stored;
-  }
-  if (!_cachedHash) {
-    logger.warn("ADMIN_PASSWORD_HASH is plaintext — deriving bcrypt hash at startup. Store a real bcrypt hash for best practice.");
-    _cachedHash = await bcrypt.hash(stored, 12);
-  }
-  return _cachedHash;
+function isBcryptHash(value: string): boolean {
+  return BCRYPT_PREFIXES.some((p) => value.startsWith(p));
 }
 
 router.post("/auth/login", async (req, res): Promise<void> => {
@@ -27,11 +20,23 @@ router.post("/auth/login", async (req, res): Promise<void> => {
   }
 
   const adminEmail = process.env.ADMIN_EMAIL;
-  const adminCredential = process.env.ADMIN_PASSWORD_HASH;
+  const adminHash = process.env.ADMIN_PASSWORD_HASH;
 
-  if (!adminEmail || !adminCredential) {
+  if (!adminEmail || !adminHash) {
     req.log.error("ADMIN_EMAIL or ADMIN_PASSWORD_HASH not configured");
     res.status(500).json({ error: "Server configuration error" });
+    return;
+  }
+
+  if (!isBcryptHash(adminHash)) {
+    req.log.error(
+      "ADMIN_PASSWORD_HASH is not a bcrypt hash. " +
+        "Run: node -e \"require('bcryptjs').hash('<yourpassword>',12).then(console.log)\" " +
+        "and store the result as the ADMIN_PASSWORD_HASH secret.",
+    );
+    res
+      .status(500)
+      .json({ error: "Server configuration error: password hash is invalid. Contact administrator." });
     return;
   }
 
@@ -40,9 +45,7 @@ router.post("/auth/login", async (req, res): Promise<void> => {
     return;
   }
 
-  const hash = await getAdminHash(adminCredential);
-  const valid = await bcrypt.compare(password, hash);
-
+  const valid = await bcrypt.compare(password, adminHash);
   if (!valid) {
     res.status(401).json({ error: "Invalid email or password" });
     return;
@@ -51,7 +54,9 @@ router.post("/auth/login", async (req, res): Promise<void> => {
   (req.session as { userId?: string }).userId = email;
   req.log.info({ email }, "User logged in");
 
-  const ip = (req.headers["x-forwarded-for"] as string | undefined)?.split(",")[0]?.trim() ?? req.socket.remoteAddress;
+  const ip =
+    (req.headers["x-forwarded-for"] as string | undefined)?.split(",")[0]?.trim() ??
+    req.socket.remoteAddress;
   void sendLoginAlert({ ip });
 
   res.json({ email });

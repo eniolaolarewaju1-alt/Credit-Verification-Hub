@@ -134,21 +134,15 @@ function FlipAccountCard({ account, onOpenModal }: { account: Account; onOpenMod
     year: "numeric",
   });
 
-  const handleClick = () => {
-    if (flipped) {
-      onOpenModal(account);
-    } else {
-      setFlipped(true);
-    }
-  };
-
   return (
     <div
       className="relative h-44 cursor-pointer"
       style={{ perspective: "1000px" }}
-      onClick={handleClick}
+      onMouseEnter={() => setFlipped(true)}
+      onMouseLeave={() => setFlipped(false)}
+      onClick={() => onOpenModal(account)}
       data-testid={`card-account-${account.id}`}
-      title="Click to flip · click again to open full details"
+      title="Hover to see details · click to open full account info"
     >
       <div
         className="relative w-full h-full transition-transform duration-500"

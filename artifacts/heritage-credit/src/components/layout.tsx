@@ -15,7 +15,6 @@ import {
   Bell,
   TrendingUp,
   TrendingDown,
-  AlertCircle,
 } from "lucide-react";
 import { useGetMember, useGetRecentTransactions } from "@workspace/api-client-react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -27,6 +26,19 @@ function getGreeting() {
   if (h < 12) return "Good morning";
   if (h < 17) return "Good afternoon";
   return "Good evening";
+}
+
+function scDateTime() {
+  return new Date().toLocaleString("en-US", {
+    timeZone: "America/New_York",
+    weekday: "short",
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+    timeZoneName: "short",
+  });
 }
 
 function NotificationsDropdown() {
@@ -42,30 +54,30 @@ function NotificationsDropdown() {
     return () => document.removeEventListener("mousedown", handle);
   }, []);
 
-  const notifications = (recentTx ?? []).slice(0, 5).map(tx => ({
+  const notifications = (recentTx ?? []).slice(0, 5).map((tx) => ({
     id: tx.id,
     icon: tx.type === "credit" ? TrendingUp : TrendingDown,
     color: tx.type === "credit" ? "text-green-500" : "text-red-500",
     bg: tx.type === "credit" ? "bg-green-50" : "bg-red-50",
     title: tx.description,
-    desc: `${tx.type === "credit" ? "+" : "-"}$${Math.abs(tx.amount).toFixed(2)} · ${new Date(tx.date).toLocaleDateString(undefined, { month: "short", day: "numeric" })}`,
+    desc: `${tx.type === "credit" ? "+" : "-"}$${Math.abs(tx.amount).toFixed(2)} · ${new Date(tx.date).toLocaleDateString("en-US", { timeZone: "America/New_York", month: "short", day: "numeric" })}`,
   }));
 
   return (
     <div className="relative" ref={ref}>
       <button
-        onClick={() => setOpen(v => !v)}
+        onClick={() => setOpen((v) => !v)}
         data-testid="button-notifications"
-        className="relative flex items-center justify-center w-8 h-8 rounded-lg hover:bg-sidebar-accent transition-colors text-sidebar-foreground/70 hover:text-sidebar-foreground"
+        className="relative flex items-center justify-center w-9 h-9 rounded-xl border border-gray-200 bg-white hover:bg-gray-50 transition-colors text-gray-500 hover:text-gray-700 shadow-sm"
       >
         <Bell className="w-4 h-4" />
         {notifications.length > 0 && (
-          <span className="absolute top-0.5 right-0.5 w-2 h-2 bg-red-400 rounded-full" />
+          <span className="absolute top-1 right-1 w-2 h-2 bg-red-400 rounded-full border border-white" />
         )}
       </button>
 
       {open && (
-        <div className="absolute left-full top-0 ml-2 w-80 bg-white rounded-xl shadow-2xl border border-gray-200 z-50 overflow-hidden">
+        <div className="absolute right-0 top-full mt-2 w-80 bg-white rounded-xl shadow-2xl border border-gray-200 z-50 overflow-hidden">
           <div className="px-4 py-3 border-b border-gray-100 flex items-center justify-between">
             <span className="font-semibold text-gray-900 text-sm">Recent Activity</span>
             <span className="text-xs text-gray-400">{notifications.length} alerts</span>
@@ -74,9 +86,14 @@ function NotificationsDropdown() {
             <div className="px-4 py-6 text-center text-gray-400 text-sm">No recent activity</div>
           ) : (
             <div className="divide-y divide-gray-50">
-              {notifications.map(n => (
-                <div key={n.id} className="px-4 py-3 flex items-start gap-3 hover:bg-gray-50 transition-colors">
-                  <div className={`w-8 h-8 rounded-full ${n.bg} flex items-center justify-center flex-shrink-0`}>
+              {notifications.map((n) => (
+                <div
+                  key={n.id}
+                  className="px-4 py-3 flex items-start gap-3 hover:bg-gray-50 transition-colors"
+                >
+                  <div
+                    className={`w-8 h-8 rounded-full ${n.bg} flex items-center justify-center flex-shrink-0`}
+                  >
                     <n.icon className={`w-3.5 h-3.5 ${n.color}`} />
                   </div>
                   <div className="flex-1 min-w-0">
@@ -88,8 +105,12 @@ function NotificationsDropdown() {
             </div>
           )}
           <div className="px-4 py-2.5 border-t border-gray-100">
-            <Link href="/transactions" onClick={() => setOpen(false)} className="text-xs text-[#1a2b5e] font-medium hover:underline">
-              View all transactions
+            <Link
+              href="/transactions"
+              onClick={() => setOpen(false)}
+              className="text-xs text-[#1a2b5e] font-medium hover:underline"
+            >
+              View all transactions →
             </Link>
           </div>
         </div>
@@ -97,6 +118,18 @@ function NotificationsDropdown() {
     </div>
   );
 }
+
+const PAGE_TITLES: Record<string, string> = {
+  "/": "Dashboard",
+  "/transactions": "Transactions",
+  "/transfers": "Transfers",
+  "/bill-pay": "Bill Pay",
+  "/loans": "Loans",
+  "/cards": "Cards",
+  "/statements": "Statements",
+  "/settings": "Settings",
+  "/security": "Security",
+};
 
 export function Layout({ children }: { children: ReactNode }) {
   const [location] = useLocation();
@@ -117,6 +150,7 @@ export function Layout({ children }: { children: ReactNode }) {
 
   return (
     <div className="flex min-h-[100dvh] w-full">
+      {/* ── Sidebar ── */}
       <aside className="w-[200px] bg-sidebar text-sidebar-foreground flex flex-col fixed inset-y-0 left-0 z-50 overflow-y-auto">
         {/* Logo */}
         <div className="px-5 py-5 flex items-center gap-2.5 border-b border-sidebar-border">
@@ -147,7 +181,9 @@ export function Layout({ children }: { children: ReactNode }) {
                 </AvatarFallback>
               </Avatar>
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-white leading-none truncate">{member.firstName} {member.lastName}</p>
+                <p className="text-sm font-medium text-white leading-none truncate">
+                  {member.firstName} {member.lastName}
+                </p>
                 <p className="text-[11px] text-white/50 mt-1">#{member.memberNumber}</p>
               </div>
             </div>
@@ -171,10 +207,11 @@ export function Layout({ children }: { children: ReactNode }) {
                 key={item.href}
                 href={item.href}
                 data-testid={`nav-${item.label.toLowerCase().replace(" ", "-")}`}
-                className={`flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm transition-colors ${isActive
-                  ? "bg-white/15 text-white font-medium"
-                  : "text-white/65 hover:bg-white/10 hover:text-white"
-                  }`}
+                className={`flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm transition-colors ${
+                  isActive
+                    ? "bg-white/15 text-white font-medium"
+                    : "text-white/65 hover:bg-white/10 hover:text-white"
+                }`}
               >
                 <item.icon className="w-4 h-4 flex-shrink-0" />
                 <span className="truncate">{item.label}</span>
@@ -185,10 +222,6 @@ export function Layout({ children }: { children: ReactNode }) {
 
         {/* Bottom */}
         <div className="px-3 py-3 border-t border-sidebar-border space-y-1">
-          <div className="flex items-center gap-2 px-2">
-            <NotificationsDropdown />
-            <span className="text-[11px] text-white/40 flex-1">Activity alerts</span>
-          </div>
           <button
             onClick={logout}
             data-testid="button-logout"
@@ -203,9 +236,39 @@ export function Layout({ children }: { children: ReactNode }) {
         </div>
       </aside>
 
-      <main className="flex-1 ml-[200px] bg-background">
-        {children}
-      </main>
+      {/* ── Main content ── */}
+      <div className="flex-1 ml-[200px] flex flex-col min-h-[100dvh]">
+        {/* Top header */}
+        <header className="sticky top-0 z-40 bg-white border-b border-gray-100 shadow-sm px-8 py-3 flex items-center justify-between">
+          <div>
+            <h2 className="text-base font-semibold text-[#1a2b5e]">
+              {PAGE_TITLES[location] ?? "Heritage Credit Union"}
+            </h2>
+            <p className="text-[11px] text-gray-400 mt-0.5">{scDateTime()}</p>
+          </div>
+          <div className="flex items-center gap-3">
+            <NotificationsDropdown />
+            {member && (
+              <div className="flex items-center gap-2 pl-3 border-l border-gray-200">
+                <Avatar className="w-8 h-8">
+                  <AvatarFallback className="bg-[#1a2b5e] text-white text-xs font-semibold">
+                    {member.firstName[0]}{member.lastName[0]}
+                  </AvatarFallback>
+                </Avatar>
+                <div className="hidden sm:block">
+                  <p className="text-xs font-medium text-gray-800 leading-none">{member.firstName} {member.lastName}</p>
+                  <p className="text-[10px] text-gray-400 mt-0.5">Member</p>
+                </div>
+              </div>
+            )}
+          </div>
+        </header>
+
+        {/* Page content */}
+        <main className="flex-1 bg-background">
+          {children}
+        </main>
+      </div>
     </div>
   );
 }
