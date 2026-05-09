@@ -17,6 +17,15 @@ import {
   TrendingDown,
   Menu,
   X,
+  Moon,
+  Sun,
+  BarChart2,
+  Target,
+  MapPin,
+  Printer,
+  Wallet,
+  MessageCircle,
+  Building,
 } from "lucide-react";
 import { useGetMember, useGetRecentTransactions } from "@workspace/api-client-react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -242,6 +251,14 @@ export function Layout({ children }: { children: ReactNode }) {
   const { data: member, isLoading } = useGetMember();
   const { logout } = useAuth();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [darkMode, setDarkMode] = useState(() => localStorage.getItem("darkMode") === "true");
+  const [chatOpen, setChatOpen] = useState(false);
+
+  useEffect(() => {
+    if (darkMode) document.documentElement.classList.add("dark");
+    else document.documentElement.classList.remove("dark");
+    localStorage.setItem("darkMode", String(darkMode));
+  }, [darkMode]);
 
   const navItems = [
     { href: "/", label: "Overview", icon: LayoutDashboard },
@@ -251,6 +268,11 @@ export function Layout({ children }: { children: ReactNode }) {
     { href: "/loans", label: "Loans", icon: Landmark },
     { href: "/cards", label: "Cards", icon: CreditCard },
     { href: "/statements", label: "Statements", icon: FileText },
+    { href: "/insights", label: "Insights", icon: BarChart2 },
+    { href: "/savings-goals", label: "Goals", icon: Target },
+    { href: "/direct-deposit", label: "Direct Deposit", icon: Building },
+    { href: "/atm-locator", label: "ATM Locator", icon: MapPin },
+    { href: "/check-order", label: "Order Checks", icon: Printer },
     { href: "/settings", label: "Settings", icon: Settings },
     { href: "/security", label: "Security", icon: ShieldCheck },
   ];
@@ -323,6 +345,13 @@ export function Layout({ children }: { children: ReactNode }) {
           </div>
 
           <div className="flex items-center gap-3 flex-shrink-0">
+            <button
+              onClick={() => setDarkMode(d => !d)}
+              className="flex items-center justify-center w-9 h-9 rounded-xl border border-gray-200 bg-white hover:bg-gray-50 transition-colors text-gray-500 hover:text-gray-700 shadow-sm"
+              title={darkMode ? "Switch to light mode" : "Switch to dark mode"}
+            >
+              {darkMode ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+            </button>
             <NotificationsDropdown />
             {member && (
               <div className="flex items-center gap-2 pl-3 border-l border-gray-200">
@@ -344,6 +373,44 @@ export function Layout({ children }: { children: ReactNode }) {
         <main className="flex-1 bg-background">
           {children}
         </main>
+      </div>
+
+      {/* Live Chat Button */}
+      <div className="fixed bottom-6 right-6 z-50 flex flex-col items-end gap-3">
+        {chatOpen && (
+          <div className="bg-white rounded-2xl shadow-2xl border border-gray-200 w-80 overflow-hidden">
+            <div className="bg-[#117ACA] px-4 py-3 flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <div className="w-2 h-2 bg-green-400 rounded-full" />
+                <span className="text-white text-sm font-semibold">Heritage Credit Union Support</span>
+              </div>
+              <button onClick={() => setChatOpen(false)} className="text-white/70 hover:text-white">
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+            <div className="p-4 h-48 flex flex-col items-center justify-center text-center">
+              <MessageCircle className="w-10 h-10 text-gray-200 mb-3" />
+              <p className="text-sm font-medium text-gray-700">Our team is available</p>
+              <p className="text-xs text-gray-400 mt-1">Mon – Fri, 8 AM – 6 PM ET</p>
+              <a
+                href="tel:+18435550100"
+                className="mt-4 bg-[#117ACA] hover:bg-[#0D6DAD] text-white px-5 py-2 rounded-lg text-sm font-medium transition-colors"
+              >
+                Call (843) 555-0100
+              </a>
+            </div>
+            <div className="px-4 py-3 border-t border-gray-100 text-center">
+              <p className="text-xs text-gray-400">In-app messaging coming soon</p>
+            </div>
+          </div>
+        )}
+        <button
+          onClick={() => setChatOpen(c => !c)}
+          className="w-14 h-14 rounded-full bg-[#117ACA] hover:bg-[#0D6DAD] text-white shadow-lg hover:shadow-xl transition-all flex items-center justify-center"
+          title="Live Support Chat"
+        >
+          {chatOpen ? <X className="w-5 h-5" /> : <MessageCircle className="w-5 h-5" />}
+        </button>
       </div>
     </div>
   );

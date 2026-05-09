@@ -8,3 +8,7 @@ export * from "./bills";
 export * from "./loans";
 export * from "./cards";
 export * from "./statements";
+export * from "./savings-goals";
+export * from "./scheduled-transfers";
+export * from "./notification-prefs";
+export * from "./otp-codes";

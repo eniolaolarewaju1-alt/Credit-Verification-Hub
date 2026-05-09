@@ -1,4 +1,4 @@
-import { pgTable, text, serial, timestamp, numeric, integer } from "drizzle-orm/pg-core";
+import { pgTable, text, serial, timestamp, numeric, integer, boolean } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod/v4";
 
@@ -12,6 +12,8 @@ export const transactionsTable = pgTable("transactions", {
   date: text("date").notNull(),
   balance: numeric("balance", { precision: 12, scale: 2 }).notNull(),
   merchant: text("merchant"),
+  disputed: boolean("disputed").notNull().default(false),
+  disputeReason: text("dispute_reason"),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 });
 

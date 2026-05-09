@@ -472,6 +472,38 @@ export default function Home() {
             </div>
           )}
 
+          {/* Credit Score Widget */}
+          {(() => {
+            const score = 745;
+            const maxScore = 850;
+            const pct = score / maxScore;
+            const radius = 52;
+            const circumference = Math.PI * radius;
+            const dashOffset = circumference * (1 - pct);
+            const getColor = (s: number) => s >= 740 ? "#16a34a" : s >= 670 ? "#f59e0b" : "#ef4444";
+            const getLabel = (s: number) => s >= 740 ? "Very Good" : s >= 670 ? "Fair" : "Poor";
+            return (
+              <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-4">
+                <h2 className="font-semibold text-gray-900 mb-3 text-sm">Credit Score</h2>
+                <div className="flex flex-col items-center">
+                  <svg width="130" height="70" viewBox="0 0 130 70">
+                    <path d="M 10 65 A 52 52 0 0 1 120 65" fill="none" stroke="#f3f4f6" strokeWidth="10" strokeLinecap="round" />
+                    <path d="M 10 65 A 52 52 0 0 1 120 65" fill="none" stroke={getColor(score)} strokeWidth="10" strokeLinecap="round"
+                      strokeDasharray={circumference} strokeDashoffset={dashOffset} style={{ transition: "stroke-dashoffset 1s ease" }} />
+                    <text x="65" y="62" textAnchor="middle" fontSize="22" fontWeight="700" fill="#111827">{score}</text>
+                  </svg>
+                  <span className="text-xs font-semibold mt-1" style={{ color: getColor(score) }}>{getLabel(score)}</span>
+                  <p className="text-[10px] text-gray-400 mt-1">out of {maxScore} · Simulated score</p>
+                </div>
+                <div className="mt-3 grid grid-cols-3 text-center gap-1">
+                  <div><p className="text-[10px] text-gray-400">Poor</p><p className="text-[10px] font-medium text-red-500">300–669</p></div>
+                  <div><p className="text-[10px] text-gray-400">Fair</p><p className="text-[10px] font-medium text-amber-500">670–739</p></div>
+                  <div><p className="text-[10px] text-gray-400">Very Good</p><p className="text-[10px] font-medium text-green-600">740+</p></div>
+                </div>
+              </div>
+            );
+          })()}
+
           {/* Next loan payment */}
           {nextLoan && (
             <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-4">

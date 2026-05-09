@@ -19,6 +19,11 @@ import Settings from "@/pages/settings";
 import Security from "@/pages/security";
 import NotFound from "@/pages/not-found";
 import Receipt from "@/pages/receipt";
+import SavingsGoals from "@/pages/savings-goals";
+import Insights from "@/pages/insights";
+import DirectDeposit from "@/pages/direct-deposit";
+import AtmLocator from "@/pages/atm-locator";
+import CheckOrder from "@/pages/check-order";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -123,6 +128,11 @@ function Router() {
                   <Route path="/statements" component={Statements} />
                   <Route path="/settings" component={Settings} />
                   <Route path="/security" component={Security} />
+                  <Route path="/savings-goals" component={SavingsGoals} />
+                  <Route path="/insights" component={Insights} />
+                  <Route path="/direct-deposit" component={DirectDeposit} />
+                  <Route path="/atm-locator" component={AtmLocator} />
+                  <Route path="/check-order" component={CheckOrder} />
                   <Route component={NotFound} />
                 </Switch>
               </Layout>

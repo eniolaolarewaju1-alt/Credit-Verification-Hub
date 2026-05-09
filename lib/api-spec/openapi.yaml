@@ -31,6 +31,12 @@ tags:
     description: Statement operations
   - name: member
     description: Member profile operations
+  - name: savings-goals
+    description: Savings goals
+  - name: scheduled-transfers
+    description: Scheduled recurring transfers
+  - name: notifications
+    description: Notification preferences
 paths:
   /healthz:
     get:
@@ -488,6 +494,243 @@ paths:
                 items:
                   $ref: "#/components/schemas/Statement"
 
+  /transactions/export:
+    get:
+      operationId: exportTransactions
+      tags: [transactions]
+      summary: Export transactions as CSV
+      parameters:
+        - name: accountId
+          in: query
+          required: false
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: CSV file
+          content:
+            text/csv:
+              schema:
+                type: string
+
+  /transactions/{transactionId}/dispute:
+    patch:
+      operationId: disputeTransaction
+      tags: [transactions]
+      summary: Dispute a transaction
+      parameters:
+        - name: transactionId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/DisputeTransactionBody"
+      responses:
+        "200":
+          description: Transaction updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Transaction"
+
+  /savings-goals:
+    get:
+      operationId: getSavingsGoals
+      tags: [savings-goals]
+      summary: List savings goals
+      responses:
+        "200":
+          description: List of savings goals
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/SavingsGoal"
+    post:
+      operationId: createSavingsGoal
+      tags: [savings-goals]
+      summary: Create a savings goal
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SavingsGoalInput"
+      responses:
+        "201":
+          description: Goal created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SavingsGoal"
+
+  /savings-goals/{goalId}:
+    patch:
+      operationId: updateSavingsGoal
+      tags: [savings-goals]
+      summary: Update a savings goal (add funds, rename, etc.)
+      parameters:
+        - name: goalId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SavingsGoalUpdate"
+      responses:
+        "200":
+          description: Goal updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SavingsGoal"
+    delete:
+      operationId: deleteSavingsGoal
+      tags: [savings-goals]
+      summary: Delete a savings goal
+      parameters:
+        - name: goalId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Goal deleted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+
+  /scheduled-transfers:
+    get:
+      operationId: getScheduledTransfers
+      tags: [scheduled-transfers]
+      summary: List scheduled recurring transfers
+      responses:
+        "200":
+          description: List of scheduled transfers
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ScheduledTransfer"
+    post:
+      operationId: createScheduledTransfer
+      tags: [scheduled-transfers]
+      summary: Create a scheduled recurring transfer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ScheduledTransferInput"
+      responses:
+        "201":
+          description: Scheduled transfer created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ScheduledTransfer"
+
+  /scheduled-transfers/{scheduledTransferId}:
+    delete:
+      operationId: deleteScheduledTransfer
+      tags: [scheduled-transfers]
+      summary: Cancel a scheduled transfer
+      parameters:
+        - name: scheduledTransferId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Cancelled
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+
+  /notification-preferences:
+    get:
+      operationId: getNotificationPreferences
+      tags: [notifications]
+      summary: Get notification preferences
+      responses:
+        "200":
+          description: Notification preferences
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NotificationPreferences"
+    patch:
+      operationId: updateNotificationPreferences
+      tags: [notifications]
+      summary: Update notification preferences
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/NotificationPreferencesUpdate"
+      responses:
+        "200":
+          description: Updated preferences
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NotificationPreferences"
+
+  /auth/otp/send:
+    post:
+      operationId: sendOtp
+      tags: [auth]
+      summary: Send OTP code to member email
+      responses:
+        "200":
+          description: OTP sent
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+
+  /auth/otp/verify:
+    post:
+      operationId: verifyOtp
+      tags: [auth]
+      summary: Verify OTP code
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/VerifyOtpBody"
+      responses:
+        "200":
+          description: OTP verified
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthUser"
+        "401":
+          description: Invalid or expired code
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
 components:
   schemas:
     HealthStatus:
@@ -603,7 +846,7 @@ components:
 
     Transaction:
       type: object
-      required: [id, accountId, description, amount, type, category, date, balance]
+      required: [id, accountId, description, amount, type, category, date, balance, disputed]
       properties:
         id:
           type: integer
@@ -624,6 +867,17 @@ components:
           type: number
         merchant:
           type: ["string", "null"]
+        disputed:
+          type: boolean
+        disputeReason:
+          type: ["string", "null"]
+
+    DisputeTransactionBody:
+      type: object
+      required: [reason]
+      properties:
+        reason:
+          type: string
 
     Transfer:
       type: object
@@ -936,4 +1190,147 @@ components:
         totalDebits:
           type: number
         pdfUrl:
+          type: string
+
+    SavingsGoal:
+      type: object
+      required: [id, name, targetAmount, currentAmount, color, icon, createdAt]
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        targetAmount:
+          type: number
+        currentAmount:
+          type: number
+        targetDate:
+          type: ["string", "null"]
+        color:
+          type: string
+        icon:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+
+    SavingsGoalInput:
+      type: object
+      required: [name, targetAmount]
+      properties:
+        name:
+          type: string
+        targetAmount:
+          type: number
+        currentAmount:
+          type: number
+        targetDate:
+          type: string
+        color:
+          type: string
+        icon:
+          type: string
+
+    SavingsGoalUpdate:
+      type: object
+      properties:
+        name:
+          type: string
+        targetAmount:
+          type: number
+        currentAmount:
+          type: number
+        targetDate:
+          type: string
+        color:
+          type: string
+        icon:
+          type: string
+        addAmount:
+          type: number
+
+    ScheduledTransfer:
+      type: object
+      required: [id, fromAccountId, toAccountId, amount, frequency, nextDate, status, createdAt]
+      properties:
+        id:
+          type: integer
+        fromAccountId:
+          type: integer
+        toAccountId:
+          type: integer
+        amount:
+          type: number
+        memo:
+          type: ["string", "null"]
+        frequency:
+          type: string
+          enum: [weekly, biweekly, monthly, quarterly]
+        nextDate:
+          type: string
+        status:
+          type: string
+          enum: [active, paused, cancelled]
+        createdAt:
+          type: string
+          format: date-time
+
+    ScheduledTransferInput:
+      type: object
+      required: [fromAccountId, toAccountId, amount, frequency, nextDate]
+      properties:
+        fromAccountId:
+          type: integer
+        toAccountId:
+          type: integer
+        amount:
+          type: number
+        memo:
+          type: string
+        frequency:
+          type: string
+          enum: [weekly, biweekly, monthly, quarterly]
+        nextDate:
+          type: string
+
+    NotificationPreferences:
+      type: object
+      required: [id, loginAlerts, transferAlerts, billPayAlerts, lowBalanceAlerts, lowBalanceThreshold, marketingEmails]
+      properties:
+        id:
+          type: integer
+        loginAlerts:
+          type: boolean
+        transferAlerts:
+          type: boolean
+        billPayAlerts:
+          type: boolean
+        lowBalanceAlerts:
+          type: boolean
+        lowBalanceThreshold:
+          type: number
+        marketingEmails:
+          type: boolean
+
+    NotificationPreferencesUpdate:
+      type: object
+      properties:
+        loginAlerts:
+          type: boolean
+        transferAlerts:
+          type: boolean
+        billPayAlerts:
+          type: boolean
+        lowBalanceAlerts:
+          type: boolean
+        lowBalanceThreshold:
+          type: number
+        marketingEmails:
+          type: boolean
+
+    VerifyOtpBody:
+      type: object
+      required: [code]
+      properties:
+        code:
           type: string

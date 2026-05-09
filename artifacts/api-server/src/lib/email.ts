@@ -227,6 +227,33 @@ export async function sendLoginAlert(opts: { ip?: string }) {
   }
 }
 
+export async function sendOtpEmail(opts: { code: string; expiresAt: Date }) {
+  const transporter = createTransporter();
+  if (!transporter) {
+    logger.warn("GMAIL_APP_PASSWORD not set — skipping OTP email");
+    return;
+  }
+  const to = MEMBER_EMAIL;
+  const body = `
+    <div class="amount" style="font-size:48px;letter-spacing:0.25em;font-family:monospace;color:#117ACA;text-align:center;padding:20px 0;">${opts.code}</div>
+    <div class="row"><span class="label">Member</span><span class="value">${MEMBER_NAME}</span></div>
+    <div class="row"><span class="label">Expires At</span><span class="value">${scTime(opts.expiresAt)}</span></div>
+    <div class="note">Enter this code on the Heritage Credit Union login page to complete sign-in. This code expires in 10 minutes and can only be used once.</div>
+    <div class="alert">If you did not attempt to sign in, contact us immediately at (843) 555-0100.</div>
+  `;
+  try {
+    await transporter.sendMail({
+      from: `Heritage Credit Union <${senderAddress()}>`,
+      to,
+      subject: `Your Sign-In Code: ${opts.code} — Heritage Credit Union`,
+      html: htmlWrapper("Two-Factor Verification Code", body),
+    });
+    logger.info({ to }, "OTP email sent");
+  } catch (err) {
+    logger.error(err, "Failed to send OTP email");
+  }
+}
+
 export async function sendBillPayAlert(opts: {
   payeeName: string;
   amount: number;

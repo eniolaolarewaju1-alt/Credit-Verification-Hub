@@ -124,6 +124,8 @@ export const GetTransactionsResponseItem = zod.object({
   date: zod.string(),
   balance: zod.number(),
   merchant: zod.string().nullish(),
+  disputed: zod.boolean(),
+  disputeReason: zod.string().nullish(),
 });
 export const GetTransactionsResponse = zod.array(GetTransactionsResponseItem);
 
@@ -140,6 +142,8 @@ export const GetRecentTransactionsResponseItem = zod.object({
   date: zod.string(),
   balance: zod.number(),
   merchant: zod.string().nullish(),
+  disputed: zod.boolean(),
+  disputeReason: zod.string().nullish(),
 });
 export const GetRecentTransactionsResponse = zod.array(
   GetRecentTransactionsResponseItem,
@@ -393,3 +397,195 @@ export const GetStatementsResponseItem = zod.object({
   pdfUrl: zod.string(),
 });
 export const GetStatementsResponse = zod.array(GetStatementsResponseItem);
+
+/**
+ * @summary Export transactions as CSV
+ */
+export const ExportTransactionsQueryParams = zod.object({
+  accountId: zod.coerce.number().optional(),
+});
+
+/**
+ * @summary Dispute a transaction
+ */
+export const DisputeTransactionParams = zod.object({
+  transactionId: zod.coerce.number(),
+});
+
+export const DisputeTransactionBody = zod.object({
+  reason: zod.string(),
+});
+
+export const DisputeTransactionResponse = zod.object({
+  id: zod.number(),
+  accountId: zod.number(),
+  description: zod.string(),
+  amount: zod.number(),
+  type: zod.enum(["credit", "debit"]),
+  category: zod.string(),
+  date: zod.string(),
+  balance: zod.number(),
+  merchant: zod.string().nullish(),
+  disputed: zod.boolean(),
+  disputeReason: zod.string().nullish(),
+});
+
+/**
+ * @summary List savings goals
+ */
+export const GetSavingsGoalsResponseItem = zod.object({
+  id: zod.number(),
+  name: zod.string(),
+  targetAmount: zod.number(),
+  currentAmount: zod.number(),
+  targetDate: zod.string().nullish(),
+  color: zod.string(),
+  icon: zod.string(),
+  createdAt: zod.coerce.date(),
+});
+export const GetSavingsGoalsResponse = zod.array(GetSavingsGoalsResponseItem);
+
+/**
+ * @summary Create a savings goal
+ */
+export const CreateSavingsGoalBody = zod.object({
+  name: zod.string(),
+  targetAmount: zod.number(),
+  currentAmount: zod.number().optional(),
+  targetDate: zod.string().optional(),
+  color: zod.string().optional(),
+  icon: zod.string().optional(),
+});
+
+/**
+ * @summary Update a savings goal (add funds, rename, etc.)
+ */
+export const UpdateSavingsGoalParams = zod.object({
+  goalId: zod.coerce.number(),
+});
+
+export const UpdateSavingsGoalBody = zod.object({
+  name: zod.string().optional(),
+  targetAmount: zod.number().optional(),
+  currentAmount: zod.number().optional(),
+  targetDate: zod.string().optional(),
+  color: zod.string().optional(),
+  icon: zod.string().optional(),
+  addAmount: zod.number().optional(),
+});
+
+export const UpdateSavingsGoalResponse = zod.object({
+  id: zod.number(),
+  name: zod.string(),
+  targetAmount: zod.number(),
+  currentAmount: zod.number(),
+  targetDate: zod.string().nullish(),
+  color: zod.string(),
+  icon: zod.string(),
+  createdAt: zod.coerce.date(),
+});
+
+/**
+ * @summary Delete a savings goal
+ */
+export const DeleteSavingsGoalParams = zod.object({
+  goalId: zod.coerce.number(),
+});
+
+export const DeleteSavingsGoalResponse = zod.object({
+  message: zod.string(),
+});
+
+/**
+ * @summary List scheduled recurring transfers
+ */
+export const GetScheduledTransfersResponseItem = zod.object({
+  id: zod.number(),
+  fromAccountId: zod.number(),
+  toAccountId: zod.number(),
+  amount: zod.number(),
+  memo: zod.string().nullish(),
+  frequency: zod.enum(["weekly", "biweekly", "monthly", "quarterly"]),
+  nextDate: zod.string(),
+  status: zod.enum(["active", "paused", "cancelled"]),
+  createdAt: zod.coerce.date(),
+});
+export const GetScheduledTransfersResponse = zod.array(
+  GetScheduledTransfersResponseItem,
+);
+
+/**
+ * @summary Create a scheduled recurring transfer
+ */
+export const CreateScheduledTransferBody = zod.object({
+  fromAccountId: zod.number(),
+  toAccountId: zod.number(),
+  amount: zod.number(),
+  memo: zod.string().optional(),
+  frequency: zod.enum(["weekly", "biweekly", "monthly", "quarterly"]),
+  nextDate: zod.string(),
+});
+
+/**
+ * @summary Cancel a scheduled transfer
+ */
+export const DeleteScheduledTransferParams = zod.object({
+  scheduledTransferId: zod.coerce.number(),
+});
+
+export const DeleteScheduledTransferResponse = zod.object({
+  message: zod.string(),
+});
+
+/**
+ * @summary Get notification preferences
+ */
+export const GetNotificationPreferencesResponse = zod.object({
+  id: zod.number(),
+  loginAlerts: zod.boolean(),
+  transferAlerts: zod.boolean(),
+  billPayAlerts: zod.boolean(),
+  lowBalanceAlerts: zod.boolean(),
+  lowBalanceThreshold: zod.number(),
+  marketingEmails: zod.boolean(),
+});
+
+/**
+ * @summary Update notification preferences
+ */
+export const UpdateNotificationPreferencesBody = zod.object({
+  loginAlerts: zod.boolean().optional(),
+  transferAlerts: zod.boolean().optional(),
+  billPayAlerts: zod.boolean().optional(),
+  lowBalanceAlerts: zod.boolean().optional(),
+  lowBalanceThreshold: zod.number().optional(),
+  marketingEmails: zod.boolean().optional(),
+});
+
+export const UpdateNotificationPreferencesResponse = zod.object({
+  id: zod.number(),
+  loginAlerts: zod.boolean(),
+  transferAlerts: zod.boolean(),
+  billPayAlerts: zod.boolean(),
+  lowBalanceAlerts: zod.boolean(),
+  lowBalanceThreshold: zod.number(),
+  marketingEmails: zod.boolean(),
+});
+
+/**
+ * @summary Send OTP code to member email
+ */
+export const SendOtpResponse = zod.object({
+  message: zod.string(),
+});
+
+/**
+ * @summary Verify OTP code
+ */
+export const VerifyOtpBody = zod.object({
+  code: zod.string(),
+});
+
+export const VerifyOtpResponse = zod.object({
+  email: zod.string(),
+});

@@ -90,6 +90,13 @@ export interface Transaction {
   balance: number;
   /** @nullable */
   merchant?: string | null;
+  disputed: boolean;
+  /** @nullable */
+  disputeReason?: string | null;
+}
+
+export interface DisputeTransactionBody {
+  reason: string;
 }
 
 export type TransferStatus =
@@ -314,8 +321,117 @@ export interface Statement {
   pdfUrl: string;
 }
 
+export interface SavingsGoal {
+  id: number;
+  name: string;
+  targetAmount: number;
+  currentAmount: number;
+  /** @nullable */
+  targetDate?: string | null;
+  color: string;
+  icon: string;
+  createdAt: string;
+}
+
+export interface SavingsGoalInput {
+  name: string;
+  targetAmount: number;
+  currentAmount?: number;
+  targetDate?: string;
+  color?: string;
+  icon?: string;
+}
+
+export interface SavingsGoalUpdate {
+  name?: string;
+  targetAmount?: number;
+  currentAmount?: number;
+  targetDate?: string;
+  color?: string;
+  icon?: string;
+  addAmount?: number;
+}
+
+export type ScheduledTransferFrequency =
+  (typeof ScheduledTransferFrequency)[keyof typeof ScheduledTransferFrequency];
+
+export const ScheduledTransferFrequency = {
+  weekly: "weekly",
+  biweekly: "biweekly",
+  monthly: "monthly",
+  quarterly: "quarterly",
+} as const;
+
+export type ScheduledTransferStatus =
+  (typeof ScheduledTransferStatus)[keyof typeof ScheduledTransferStatus];
+
+export const ScheduledTransferStatus = {
+  active: "active",
+  paused: "paused",
+  cancelled: "cancelled",
+} as const;
+
+export interface ScheduledTransfer {
+  id: number;
+  fromAccountId: number;
+  toAccountId: number;
+  amount: number;
+  /** @nullable */
+  memo?: string | null;
+  frequency: ScheduledTransferFrequency;
+  nextDate: string;
+  status: ScheduledTransferStatus;
+  createdAt: string;
+}
+
+export type ScheduledTransferInputFrequency =
+  (typeof ScheduledTransferInputFrequency)[keyof typeof ScheduledTransferInputFrequency];
+
+export const ScheduledTransferInputFrequency = {
+  weekly: "weekly",
+  biweekly: "biweekly",
+  monthly: "monthly",
+  quarterly: "quarterly",
+} as const;
+
+export interface ScheduledTransferInput {
+  fromAccountId: number;
+  toAccountId: number;
+  amount: number;
+  memo?: string;
+  frequency: ScheduledTransferInputFrequency;
+  nextDate: string;
+}
+
+export interface NotificationPreferences {
+  id: number;
+  loginAlerts: boolean;
+  transferAlerts: boolean;
+  billPayAlerts: boolean;
+  lowBalanceAlerts: boolean;
+  lowBalanceThreshold: number;
+  marketingEmails: boolean;
+}
+
+export interface NotificationPreferencesUpdate {
+  loginAlerts?: boolean;
+  transferAlerts?: boolean;
+  billPayAlerts?: boolean;
+  lowBalanceAlerts?: boolean;
+  lowBalanceThreshold?: number;
+  marketingEmails?: boolean;
+}
+
+export interface VerifyOtpBody {
+  code: string;
+}
+
 export type GetTransactionsParams = {
   accountId?: number;
   limit?: number;
   offset?: number;
+};
+
+export type ExportTransactionsParams = {
+  accountId?: number;
 };

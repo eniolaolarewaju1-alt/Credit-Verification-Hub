@@ -1,6 +1,7 @@
 import { Router, type IRouter } from "express";
 import healthRouter from "./health";
 import authRouter from "./auth";
+import otpRouter from "./otp";
 import memberRouter from "./member";
 import accountsRouter from "./accounts";
 import transactionsRouter from "./transactions";
@@ -12,12 +13,16 @@ import loansRouter from "./loans";
 import cardsRouter from "./cards";
 import statementsRouter from "./statements";
 import validateRoutingRouter from "./validate-routing";
+import savingsGoalsRouter from "./savings-goals";
+import scheduledTransfersRouter from "./scheduled-transfers";
+import notificationPrefsRouter from "./notification-prefs";
 import { requireAuth } from "../middleware/requireAuth";
 
 const router: IRouter = Router();
 
 router.use(healthRouter);
 router.use(authRouter);
+router.use(otpRouter);
 
 router.use(requireAuth);
 
@@ -32,5 +37,8 @@ router.use(loansRouter);
 router.use(cardsRouter);
 router.use(statementsRouter);
 router.use(validateRoutingRouter);
+router.use(savingsGoalsRouter);
+router.use(scheduledTransfersRouter);
+router.use(notificationPrefsRouter);
 
 export default router;

@@ -18,6 +18,10 @@ import {
   getGetRecentTransactionsQueryKey,
   getGetAccountSummaryQueryKey,
   getGetValidateRoutingQueryKey,
+  useGetScheduledTransfers,
+  useCreateScheduledTransfer,
+  useDeleteScheduledTransfer,
+  getGetScheduledTransfersQueryKey,
 } from "@workspace/api-client-react";
 import type { ExternalPayee } from "@workspace/api-client-react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -41,6 +45,8 @@ import {
   Printer,
   FileText,
   X,
+  CalendarClock,
+  RefreshCw,
 } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
@@ -161,7 +167,7 @@ function TransferSuccessModal({ modal, onClose }: { modal: SuccessModal; onClose
   );
 }
 
-type Tab = "internal" | "external" | "payees";
+type Tab = "internal" | "external" | "payees" | "scheduled";
 
 export default function Transfers() {
   const { toast } = useToast();
@@ -350,6 +356,7 @@ export default function Transfers() {
     { id: "internal", label: "Between My Accounts", icon: ArrowRightLeft },
     { id: "external", label: "Send to Someone", icon: Send },
     { id: "payees", label: "My Payees", icon: Building2 },
+    { id: "scheduled", label: "Scheduled", icon: CalendarClock },
   ];
 
   return (
@@ -832,6 +839,176 @@ export default function Transfers() {
           </Card>
         </div>
       )}
+
+      {/* ── Scheduled Transfers ── */}
+      {tab === "scheduled" && (
+        <ScheduledTransfersTab accounts={accounts ?? []} queryClient={queryClient} toast={toast} />
+      )}
+    </div>
+  );
+}
+
+function ScheduledTransfersTab({ accounts, queryClient, toast }: {
+  accounts: { id: number; nickname: string; availableBalance: number; type: string }[];
+  queryClient: ReturnType<typeof useQueryClient>;
+  toast: (opts: { title: string; description?: string; variant?: "default" | "destructive" }) => void;
+}) {
+  const { data: scheduled, isLoading } = useGetScheduledTransfers();
+  const createScheduled = useCreateScheduledTransfer();
+  const deleteScheduled = useDeleteScheduledTransfer();
+
+  const [fromId, setFromId] = useState("");
+  const [toId, setToId] = useState("");
+  const [amount, setAmount] = useState("");
+  const [freq, setFreq] = useState<"weekly" | "biweekly" | "monthly">("monthly");
+  const [nextDate, setNextDate] = useState("");
+  const [memo, setMemo] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+
+  const fmt = (n: number) => `$${n.toLocaleString("en-US", { minimumFractionDigits: 2 })}`;
+
+  const handleCreate = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSubmitting(true);
+    try {
+      await createScheduled.mutateAsync({
+        data: {
+          fromAccountId: Number(fromId),
+          toAccountId: Number(toId),
+          amount: Number(amount),
+          frequency: freq,
+          nextDate: nextDate,
+          memo: memo || undefined,
+        },
+      });
+      await queryClient.invalidateQueries({ queryKey: getGetScheduledTransfersQueryKey() });
+      toast({ title: "Scheduled transfer created" });
+      setFromId(""); setToId(""); setAmount(""); setMemo(""); setNextDate("");
+    } catch {
+      toast({ title: "Error", description: "Could not create scheduled transfer.", variant: "destructive" });
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const handleDelete = async (id: number) => {
+    try {
+      await deleteScheduled.mutateAsync({ scheduledTransferId: id });
+      await queryClient.invalidateQueries({ queryKey: getGetScheduledTransfersQueryKey() });
+      toast({ title: "Transfer cancelled" });
+    } catch {
+      toast({ title: "Error", description: "Could not cancel transfer.", variant: "destructive" });
+    }
+  };
+
+  const freqLabel = (f: string) => ({ weekly: "Weekly", biweekly: "Every 2 weeks", monthly: "Monthly" }[f] ?? f);
+
+  return (
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <Card className="shadow-sm bg-white">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2 text-[#117ACA]">
+            <CalendarClock className="w-5 h-5" /> New Recurring Transfer
+          </CardTitle>
+          <CardDescription>Set up automatic transfers between your Heritage accounts.</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <form onSubmit={handleCreate} className="space-y-4">
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-1.5">
+                <label className="text-sm font-medium">From</label>
+                <select value={fromId} onChange={e => setFromId(e.target.value)} required
+                  className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#117ACA]">
+                  <option value="">Select account</option>
+                  {accounts.map(a => <option key={a.id} value={String(a.id)}>{a.nickname}</option>)}
+                </select>
+              </div>
+              <div className="space-y-1.5">
+                <label className="text-sm font-medium">To</label>
+                <select value={toId} onChange={e => setToId(e.target.value)} required
+                  className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#117ACA]">
+                  <option value="">Select account</option>
+                  {accounts.filter(a => String(a.id) !== fromId).map(a => <option key={a.id} value={String(a.id)}>{a.nickname}</option>)}
+                </select>
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-1.5">
+                <label className="text-sm font-medium">Amount</label>
+                <div className="relative">
+                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm">$</span>
+                  <Input type="number" min="1" step="0.01" required value={amount} onChange={e => setAmount(e.target.value)}
+                    placeholder="0.00" className="pl-6" />
+                </div>
+              </div>
+              <div className="space-y-1.5">
+                <label className="text-sm font-medium">Frequency</label>
+                <select value={freq} onChange={e => setFreq(e.target.value as typeof freq)}
+                  className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#117ACA]">
+                  <option value="weekly">Weekly</option>
+                  <option value="biweekly">Every 2 weeks</option>
+                  <option value="monthly">Monthly</option>
+                </select>
+              </div>
+            </div>
+            <div className="space-y-1.5">
+              <label className="text-sm font-medium">Start Date</label>
+              <Input type="date" required value={nextDate} onChange={e => setNextDate(e.target.value)}
+                min={new Date().toISOString().split("T")[0]} />
+            </div>
+            <div className="space-y-1.5">
+              <label className="text-sm font-medium">Memo (optional)</label>
+              <Input placeholder="e.g. Monthly savings" value={memo} onChange={e => setMemo(e.target.value)} />
+            </div>
+            <button type="submit" disabled={submitting}
+              className="w-full bg-[#117ACA] hover:bg-[#0D6DAD] text-white font-semibold py-2.5 rounded-xl text-sm transition-colors disabled:opacity-60">
+              {submitting ? "Scheduling..." : "Schedule Transfer"}
+            </button>
+          </form>
+        </CardContent>
+      </Card>
+
+      <Card className="shadow-sm bg-white">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2 text-[#117ACA]">
+            <RefreshCw className="w-5 h-5" /> Active Schedules
+          </CardTitle>
+          <CardDescription>Your upcoming automatic transfers.</CardDescription>
+        </CardHeader>
+        <CardContent>
+          {isLoading ? (
+            <div className="space-y-3">{[1,2].map(i => <Skeleton key={i} className="h-16 w-full" />)}</div>
+          ) : !scheduled?.length ? (
+            <div className="text-center py-10 text-gray-400">
+              <CalendarClock className="w-10 h-10 mx-auto mb-2 text-gray-200" />
+              <p className="text-sm">No scheduled transfers yet.</p>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {scheduled.map(s => {
+                const fromAcct = accounts.find(a => a.id === s.fromAccountId);
+                const toAcct = accounts.find(a => a.id === s.toAccountId);
+                return (
+                  <div key={s.id} className="flex items-center justify-between p-3.5 rounded-xl border border-gray-100 bg-gray-50/60">
+                    <div className="space-y-0.5 min-w-0">
+                      <p className="text-sm font-medium text-gray-900 truncate">
+                        {fromAcct?.nickname ?? `Acct #${s.fromAccountId}`} → {toAcct?.nickname ?? `Acct #${s.toAccountId}`}
+                      </p>
+                      <p className="text-xs text-gray-500">{fmt(s.amount)} · {freqLabel(s.frequency)}</p>
+                      <p className="text-xs text-gray-400">Next: {new Date(s.nextDate).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}</p>
+                      {s.memo && <p className="text-xs text-gray-400 italic">"{s.memo}"</p>}
+                    </div>
+                    <button onClick={() => handleDelete(s.id)}
+                      className="ml-3 p-2 rounded-lg text-gray-400 hover:text-red-500 hover:bg-red-50 transition-colors flex-shrink-0">
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </CardContent>
+      </Card>
     </div>
   );
 }
