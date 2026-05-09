@@ -59,6 +59,7 @@ export interface Account {
   availableBalance: number;
   interestRate: number;
   status: string;
+  createdAt: string;
 }
 
 export interface AccountSummary {

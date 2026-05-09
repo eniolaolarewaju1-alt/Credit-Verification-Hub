@@ -7,10 +7,30 @@ import {
   useGetLoans,
   useGetTransactions,
 } from "@workspace/api-client-react";
+import type { Account } from "@workspace/api-client-react";
 import { Skeleton } from "@/components/ui/skeleton";
-import { ArrowRightLeft, Receipt, ChevronRight, Wifi, CreditCard, Building2, TrendingUp, TrendingDown, Coffee, ShoppingCart, Zap, Car, Monitor, X, Info, Landmark } from "lucide-react";
+import {
+  ArrowRightLeft,
+  Receipt,
+  ChevronRight,
+  Wifi,
+  CreditCard,
+  Building2,
+  TrendingUp,
+  TrendingDown,
+  Coffee,
+  ShoppingCart,
+  Zap,
+  Car,
+  Monitor,
+  X,
+  Info,
+  Landmark,
+} from "lucide-react";
 import { Link } from "wouter";
-import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer, Legend } from "recharts";
+import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from "recharts";
+
+const ROUTING_NUMBER = "021000021";
 
 const CATEGORY_COLORS: Record<string, string> = {
   Income: "#16a34a",
@@ -40,9 +60,15 @@ function formatCurrency(n: number) {
   return new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(n);
 }
 
-function AccountDetailsModal({ account, onClose }: { account: { id: number; nickname: string; maskedNumber: string; balance: number; availableBalance: number; interestRate: number; type: string; status: string }; onClose: () => void }) {
-  const routingNumber = account.type === "checking" ? "253279398" : "253279398";
-  const fullAccount = account.maskedNumber.replace(/\*/g, "").trim();
+function getGreeting() {
+  const h = new Date().getHours();
+  if (h < 12) return "Good morning";
+  if (h < 17) return "Good afternoon";
+  return "Good evening";
+}
+
+function AccountDetailsModal({ account, onClose }: { account: Account; onClose: () => void }) {
+  const fullAccount = account.maskedNumber.replace(/[*• ]/g, "").trim();
 
   return (
     <div className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center p-4" onClick={onClose}>
@@ -72,11 +98,13 @@ function AccountDetailsModal({ account, onClose }: { account: { id: number; nick
           <div className="grid grid-cols-2 gap-3">
             <div className="bg-gray-50 rounded-xl p-3">
               <p className="text-xs text-gray-500 mb-1">Routing Number</p>
-              <p className="font-mono font-semibold text-sm text-gray-800">{routingNumber}</p>
+              <p className="font-mono font-semibold text-sm text-gray-800">{ROUTING_NUMBER}</p>
             </div>
             <div className="bg-gray-50 rounded-xl p-3">
               <p className="text-xs text-gray-500 mb-1">Account Number</p>
-              <p className="font-mono font-semibold text-sm text-gray-800">{fullAccount || "••••9023"}</p>
+              <p className="font-mono font-semibold text-sm text-gray-800">
+                {fullAccount.length > 0 ? fullAccount : account.maskedNumber}
+              </p>
             </div>
           </div>
 
@@ -101,6 +129,115 @@ function AccountDetailsModal({ account, onClose }: { account: { id: number; nick
   );
 }
 
+function FlipAccountCard({ account }: { account: Account }) {
+  const [flipped, setFlipped] = useState(false);
+  const isChecking = account.type === "checking";
+
+  const openedDate = new Date(account.createdAt).toLocaleDateString("en-US", {
+    month: "long",
+    year: "numeric",
+  });
+
+  return (
+    <div
+      className="relative h-44 cursor-pointer"
+      style={{ perspective: "1000px" }}
+      onClick={() => setFlipped(v => !v)}
+      data-testid={`card-account-${account.id}`}
+      title="Click to flip for account details"
+    >
+      <div
+        className="relative w-full h-full transition-transform duration-500"
+        style={{
+          transformStyle: "preserve-3d",
+          transform: flipped ? "rotateY(180deg)" : "rotateY(0deg)",
+        }}
+      >
+        {/* Front */}
+        <div
+          className={`absolute inset-0 rounded-2xl p-5 overflow-hidden flex flex-col justify-between ${
+            isChecking
+              ? "bg-[#1a2b5e] text-white shadow-lg shadow-[#1a2b5e]/30"
+              : "bg-white text-gray-900 border-2 border-gray-100 shadow-sm"
+          }`}
+          style={{ backfaceVisibility: "hidden" }}
+        >
+          {isChecking && (
+            <>
+              <div className="absolute -top-8 -right-8 w-32 h-32 rounded-full bg-white/5" />
+              <div className="absolute -bottom-4 -right-4 w-20 h-20 rounded-full bg-white/5" />
+            </>
+          )}
+          <div className="relative z-10 flex items-center justify-between">
+            <div>
+              <p className={`text-xs font-medium uppercase tracking-wider ${isChecking ? "text-white/60" : "text-gray-400"}`}>
+                {account.type.replace("_", " ")} Account
+              </p>
+              <p className={`text-sm font-mono mt-0.5 tracking-wider ${isChecking ? "text-white/80" : "text-gray-500"}`}>
+                {account.maskedNumber}
+              </p>
+            </div>
+            <div className={`w-9 h-9 rounded-xl flex items-center justify-center ${isChecking ? "bg-white/15" : "bg-gray-100"}`}>
+              {isChecking ? <Wifi className="w-4 h-4 text-white" /> : <CreditCard className="w-4 h-4 text-gray-500" />}
+            </div>
+          </div>
+          <div className="relative z-10">
+            <p className={`text-3xl font-bold tracking-tight ${isChecking ? "text-white" : "text-gray-900"}`}>
+              {formatCurrency(account.balance)}
+            </p>
+            <div className="flex items-center justify-between mt-2">
+              <p className={`text-xs ${isChecking ? "text-white/60" : "text-gray-400"}`}>
+                Available: {formatCurrency(account.availableBalance)}
+              </p>
+              <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${isChecking ? "bg-white/15 text-white/80" : "bg-[#1a2b5e]/10 text-[#1a2b5e]"}`}>
+                {(account.interestRate * 100).toFixed(2)}% APY
+              </span>
+            </div>
+            <p className={`text-[10px] mt-2 ${isChecking ? "text-white/30" : "text-gray-300"}`}>Tap for details →</p>
+          </div>
+        </div>
+
+        {/* Back */}
+        <div
+          className={`absolute inset-0 rounded-2xl p-5 flex flex-col justify-between ${
+            isChecking
+              ? "bg-[#162450] text-white shadow-lg shadow-[#1a2b5e]/30"
+              : "bg-gray-50 text-gray-900 border-2 border-gray-100 shadow-sm"
+          }`}
+          style={{ backfaceVisibility: "hidden", transform: "rotateY(180deg)" }}
+        >
+          <div>
+            <p className={`text-xs font-medium uppercase tracking-wider mb-3 ${isChecking ? "text-white/50" : "text-gray-400"}`}>
+              Account Details
+            </p>
+            <div className="space-y-2">
+              <div className="flex justify-between items-center">
+                <span className={`text-xs ${isChecking ? "text-white/60" : "text-gray-500"}`}>Routing</span>
+                <span className={`font-mono text-sm font-semibold ${isChecking ? "text-white" : "text-gray-900"}`}>{ROUTING_NUMBER}</span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className={`text-xs ${isChecking ? "text-white/60" : "text-gray-500"}`}>Interest Rate</span>
+                <span className={`text-sm font-semibold ${isChecking ? "text-white" : "text-gray-900"}`}>
+                  {(account.interestRate * 100).toFixed(2)}% APY
+                </span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className={`text-xs ${isChecking ? "text-white/60" : "text-gray-500"}`}>Opened</span>
+                <span className={`text-sm font-semibold ${isChecking ? "text-white" : "text-gray-900"}`}>{openedDate}</span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className={`text-xs ${isChecking ? "text-white/60" : "text-gray-500"}`}>Status</span>
+                <span className="text-sm font-semibold text-green-400 capitalize">{account.status}</span>
+              </div>
+            </div>
+          </div>
+          <p className={`text-[10px] ${isChecking ? "text-white/30" : "text-gray-300"}`}>← Tap to flip back</p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function Home() {
   const { data: member, isLoading: isLoadingMember } = useGetMember();
   const { data: accounts, isLoading: isLoadingAccounts } = useGetAccounts();
@@ -108,8 +245,7 @@ export default function Home() {
   const { data: recentTx, isLoading: isLoadingTx } = useGetRecentTransactions();
   const { data: loans } = useGetLoans();
   const { data: allTx } = useGetTransactions();
-  type AccountItem = NonNullable<typeof accounts>[number];
-  const [detailAccount, setDetailAccount] = useState<AccountItem | null>(null);
+  const [detailAccount, setDetailAccount] = useState<Account | null>(null);
 
   const now = new Date();
   const dateStr = now.toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric", year: "numeric" });
@@ -132,15 +268,18 @@ export default function Home() {
 
   return (
     <div className="max-w-5xl mx-auto px-6 py-8 space-y-6">
-      {/* Header */}
+      {/* Header with time-based greeting */}
       <div className="flex items-start justify-between">
         <div>
           {isLoadingMember ? (
             <Skeleton className="h-8 w-64 mb-2" />
           ) : (
-            <h1 className="text-2xl font-serif font-semibold text-[#1a2b5e]">
-              Welcome back, {member?.firstName} {member?.lastName}.
-            </h1>
+            <>
+              <p className="text-sm text-gray-400 font-medium">{getGreeting()}, {member?.firstName}.</p>
+              <h1 className="text-2xl font-serif font-semibold text-[#1a2b5e] mt-0.5">
+                Account Overview
+              </h1>
+            </>
           )}
           <p className="text-sm text-gray-400 mt-0.5">{dateStr}</p>
         </div>
@@ -162,11 +301,11 @@ export default function Home() {
         </div>
       </div>
 
-      {/* Account Cards */}
+      {/* Account Cards — flip on click */}
       <div>
         <div className="flex items-center justify-between mb-3">
           <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wide">Your Accounts</h2>
-          <span className="text-xs text-gray-400">Click card for details</span>
+          <span className="text-xs text-gray-400">Tap a card to see routing & rate details</span>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           {isLoadingAccounts ? (
@@ -174,59 +313,15 @@ export default function Home() {
               <Skeleton className="h-44 w-full rounded-2xl" />
               <Skeleton className="h-44 w-full rounded-2xl" />
             </>
-          ) : accounts?.map((account) => {
-            const isChecking = account.type === "checking";
-            return (
-              <button
-                key={account.id}
-                onClick={() => setDetailAccount(account as any)}
-                data-testid={`card-account-${account.id}`}
-                className={`relative p-5 rounded-2xl text-left w-full overflow-hidden transition-transform hover:scale-[1.01] active:scale-[0.99] cursor-pointer focus:outline-none focus:ring-2 focus:ring-[#1a2b5e]/30 ${isChecking
-                  ? "bg-[#1a2b5e] text-white shadow-lg shadow-[#1a2b5e]/30"
-                  : "bg-white text-gray-900 border-2 border-gray-100 shadow-sm hover:shadow-md"
-                  }`}
-              >
-                {/* Decorative circle */}
-                {isChecking && (
-                  <>
-                    <div className="absolute -top-8 -right-8 w-32 h-32 rounded-full bg-white/5" />
-                    <div className="absolute -bottom-4 -right-4 w-20 h-20 rounded-full bg-white/5" />
-                  </>
-                )}
-
-                <div className="relative z-10">
-                  <div className="flex items-center justify-between mb-4">
-                    <div>
-                      <p className={`text-xs font-medium uppercase tracking-wider ${isChecking ? "text-white/60" : "text-gray-400"}`}>
-                        {account.type.replace("_", " ")} Account
-                      </p>
-                      <p className={`text-sm font-mono mt-0.5 tracking-wider ${isChecking ? "text-white/80" : "text-gray-500"}`}>
-                        {account.maskedNumber}
-                      </p>
-                    </div>
-                    <div className={`w-9 h-9 rounded-xl flex items-center justify-center ${isChecking ? "bg-white/15" : "bg-gray-100"}`}>
-                      {isChecking ? <Wifi className="w-4 h-4 text-white" /> : <CreditCard className="w-4 h-4 text-gray-500" />}
-                    </div>
-                  </div>
-
-                  <div>
-                    <p className={`text-3xl font-bold tracking-tight ${isChecking ? "text-white" : "text-gray-900"}`}>
-                      {formatCurrency(account.balance)}
-                    </p>
-                    <div className="flex items-center justify-between mt-2">
-                      <p className={`text-xs ${isChecking ? "text-white/60" : "text-gray-400"}`}>
-                        Available: {formatCurrency(account.availableBalance)}
-                      </p>
-                      <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${isChecking ? "bg-white/15 text-white/80" : "bg-[#1a2b5e]/8 text-[#1a2b5e]"}`}>
-                        {(account.interestRate * 100).toFixed(2)}% APY
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              </button>
-            );
-          })}
+          ) : accounts?.map(account => (
+            <FlipAccountCard key={account.id} account={account} />
+          ))}
         </div>
+        {accounts && accounts.length > 0 && (
+          <p className="text-center text-[11px] text-gray-300 mt-2">
+            Click any account card to see routing number, interest rate, and opening date
+          </p>
+        )}
       </div>
 
       {/* Stats Row */}
@@ -322,7 +417,7 @@ export default function Home() {
                     paddingAngle={2}
                     dataKey="value"
                   >
-                    {spendingByCategory.map((entry) => (
+                    {spendingByCategory.map(entry => (
                       <Cell key={entry.name} fill={CATEGORY_COLORS[entry.name] ?? "#94a3b8"} />
                     ))}
                   </Pie>
@@ -355,7 +450,7 @@ export default function Home() {
                   <Landmark className="w-4 h-4 text-amber-600" />
                 </div>
                 <div className="flex-1">
-                  <p className="text-sm font-medium text-gray-800">{nextLoan.nickname || nextLoan.type}</p>
+                  <p className="text-sm font-medium text-gray-800">{nextLoan.nickname ?? nextLoan.type}</p>
                   <p className="text-xs text-gray-400">Due {new Date(nextLoan.nextPaymentDate).toLocaleDateString("en-US", { month: "short", day: "numeric" })}</p>
                 </div>
                 <p className="text-sm font-bold text-[#1a2b5e]">{formatCurrency(nextLoan.nextPaymentAmount)}</p>
@@ -368,11 +463,10 @@ export default function Home() {
         </div>
       </div>
 
-      {/* Account Details Modal */}
+      {/* Account Details Modal (for programmatic access still) */}
       {detailAccount && (
         <AccountDetailsModal account={detailAccount} onClose={() => setDetailAccount(null)} />
       )}
     </div>
   );
 }
-

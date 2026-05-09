@@ -70,6 +70,7 @@ export const GetAccountsResponseItem = zod.object({
   availableBalance: zod.number(),
   interestRate: zod.number(),
   status: zod.string(),
+  createdAt: zod.coerce.date(),
 });
 export const GetAccountsResponse = zod.array(GetAccountsResponseItem);
 
@@ -101,6 +102,7 @@ export const GetAccountResponse = zod.object({
   availableBalance: zod.number(),
   interestRate: zod.number(),
   status: zod.string(),
+  createdAt: zod.coerce.date(),
 });
 
 /**

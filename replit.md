@@ -12,7 +12,7 @@ A private, single-owner online banking portal for Dax Emry Brooks at Heritage Cr
 - Required env: `DATABASE_URL` — Postgres connection string
 - Required env: `SESSION_SECRET` — Express session secret
 - Required env: `ADMIN_EMAIL` — portal owner email (`daxemry5855@gmail.com`)
-- Required env: `ADMIN_PASSWORD_HASH` — bcrypt hash of portal password (default: `Heritage2026!`)
+- Required secret: `ADMIN_PASSWORD_HASH` — bcrypt hash of portal password (set via Replit Secrets panel)
 
 ## Stack
 
@@ -59,7 +59,7 @@ A private, single-owner online banking portal for Dax Emry Brooks at Heritage Cr
 ## User preferences
 
 - Portal is private to Dax Emry Brooks only — no public sign-up
-- Default password: `Heritage2026!` (change via ADMIN_PASSWORD_HASH env var)
+- Default password is `Heritage2026!` — the hash is stored as a Replit Secret (never in source or docs)
 - Heritage Credit Union branding: deep navy `#1a2b5e`, serif font for headings
 - Charleston, SC 29401 · Member FDIC
 

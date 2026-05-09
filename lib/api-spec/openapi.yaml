@@ -411,7 +411,7 @@ components:
 
     Account:
       type: object
-      required: [id, type, nickname, maskedNumber, balance, availableBalance, interestRate, status]
+      required: [id, type, nickname, maskedNumber, balance, availableBalance, interestRate, status, createdAt]
       properties:
         id:
           type: integer
@@ -430,6 +430,9 @@ components:
           type: number
         status:
           type: string
+        createdAt:
+          type: string
+          format: date-time
 
     AccountSummary:
       type: object
