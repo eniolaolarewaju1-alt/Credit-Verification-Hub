@@ -43,7 +43,7 @@ router.post("/transfers", async (req, res): Promise<void> => {
     availableBalance: String((Number(toAcc.availableBalance) + amount).toFixed(2)),
   }).where(eq(accountsTable.id, toAccountId));
 
-  const today = new Date().toLocaleDateString("en-US", { timeZone: "America/New_York" }).split("/").reverse().join("-");
+  const today = new Date().toLocaleDateString("en-CA", { timeZone: "America/New_York" });
 
   const [transfer] = await db.insert(transfersTable).values({
     fromAccountId,
