@@ -202,7 +202,10 @@ export async function sendTransferAlert(opts: {
 
 export async function sendLoginAlert(opts: { ip?: string }) {
   const transporter = createTransporter();
-  if (!transporter) return;
+  if (!transporter) {
+    logger.warn("GMAIL_APP_PASSWORD not set — skipping login alert email");
+    return;
+  }
   const to = MEMBER_EMAIL;
   const body = `
     <div class="row"><span class="label">Member</span><span class="value">${MEMBER_NAME}</span></div>
@@ -218,6 +221,7 @@ export async function sendLoginAlert(opts: { ip?: string }) {
       subject: "Sign-In Alert — Heritage Credit Union",
       html: htmlWrapper("New Sign-In Detected", body),
     });
+    logger.info({ to }, "Login alert email sent");
   } catch (err) {
     logger.error(err, "Failed to send login email");
   }
@@ -230,7 +234,10 @@ export async function sendBillPayAlert(opts: {
   payDate: string;
 }) {
   const transporter = createTransporter();
-  if (!transporter) return;
+  if (!transporter) {
+    logger.warn("GMAIL_APP_PASSWORD not set — skipping bill pay alert email");
+    return;
+  }
   const to = MEMBER_EMAIL;
   const fmt = (n: number) => n.toLocaleString("en-US", { style: "currency", currency: "USD" });
   const body = `
