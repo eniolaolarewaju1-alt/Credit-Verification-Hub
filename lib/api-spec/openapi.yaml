@@ -1,15 +1,30 @@
 openapi: 3.1.0
 info:
-  # Do not change the title, if the title changes, the import paths will be broken
   title: Api
   version: 0.1.0
-  description: API specification
+  description: Heritage Credit Union API
 servers:
   - url: /api
     description: Base API path
 tags:
   - name: health
     description: Health operations
+  - name: accounts
+    description: Account operations
+  - name: transactions
+    description: Transaction operations
+  - name: transfers
+    description: Transfer operations
+  - name: bills
+    description: Bill pay operations
+  - name: loans
+    description: Loan operations
+  - name: cards
+    description: Card operations
+  - name: statements
+    description: Statement operations
+  - name: member
+    description: Member profile operations
 paths:
   /healthz:
     get:
@@ -24,6 +39,222 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+
+  /member:
+    get:
+      operationId: getMember
+      tags: [member]
+      summary: Get member profile
+      responses:
+        "200":
+          description: Member profile
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Member"
+
+  /accounts:
+    get:
+      operationId: getAccounts
+      tags: [accounts]
+      summary: List all accounts
+      responses:
+        "200":
+          description: List of accounts
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Account"
+
+  /accounts/summary:
+    get:
+      operationId: getAccountSummary
+      tags: [accounts]
+      summary: Get account summary (balances, deposits, spending, status)
+      responses:
+        "200":
+          description: Account summary
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AccountSummary"
+
+  /accounts/{accountId}:
+    get:
+      operationId: getAccount
+      tags: [accounts]
+      summary: Get a single account
+      parameters:
+        - name: accountId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Account details
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Account"
+
+  /transactions:
+    get:
+      operationId: getTransactions
+      tags: [transactions]
+      summary: List transactions (optionally filtered by account)
+      parameters:
+        - name: accountId
+          in: query
+          required: false
+          schema:
+            type: integer
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+        - name: offset
+          in: query
+          required: false
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: List of transactions
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Transaction"
+
+  /transactions/recent:
+    get:
+      operationId: getRecentTransactions
+      tags: [transactions]
+      summary: Get recent transactions across all accounts
+      responses:
+        "200":
+          description: Recent transactions
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Transaction"
+
+  /transfers:
+    get:
+      operationId: getTransfers
+      tags: [transfers]
+      summary: List transfers
+      responses:
+        "200":
+          description: List of transfers
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Transfer"
+    post:
+      operationId: createTransfer
+      tags: [transfers]
+      summary: Create a new transfer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TransferInput"
+      responses:
+        "201":
+          description: Transfer created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Transfer"
+
+  /bills:
+    get:
+      operationId: getBills
+      tags: [bills]
+      summary: List bill payees
+      responses:
+        "200":
+          description: List of bills/payees
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Bill"
+    post:
+      operationId: payBill
+      tags: [bills]
+      summary: Pay a bill
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/BillPayInput"
+      responses:
+        "201":
+          description: Payment submitted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BillPayment"
+
+  /loans:
+    get:
+      operationId: getLoans
+      tags: [loans]
+      summary: List member loans
+      responses:
+        "200":
+          description: List of loans
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Loan"
+
+  /cards:
+    get:
+      operationId: getCards
+      tags: [cards]
+      summary: List member cards
+      responses:
+        "200":
+          description: List of cards
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Card"
+
+  /statements:
+    get:
+      operationId: getStatements
+      tags: [statements]
+      summary: List statements
+      responses:
+        "200":
+          description: List of statements
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Statement"
+
 components:
   schemas:
     HealthStatus:
@@ -34,3 +265,260 @@ components:
       required:
         - status
 
+    Member:
+      type: object
+      required: [id, firstName, lastName, memberNumber, email, phone, address, city, state, zip, memberSince, status]
+      properties:
+        id:
+          type: integer
+        firstName:
+          type: string
+        lastName:
+          type: string
+        memberNumber:
+          type: string
+        email:
+          type: string
+        phone:
+          type: string
+        address:
+          type: string
+        city:
+          type: string
+        state:
+          type: string
+        zip:
+          type: string
+        memberSince:
+          type: string
+        status:
+          type: string
+
+    Account:
+      type: object
+      required: [id, type, nickname, maskedNumber, balance, availableBalance, interestRate, status]
+      properties:
+        id:
+          type: integer
+        type:
+          type: string
+          enum: [checking, savings, money_market, cd]
+        nickname:
+          type: string
+        maskedNumber:
+          type: string
+        balance:
+          type: number
+        availableBalance:
+          type: number
+        interestRate:
+          type: number
+        status:
+          type: string
+
+    AccountSummary:
+      type: object
+      required: [totalBalance, monthlyDeposits, monthlySpending, accountStatus, checkingBalance, savingsBalance]
+      properties:
+        totalBalance:
+          type: number
+        checkingBalance:
+          type: number
+        savingsBalance:
+          type: number
+        monthlyDeposits:
+          type: number
+        monthlySpending:
+          type: number
+        accountStatus:
+          type: string
+
+    Transaction:
+      type: object
+      required: [id, accountId, description, amount, type, category, date, balance]
+      properties:
+        id:
+          type: integer
+        accountId:
+          type: integer
+        description:
+          type: string
+        amount:
+          type: number
+        type:
+          type: string
+          enum: [credit, debit]
+        category:
+          type: string
+        date:
+          type: string
+        balance:
+          type: number
+        merchant:
+          type: ["string", "null"]
+
+    Transfer:
+      type: object
+      required: [id, fromAccountId, toAccountId, amount, date, status, memo]
+      properties:
+        id:
+          type: integer
+        fromAccountId:
+          type: integer
+        toAccountId:
+          type: integer
+        amount:
+          type: number
+        date:
+          type: string
+        status:
+          type: string
+          enum: [pending, completed, failed]
+        memo:
+          type: string
+
+    TransferInput:
+      type: object
+      required: [fromAccountId, toAccountId, amount]
+      properties:
+        fromAccountId:
+          type: integer
+        toAccountId:
+          type: integer
+        amount:
+          type: number
+        memo:
+          type: string
+
+    Bill:
+      type: object
+      required: [id, payeeName, accountNumber, dueDate, amountDue, category, autopay]
+      properties:
+        id:
+          type: integer
+        payeeName:
+          type: string
+        accountNumber:
+          type: string
+        dueDate:
+          type: string
+        amountDue:
+          type: number
+        category:
+          type: string
+        autopay:
+          type: boolean
+        lastPaidDate:
+          type: ["string", "null"]
+        lastPaidAmount:
+          type: ["number", "null"]
+
+    BillPayInput:
+      type: object
+      required: [billId, amount, fromAccountId, payDate]
+      properties:
+        billId:
+          type: integer
+        amount:
+          type: number
+        fromAccountId:
+          type: integer
+        payDate:
+          type: string
+
+    BillPayment:
+      type: object
+      required: [id, billId, amount, fromAccountId, payDate, status]
+      properties:
+        id:
+          type: integer
+        billId:
+          type: integer
+        amount:
+          type: number
+        fromAccountId:
+          type: integer
+        payDate:
+          type: string
+        status:
+          type: string
+
+    Loan:
+      type: object
+      required: [id, type, originalAmount, currentBalance, monthlyPayment, interestRate, nextPaymentDate, nextPaymentAmount, termMonths, status]
+      properties:
+        id:
+          type: integer
+        type:
+          type: string
+          enum: [auto, home, personal, student]
+        nickname:
+          type: string
+        originalAmount:
+          type: number
+        currentBalance:
+          type: number
+        monthlyPayment:
+          type: number
+        interestRate:
+          type: number
+        nextPaymentDate:
+          type: string
+        nextPaymentAmount:
+          type: number
+        termMonths:
+          type: integer
+        status:
+          type: string
+
+    Card:
+      type: object
+      required: [id, type, maskedNumber, cardholderName, expiryDate, status, creditLimit, currentBalance, availableCredit]
+      properties:
+        id:
+          type: integer
+        type:
+          type: string
+          enum: [debit, credit, prepaid]
+        maskedNumber:
+          type: string
+        cardholderName:
+          type: string
+        expiryDate:
+          type: string
+        status:
+          type: string
+          enum: [active, frozen, cancelled]
+        creditLimit:
+          type: ["number", "null"]
+        currentBalance:
+          type: number
+        availableCredit:
+          type: ["number", "null"]
+        rewardsPoints:
+          type: ["integer", "null"]
+
+    Statement:
+      type: object
+      required: [id, accountId, period, startDate, endDate, openingBalance, closingBalance, totalCredits, totalDebits, pdfUrl]
+      properties:
+        id:
+          type: integer
+        accountId:
+          type: integer
+        period:
+          type: string
+        startDate:
+          type: string
+        endDate:
+          type: string
+        openingBalance:
+          type: number
+        closingBalance:
+          type: number
+        totalCredits:
+          type: number
+        totalDebits:
+          type: number
+        pdfUrl:
+          type: string

@@ -1,0 +1,31 @@
+kind = "web"
+previewPath = "/"
+title = "Heritage Credit"
+version = "1.0.0"
+id = "artifacts/heritage-credit"
+router = "path"
+
+[[integratedSkills]]
+name = "react-vite"
+version = "1.0.0"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 18872
+
+[services.development]
+run = "pnpm --filter @workspace/heritage-credit run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/heritage-credit", "run", "build" ]
+publicDir = "artifacts/heritage-credit/dist/public"
+serve = "static"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "18872"
+BASE_PATH = "/"
