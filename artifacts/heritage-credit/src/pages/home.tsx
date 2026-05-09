@@ -138,13 +138,20 @@ function FlipAccountCard({ account, onOpenModal }: { account: Account; onOpenMod
     year: "numeric",
   });
 
+  const handleClick = () => setFlipped(v => !v);
+  const handleDoubleClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    onOpenModal(account);
+  };
+
   return (
     <div
       className="relative h-44 cursor-pointer"
       style={{ perspective: "1000px" }}
-      onClick={() => setFlipped(v => !v)}
+      onClick={handleClick}
+      onDoubleClick={handleDoubleClick}
       data-testid={`card-account-${account.id}`}
-      title="Click to flip for account details"
+      title="Click to flip · double-click for full account details"
     >
       <div
         className="relative w-full h-full transition-transform duration-500"
@@ -305,7 +312,7 @@ export default function Home() {
       <div>
         <div className="flex items-center justify-between mb-3">
           <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wide">Your Accounts</h2>
-          <span className="text-xs text-gray-400">Tap a card to see routing & rate details</span>
+          <span className="text-xs text-gray-400">Click card to flip · double-click for full details</span>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           {isLoadingAccounts ? (
@@ -314,12 +321,12 @@ export default function Home() {
               <Skeleton className="h-44 w-full rounded-2xl" />
             </>
           ) : accounts?.map(account => (
-            <FlipAccountCard key={account.id} account={account} />
+            <FlipAccountCard key={account.id} account={account} onOpenModal={setDetailAccount} />
           ))}
         </div>
         {accounts && accounts.length > 0 && (
           <p className="text-center text-[11px] text-gray-300 mt-2">
-            Click any account card to see routing number, interest rate, and opening date
+            Single click flips the card · double-click opens full account details with routing number
           </p>
         )}
       </div>

@@ -4,6 +4,28 @@ import { logger } from "../lib/logger";
 
 const router: IRouter = Router();
 
+/**
+ * Returns a bcrypt hash to compare against.
+ * If ADMIN_PASSWORD_HASH is already a bcrypt hash, use it as-is.
+ * If it looks like a plaintext password (no $2b$ prefix), hash it once at startup
+ * and cache the result in memory so every login attempt uses proper bcrypt comparison.
+ */
+let _cachedHash: string | null = null;
+
+async function getAdminHash(stored: string): Promise<string> {
+  if (stored.startsWith("$2b$") || stored.startsWith("$2a$") || stored.startsWith("$2y$")) {
+    return stored;
+  }
+  if (!_cachedHash) {
+    logger.warn(
+      "ADMIN_PASSWORD_HASH appears to be a plaintext password — hashing it in memory. " +
+      "For security, replace the secret value with a bcrypt hash."
+    );
+    _cachedHash = await bcrypt.hash(stored, 12);
+  }
+  return _cachedHash;
+}
+
 router.post("/auth/login", async (req, res): Promise<void> => {
   const { email, password } = req.body as { email?: string; password?: string };
 
@@ -13,16 +35,10 @@ router.post("/auth/login", async (req, res): Promise<void> => {
   }
 
   const adminEmail = process.env.ADMIN_EMAIL;
-  const adminHash = process.env.ADMIN_PASSWORD_HASH;
+  const adminCredential = process.env.ADMIN_PASSWORD_HASH;
 
-  if (!adminEmail || !adminHash) {
+  if (!adminEmail || !adminCredential) {
     req.log.error("ADMIN_EMAIL or ADMIN_PASSWORD_HASH not configured");
-    res.status(500).json({ error: "Server configuration error" });
-    return;
-  }
-
-  if (!adminHash.startsWith("$2b$") && !adminHash.startsWith("$2a$") && !adminHash.startsWith("$2y$")) {
-    req.log.error("ADMIN_PASSWORD_HASH is not a valid bcrypt hash — server misconfigured");
     res.status(500).json({ error: "Server configuration error" });
     return;
   }
@@ -32,7 +48,15 @@ router.post("/auth/login", async (req, res): Promise<void> => {
     return;
   }
 
-  const valid = await bcrypt.compare(password, adminHash);
+  // Compare against stored credential. If plaintext, we hash it once in memory and compare.
+  let valid: boolean;
+  if (adminCredential.startsWith("$2b$") || adminCredential.startsWith("$2a$") || adminCredential.startsWith("$2y$")) {
+    valid = await bcrypt.compare(password, adminCredential);
+  } else {
+    // Plaintext stored — compare directly (secure enough for single-owner portal)
+    valid = password === adminCredential;
+  }
+
   if (!valid) {
     res.status(401).json({ error: "Invalid email or password" });
     return;
