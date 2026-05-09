@@ -28,7 +28,7 @@ import {
   Building,
 } from "lucide-react";
 import { useGetMember, useGetRecentTransactions } from "@workspace/api-client-react";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useAuth } from "@/contexts/auth";
 
@@ -183,6 +183,7 @@ function SidebarContent({
         ) : (
           <div className="flex items-center gap-3">
             <Avatar className="w-9 h-9 border border-white/20 flex-shrink-0">
+              <AvatarImage src="/avatar.jpeg" alt="Dax Brooks" className="object-cover" />
               <AvatarFallback className="bg-white/15 text-white text-xs font-semibold">
                 {member.firstName[0]}{member.lastName[0]}
               </AvatarFallback>
@@ -356,6 +357,7 @@ export function Layout({ children }: { children: ReactNode }) {
             {member && (
               <div className="flex items-center gap-2 pl-3 border-l border-gray-200">
                 <Avatar className="w-8 h-8">
+                  <AvatarImage src="/avatar.jpeg" alt="Dax Brooks" className="object-cover" />
                   <AvatarFallback className="bg-[#117ACA] text-white text-xs font-semibold">
                     {member.firstName[0]}{member.lastName[0]}
                   </AvatarFallback>
