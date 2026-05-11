@@ -1003,6 +1003,90 @@ export const useCreateTransfer = <
 };
 
 /**
+ * @summary Manually reverse an internal transfer
+ */
+export const getReverseTransferUrl = (transferId: number) => {
+  return `/api/transfers/${transferId}/reverse`;
+};
+
+export const reverseTransfer = async (
+  transferId: number,
+  options?: RequestInit,
+): Promise<Transfer> => {
+  return customFetch<Transfer>(getReverseTransferUrl(transferId), {
+    ...options,
+    method: "POST",
+  });
+};
+
+export const getReverseTransferMutationOptions = <
+  TError = ErrorType<ErrorResponse>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof reverseTransfer>>,
+    TError,
+    { transferId: number },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof reverseTransfer>>,
+  TError,
+  { transferId: number },
+  TContext
+> => {
+  const mutationKey = ["reverseTransfer"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof reverseTransfer>>,
+    { transferId: number }
+  > = (props) => {
+    const { transferId } = props ?? {};
+
+    return reverseTransfer(transferId, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type ReverseTransferMutationResult = NonNullable<
+  Awaited<ReturnType<typeof reverseTransfer>>
+>;
+
+export type ReverseTransferMutationError = ErrorType<ErrorResponse>;
+
+/**
+ * @summary Manually reverse an internal transfer
+ */
+export const useReverseTransfer = <
+  TError = ErrorType<ErrorResponse>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof reverseTransfer>>,
+    TError,
+    { transferId: number },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof reverseTransfer>>,
+  TError,
+  { transferId: number },
+  TContext
+> => {
+  return useMutation(getReverseTransferMutationOptions(options));
+};
+
+/**
  * @summary Get receipt data for a transfer
  */
 export const getGetTransferReceiptUrl = (transferId: number) => {

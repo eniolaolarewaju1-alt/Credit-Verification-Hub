@@ -246,6 +246,37 @@ paths:
               schema:
                 $ref: "#/components/schemas/Transfer"
 
+  /transfers/{transferId}/reverse:
+    post:
+      operationId: reverseTransfer
+      tags: [transfers]
+      summary: Manually reverse an internal transfer
+      parameters:
+        - name: transferId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Transfer reversed
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Transfer"
+        "400":
+          description: Transfer cannot be reversed
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: Transfer not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
   /transfers/{transferId}/receipt:
     get:
       operationId: getTransferReceipt

@@ -182,6 +182,31 @@ export const CreateTransferBody = zod.object({
 });
 
 /**
+ * @summary Manually reverse an internal transfer
+ */
+export const ReverseTransferParams = zod.object({
+  transferId: zod.coerce.number(),
+});
+
+export const ReverseTransferResponse = zod.object({
+  id: zod.number(),
+  fromAccountId: zod.number(),
+  toAccountId: zod.number(),
+  amount: zod.number(),
+  date: zod.string(),
+  status: zod.enum([
+    "pending",
+    "pending_reversal",
+    "completed",
+    "reversed",
+    "failed",
+  ]),
+  memo: zod.string(),
+  referenceNumber: zod.string(),
+  reversedAt: zod.coerce.date().nullish(),
+});
+
+/**
  * @summary Get receipt data for a transfer
  */
 export const GetTransferReceiptParams = zod.object({

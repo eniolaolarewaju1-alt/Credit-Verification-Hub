@@ -22,6 +22,8 @@ import {
   useCreateScheduledTransfer,
   useDeleteScheduledTransfer,
   getGetScheduledTransfersQueryKey,
+  useReverseTransfer,
+  getGetTransactionsQueryKey,
 } from "@workspace/api-client-react";
 import type { ExternalPayee } from "@workspace/api-client-react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -206,6 +208,7 @@ export default function Transfers() {
   const { data: externalTransfers, isLoading: loadingExtTransfers } = useGetExternalTransfers();
 
   const createTransfer = useCreateTransfer();
+  const reverseTransfer = useReverseTransfer();
   const createExternalTransfer = useCreateExternalTransfer();
   const verifyAccount = useVerifyExternalAccount();
   const createPayee = useCreateExternalPayee();
@@ -225,6 +228,18 @@ export default function Transfers() {
     queryClient.invalidateQueries({ queryKey: getGetAccountsQueryKey() });
     queryClient.invalidateQueries({ queryKey: getGetRecentTransactionsQueryKey() });
     queryClient.invalidateQueries({ queryKey: getGetAccountSummaryQueryKey() });
+    queryClient.invalidateQueries({ queryKey: getGetTransactionsQueryKey() });
+  }
+
+  function handleReverseTransfer(transferId: number, amount: number) {
+    if (!confirm(`Reverse this ${fmt(amount)} transfer? Funds will be restored and a Gmail confirmation will be sent.`)) return;
+    reverseTransfer.mutate({ transferId }, {
+      onSuccess: () => {
+        toast({ title: "Transfer Reversed", description: `${fmt(amount)} has been returned. Confirmation sent to your email.` });
+        invalidateAll();
+      },
+      onError: (err: Error) => toast({ title: "Reversal Failed", description: err.message, variant: "destructive" }),
+    });
   }
 
   // ── Internal Transfer ──────────────────────────────────────────────
@@ -489,13 +504,24 @@ export default function Transfers() {
                         </div>
                         <div className="flex flex-col items-end gap-1 flex-shrink-0">
                           <span className="text-sm font-semibold text-[#117ACA]">{fmt(t.amount)}</span>
-                          <a
-                            href={`/receipt/${t.id}`}
-                            className="text-[10px] text-[#117ACA] hover:underline flex items-center gap-0.5"
-                            onClick={e => { e.preventDefault(); window.location.href = `/receipt/${t.id}`; }}
-                          >
-                            <FileText className="w-2.5 h-2.5" /> Receipt
-                          </a>
+                          <div className="flex items-center gap-2">
+                            {t.status !== "reversed" && (
+                              <button
+                                onClick={() => handleReverseTransfer(t.id, t.amount)}
+                                disabled={reverseTransfer.isPending}
+                                className="text-[10px] text-blue-600 hover:underline flex items-center gap-0.5 disabled:opacity-50 disabled:cursor-not-allowed"
+                              >
+                                <RotateCcw className="w-2.5 h-2.5" /> Reverse
+                              </button>
+                            )}
+                            <a
+                              href={`/receipt/${t.id}`}
+                              className="text-[10px] text-[#117ACA] hover:underline flex items-center gap-0.5"
+                              onClick={e => { e.preventDefault(); window.location.href = `/receipt/${t.id}`; }}
+                            >
+                              <FileText className="w-2.5 h-2.5" /> Receipt
+                            </a>
+                          </div>
                         </div>
                       </div>
                     );
