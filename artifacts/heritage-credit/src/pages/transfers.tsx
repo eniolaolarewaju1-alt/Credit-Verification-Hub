@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
 import {
   useGetAccounts,
@@ -96,6 +96,99 @@ interface SuccessModal {
   toName: string;
 }
 
+interface ExternalSuccess {
+  recipientName: string;
+  amount: number;
+  fromName: string;
+  newBalance: number;
+  reversesAt: number; // ms timestamp
+}
+
+function ExternalSuccessAlert({ alert, onClose }: { alert: ExternalSuccess; onClose: () => void }) {
+  const [secondsLeft, setSecondsLeft] = useState(() =>
+    Math.max(0, Math.ceil((alert.reversesAt - Date.now()) / 1000))
+  );
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      const remaining = Math.max(0, Math.ceil((alert.reversesAt - Date.now()) / 1000));
+      setSecondsLeft(remaining);
+      if (remaining === 0) clearInterval(interval);
+    }, 200);
+    return () => clearInterval(interval);
+  }, [alert.reversesAt]);
+
+  const reversed = secondsLeft === 0;
+
+  return (
+    <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4">
+      <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full overflow-hidden">
+        <div className={`px-6 py-5 text-white transition-colors ${reversed ? "bg-blue-600" : "bg-green-600"}`}>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center">
+                {reversed ? <RotateCcw className="w-5 h-5" /> : <CheckCircle2 className="w-5 h-5" />}
+              </div>
+              <div>
+                <p className="font-semibold text-base">
+                  {reversed ? "Transfer Reversed" : "Transfer Successful"}
+                </p>
+                <p className="text-white/70 text-xs">
+                  {reversed ? "Funds have been returned" : "Money sent — balance updated live"}
+                </p>
+              </div>
+            </div>
+            <button onClick={onClose} className="text-white/60 hover:text-white transition-colors">
+              <X className="w-5 h-5" />
+            </button>
+          </div>
+        </div>
+
+        <div className="px-6 py-5 space-y-4">
+          <div className="text-center">
+            <p className="text-3xl font-bold text-[#117ACA]">{fmt(alert.amount)}</p>
+            <p className="text-sm text-gray-500 mt-1">Sent to {alert.recipientName}</p>
+          </div>
+
+          <div className="bg-gradient-to-br from-[#f0f4ff] to-[#e6efff] rounded-xl p-4">
+            <p className="text-xs text-gray-500 uppercase tracking-wider font-medium mb-1">
+              {alert.fromName} — New Balance
+            </p>
+            <p className="text-2xl font-bold text-[#117ACA] tabular-nums">{fmt(alert.newBalance)}</p>
+            <p className="text-xs text-gray-500 mt-1">Updated in real time</p>
+          </div>
+
+          {!reversed ? (
+            <div className="bg-amber-50 border border-amber-200 rounded-xl p-4">
+              <div className="flex items-center justify-between mb-2">
+                <p className="text-sm font-semibold text-amber-800">Auto-Reversal in</p>
+                <p className="text-2xl font-bold text-amber-700 tabular-nums">{secondsLeft}s</p>
+              </div>
+              <div className="w-full h-2 bg-amber-200 rounded-full overflow-hidden">
+                <div
+                  className="h-full bg-amber-500 transition-all duration-200 ease-linear"
+                  style={{ width: `${(secondsLeft / 30) * 100}%` }}
+                />
+              </div>
+              <p className="text-xs text-amber-700 mt-2">
+                Demo portal — funds will be automatically returned and a Gmail confirmation sent.
+              </p>
+            </div>
+          ) : (
+            <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 text-sm text-blue-800">
+              <strong>Funds returned.</strong> Your balance has been restored and a reversal entry was added to your transaction history. Check your email for confirmation.
+            </div>
+          )}
+
+          <Button onClick={onClose} className="w-full bg-[#117ACA] hover:bg-[#0D6DAD]">
+            Close
+          </Button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function TransferSuccessModal({ modal, onClose }: { modal: SuccessModal; onClose: () => void }) {
   const [, navigate] = useLocation();
   return (
@@ -176,6 +269,7 @@ export default function Transfers() {
   const queryClient = useQueryClient();
   const [tab, setTab] = useState<Tab>("internal");
   const [successModal, setSuccessModal] = useState<SuccessModal | null>(null);
+  const [externalSuccess, setExternalSuccess] = useState<ExternalSuccess | null>(null);
 
   // Internal transfer state
   const [fromAccount, setFromAccount] = useState("");
@@ -310,19 +404,51 @@ export default function Transfers() {
   }
 
   // ── External Transfer (saved payee) ───────────────────────────────
+  function invalidateAfterExternal() {
+    queryClient.invalidateQueries({ queryKey: getGetExternalTransfersQueryKey() });
+    queryClient.invalidateQueries({ queryKey: getGetAccountsQueryKey() });
+    queryClient.invalidateQueries({ queryKey: getGetAccountSummaryQueryKey() });
+    queryClient.invalidateQueries({ queryKey: getGetTransactionsQueryKey() });
+    queryClient.invalidateQueries({ queryKey: getGetRecentTransactionsQueryKey() });
+  }
+
+  function showExternalAlert(opts: { recipientName: string; amount: number; fromAccountId: number; newBalance: number | null | undefined; reversesAt: string | Date | null | undefined }) {
+    const fromAcc = accounts?.find(a => a.id === opts.fromAccountId);
+    const fromName = fromAcc?.nickname ?? "Account";
+    const fallbackBalance = (fromAcc?.availableBalance ?? 0) - opts.amount;
+    const balance = opts.newBalance ?? fallbackBalance;
+    const reversesAt = opts.reversesAt ? new Date(opts.reversesAt).getTime() : Date.now() + 30000;
+    setExternalSuccess({
+      recipientName: opts.recipientName,
+      amount: opts.amount,
+      fromName,
+      newBalance: balance,
+      reversesAt,
+    });
+
+    // Re-refresh once the reversal completes so the UI reflects the restored balance + history entry
+    const delay = Math.max(0, reversesAt - Date.now()) + 1500;
+    setTimeout(() => invalidateAfterExternal(), delay);
+  }
+
   function handleExternalTransfer(e: React.FormEvent) {
     e.preventDefault();
     const amt = parseFloat(extAmount);
     if (!extFromAccount || !selectedPayeeId || isNaN(amt) || amt <= 0) return;
+    const payee = externalPayees?.find((p: ExternalPayee) => p.id === parseInt(selectedPayeeId));
     createExternalTransfer.mutate({
       data: { fromAccountId: parseInt(extFromAccount), externalPayeeId: parseInt(selectedPayeeId), amount: amt, memo: extMemo || undefined },
     }, {
-      onSuccess: () => {
-        toast({ title: "Transfer Initiated", description: `${fmt(amt)} is being sent. You'll receive a Gmail confirmation.` });
+      onSuccess: (transfer) => {
         setExtAmount(""); setExtMemo(""); setSelectedPayeeId("");
-        queryClient.invalidateQueries({ queryKey: getGetExternalTransfersQueryKey() });
-        queryClient.invalidateQueries({ queryKey: getGetAccountsQueryKey() });
-        queryClient.invalidateQueries({ queryKey: getGetAccountSummaryQueryKey() });
+        invalidateAfterExternal();
+        showExternalAlert({
+          recipientName: payee?.recipientName ?? "Recipient",
+          amount: amt,
+          fromAccountId: parseInt(extFromAccount),
+          newBalance: transfer.newBalance,
+          reversesAt: transfer.reversesAt ?? null,
+        });
       },
       onError: (err: Error) => toast({ title: "Transfer Failed", description: err.message, variant: "destructive" }),
     });
@@ -344,15 +470,21 @@ export default function Transfers() {
           accountType: "checking",
         },
       });
-      await createExternalTransfer.mutateAsync({
+      const transfer = await createExternalTransfer.mutateAsync({
         data: { fromAccountId: parseInt(extFromAccount), externalPayeeId: payee.id, amount: amt, memo: extMemo || undefined },
       });
-      toast({ title: "Transfer Initiated", description: `${fmt(amt)} is being sent to ${directRecipientName}. You'll receive a Gmail confirmation.` });
+      const recipientName = directRecipientName;
+      const fromAccountId = parseInt(extFromAccount);
       setDirectRouting(""); setDirectAccount(""); setDirectRecipientName(""); setExtAmount(""); setExtMemo("");
-      queryClient.invalidateQueries({ queryKey: getGetExternalTransfersQueryKey() });
-      queryClient.invalidateQueries({ queryKey: getGetAccountsQueryKey() });
-      queryClient.invalidateQueries({ queryKey: getGetAccountSummaryQueryKey() });
+      invalidateAfterExternal();
       queryClient.invalidateQueries({ queryKey: getGetExternalPayeesQueryKey() });
+      showExternalAlert({
+        recipientName,
+        amount: amt,
+        fromAccountId,
+        newBalance: transfer.newBalance,
+        reversesAt: transfer.reversesAt ?? null,
+      });
     } catch (err) {
       toast({ title: "Transfer Failed", description: (err as Error).message, variant: "destructive" });
     }
@@ -378,6 +510,10 @@ export default function Transfers() {
     <div className="max-w-6xl mx-auto p-8 space-y-6">
       {successModal && (
         <TransferSuccessModal modal={successModal} onClose={() => setSuccessModal(null)} />
+      )}
+
+      {externalSuccess && (
+        <ExternalSuccessAlert alert={externalSuccess} onClose={() => setExternalSuccess(null)} />
       )}
 
       <div>
@@ -693,7 +829,13 @@ export default function Transfers() {
                     return (
                       <div key={t.id} className="flex items-center gap-3 p-3 rounded-lg border border-gray-100 bg-gray-50">
                         <div className="w-8 h-8 rounded-full bg-white border flex items-center justify-center flex-shrink-0">
-                          {t.status === "completed" ? <CheckCircle2 className="w-4 h-4 text-green-500" /> : <Clock className="w-4 h-4 text-amber-500" />}
+                          {t.status === "reversed" ? (
+                            <RotateCcw className="w-4 h-4 text-blue-500" />
+                          ) : t.status === "completed" ? (
+                            <CheckCircle2 className="w-4 h-4 text-green-500" />
+                          ) : (
+                            <Clock className="w-4 h-4 text-amber-500" />
+                          )}
                         </div>
                         <div className="flex-1 min-w-0">
                           <p className="text-sm font-medium text-gray-800 truncate">{payee?.recipientName ?? "External Payee"}</p>
@@ -701,7 +843,18 @@ export default function Transfers() {
                         </div>
                         <div className="text-right flex-shrink-0">
                           <p className="text-sm font-semibold text-[#117ACA]">{fmt(t.amount)}</p>
-                          <Badge variant="outline" className="text-[10px] mt-0.5 capitalize">{t.status}</Badge>
+                          <Badge
+                            variant="outline"
+                            className={`text-[10px] mt-0.5 capitalize ${
+                              t.status === "reversed"
+                                ? "bg-blue-50 text-blue-700 border-blue-200"
+                                : t.status === "completed"
+                                ? "bg-green-50 text-green-700 border-green-200"
+                                : ""
+                            }`}
+                          >
+                            {t.status}
+                          </Badge>
                         </div>
                       </div>
                     );

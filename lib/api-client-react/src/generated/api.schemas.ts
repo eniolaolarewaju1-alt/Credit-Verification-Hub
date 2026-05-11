@@ -189,6 +189,7 @@ export const ExternalTransferStatus = {
   pending: "pending",
   processing: "processing",
   completed: "completed",
+  reversed: "reversed",
   failed: "failed",
 } as const;
 
@@ -201,6 +202,10 @@ export interface ExternalTransfer {
   status: ExternalTransferStatus;
   date: string;
   createdAt: string;
+  /** @nullable */
+  newBalance?: number | null;
+  /** @nullable */
+  reversesAt?: string | null;
 }
 
 export interface ExternalTransferInput {

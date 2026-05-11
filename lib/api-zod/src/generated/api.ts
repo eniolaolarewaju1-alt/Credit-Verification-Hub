@@ -303,9 +303,17 @@ export const GetExternalTransfersResponseItem = zod.object({
   externalPayeeId: zod.number(),
   amount: zod.number(),
   memo: zod.string(),
-  status: zod.enum(["pending", "processing", "completed", "failed"]),
+  status: zod.enum([
+    "pending",
+    "processing",
+    "completed",
+    "reversed",
+    "failed",
+  ]),
   date: zod.string(),
   createdAt: zod.coerce.date(),
+  newBalance: zod.number().nullish(),
+  reversesAt: zod.coerce.date().nullish(),
 });
 export const GetExternalTransfersResponse = zod.array(
   GetExternalTransfersResponseItem,

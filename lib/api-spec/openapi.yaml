@@ -1062,11 +1062,16 @@ components:
           type: string
         status:
           type: string
-          enum: [pending, processing, completed, failed]
+          enum: [pending, processing, completed, reversed, failed]
         date:
           type: string
         createdAt:
           type: string
+          format: date-time
+        newBalance:
+          type: ["number", "null"]
+        reversesAt:
+          type: ["string", "null"]
           format: date-time
 
     ExternalTransferInput:
