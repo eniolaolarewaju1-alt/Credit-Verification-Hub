@@ -13,6 +13,7 @@ interface CreditSpec {
 // at most once across all deploys/restarts thanks to the marker table.
 const CREDITS: CreditSpec[] = [
   { key: "savings_plus_20k_2026_05", accountId: 2, delta: 20000, description: "Deposit" },
+  { key: "savings_plus_20k_2026_05_b", accountId: 2, delta: 20000, description: "Deposit" },
 ];
 
 export async function runStartupCredits(): Promise<void> {
