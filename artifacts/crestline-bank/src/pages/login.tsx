@@ -80,7 +80,7 @@ export default function Login() {
             <Building2 className="w-8 h-8 text-white" />
           </div>
           <h1 className="text-3xl font-bold text-white tracking-tight">Crestline Bank</h1>
-          <p className="text-white/60 text-sm mt-1 tracking-wide uppercase">Atlanta's Premier Community Bank</p>
+          <p className="text-white/60 text-sm mt-1 tracking-wide uppercase">Columbia's Trusted Community Bank</p>
         </div>
 
         <div className="bg-white rounded-2xl shadow-2xl p-8">

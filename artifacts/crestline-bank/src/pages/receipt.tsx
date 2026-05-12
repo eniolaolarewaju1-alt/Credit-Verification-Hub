@@ -215,7 +215,7 @@ export default function Receipt() {
         {/* Footer — Chase style fine print */}
         <div className="px-8 py-5 border-t border-gray-200 bg-gray-50">
           <p className="text-[11px] text-gray-500 leading-relaxed text-center">
-            For questions about this transaction, call <span className="font-semibold text-gray-700">(404) 555-0100</span> Mon–Fri 8 a.m.–6 p.m. ET.
+            For questions about this transaction, call <span className="font-semibold text-gray-700">(803) 555-0100</span> Mon–Fri 8 a.m.–6 p.m. ET.
           </p>
           <p className="text-[10px] text-gray-400 text-center mt-2 tracking-wide">
             © {new Date().getFullYear()} Crestline Bank, N.A. Member FDIC. Equal Housing Lender.

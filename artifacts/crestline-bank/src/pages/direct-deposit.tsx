@@ -38,7 +38,7 @@ export default function DirectDeposit() {
   const { data: accounts, isLoading: isLoadingAccounts } = useGetAccounts();
   const { data: member, isLoading: isLoadingMember } = useGetMember();
 
-  const BANK_ROUTING = "061000104"; // Crestline Bank routing number (Atlanta, GA)
+  const BANK_ROUTING = "061000104"; // Crestline Bank routing number (Columbia, SC)
   const checkingAccount = accounts?.find(a => a.type === "checking");
   const savingsAccount = accounts?.find(a => a.type === "savings");
 
@@ -57,7 +57,7 @@ export default function DirectDeposit() {
           </div>
           <div>
             <p className="font-bold text-lg leading-none">Crestline Bank</p>
-            <p className="text-white/60 text-xs mt-0.5">Atlanta, GA 30301 · Member FDIC</p>
+            <p className="text-white/60 text-xs mt-0.5">Columbia, SC 29201 · Member FDIC</p>
           </div>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -99,7 +99,7 @@ export default function DirectDeposit() {
                 <CopyField label="Account Number" value={checkingAccount.maskedNumber.replace(/[•·]/g, "0").replace(/\s/g, "")} />
                 <div className="flex items-start gap-2 p-3 bg-blue-50 rounded-xl">
                   <Info className="w-4 h-4 text-blue-500 flex-shrink-0 mt-0.5" />
-                  <p className="text-xs text-blue-700">Contact support at (404) 555-0100 to get your full account number if needed.</p>
+                  <p className="text-xs text-blue-700">Contact support at (803) 555-0100 to get your full account number if needed.</p>
                 </div>
               </>
             ) : (

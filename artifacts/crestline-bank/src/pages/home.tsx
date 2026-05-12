@@ -122,7 +122,7 @@ function AccountDetailsModal({ account, onClose }: { account: Account; onClose: 
 
         <div className="mt-4 pt-4 border-t border-gray-100 flex items-start gap-2">
           <Info className="w-3.5 h-3.5 text-gray-400 flex-shrink-0 mt-0.5" />
-          <p className="text-[11px] text-gray-400">Crestline Bank · Atlanta, GA 30301 · Member FDIC</p>
+          <p className="text-[11px] text-gray-400">Crestline Bank · Columbia, SC 29201 · Member FDIC</p>
         </div>
       </div>
     </div>

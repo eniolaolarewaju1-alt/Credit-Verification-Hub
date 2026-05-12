@@ -6,9 +6,9 @@ import { ShieldCheck, ShieldAlert, Smartphone, Monitor, Globe, KeyRound, Fingerp
 export default function Security() {
   
   const recentLogins = [
-    { id: 1, device: "iPhone 14 Pro", os: "iOS 17", location: "Atlanta, GA", time: "Today, 10:42 AM", current: true },
-    { id: 2, device: "MacBook Air", os: "macOS Sonoma", location: "Atlanta, GA", time: "Yesterday, 8:15 PM", current: false },
-    { id: 3, device: "Chrome Browser", os: "Windows 11", location: "Atlanta, GA", time: "Oct 12, 2:30 PM", current: false },
+    { id: 1, device: "iPhone 14 Pro", os: "iOS 17", location: "Columbia, SC", time: "Today, 10:42 AM", current: true },
+    { id: 2, device: "MacBook Air", os: "macOS Sonoma", location: "Columbia, SC", time: "Yesterday, 8:15 PM", current: false },
+    { id: 3, device: "Chrome Browser", os: "Windows 11", location: "Columbia, SC", time: "Oct 12, 2:30 PM", current: false },
   ];
 
   return (

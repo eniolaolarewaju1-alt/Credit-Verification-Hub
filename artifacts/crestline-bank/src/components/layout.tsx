@@ -241,7 +241,7 @@ function SidebarContent({
           Sign Out
         </button>
         <div className="px-3 pt-2 text-[10px] text-white/30 text-center leading-tight">
-          Atlanta's Premier<br />Community Bank
+          Columbia's Trusted<br />Community Bank
         </div>
       </div>
     </>
@@ -400,7 +400,7 @@ export function Layout({ children }: { children: ReactNode }) {
                 href="tel:+18435550100"
                 className="mt-4 bg-[#1A5C38] hover:bg-[#155E36] text-white px-5 py-2 rounded-lg text-sm font-medium transition-colors"
               >
-                Call (404) 555-0100
+                Call (803) 555-0100
               </a>
             </div>
             <div className="px-4 py-3 border-t border-gray-100 text-center">
