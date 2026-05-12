@@ -24,7 +24,7 @@ const ATMs = [
     hours: "Open 24/7",
     features: ["Surcharge-Free", "Deposits"],
     type: "branch",
-    phone: "(843) 555-0101",
+    phone: "(803) 555-0101",
   },
   {
     id: 3,
@@ -68,7 +68,7 @@ const ATMs = [
     hours: "Open 24/7",
     features: ["Surcharge-Free", "Deposits", "Drive-Thru"],
     type: "branch",
-    phone: "(843) 555-0102",
+    phone: "(803) 555-0102",
   },
   {
     id: 7,

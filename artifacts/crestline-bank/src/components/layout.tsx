@@ -417,7 +417,7 @@ export function Layout({ children }: { children: ReactNode }) {
               <p className="text-sm font-medium text-gray-700">Our team is available</p>
               <p className="text-xs text-gray-400 mt-1">Mon – Fri, 8 AM – 6 PM ET</p>
               <a
-                href="tel:+18435550100"
+                href="tel:+18035550100"
                 className="mt-4 bg-[#1A5C38] hover:bg-[#155E36] text-white px-5 py-2 rounded-lg text-sm font-medium transition-colors"
               >
                 Call (803) 555-0100
