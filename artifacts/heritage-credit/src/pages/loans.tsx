@@ -126,7 +126,7 @@ export default function Loans() {
           <div className="col-span-2 text-center py-16 bg-white rounded-xl border border-dashed border-border">
             <Coins className="w-12 h-12 text-gray-200 mx-auto mb-4" />
             <h3 className="text-lg font-medium text-foreground">No Active Loans</h3>
-            <p className="text-muted-foreground mt-1 mb-4">You don't have any loans with Heritage Credit Union.</p>
+            <p className="text-muted-foreground mt-1 mb-4">You don't have any loans with Heritage Bank.</p>
             <Button>Explore Loan Options</Button>
           </div>
         )}

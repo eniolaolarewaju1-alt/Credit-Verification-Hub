@@ -27,7 +27,7 @@ const PERF_HISTORY = [
 ];
 
 const ALLOCATION = [
-  { name: "US Stocks", value: 52, color: "#1a2b5e" },
+  { name: "US Stocks", value: 52, color: "#1A5C38" },
   { name: "Intl Stocks", value: 18, color: "#3b82f6" },
   { name: "Bonds", value: 20, color: "#22c55e" },
   { name: "REITs", value: 6, color: "#f59e0b" },
@@ -105,7 +105,7 @@ export default function Investments() {
                 <XAxis dataKey="month" tick={{ fontSize: 10 }} />
                 <YAxis tick={{ fontSize: 10 }} tickFormatter={v => `$${(v / 1000).toFixed(0)}k`} />
                 <Tooltip formatter={(v: number) => [fmt(v)]} contentStyle={{ fontSize: 12, borderRadius: 8 }} />
-                <Line type="monotone" dataKey="roth" stroke="#1a2b5e" strokeWidth={2} dot={false} name="Roth IRA" />
+                <Line type="monotone" dataKey="roth" stroke="#1A5C38" strokeWidth={2} dot={false} name="Roth IRA" />
                 <Line type="monotone" dataKey="brokerage" stroke="#8b5cf6" strokeWidth={2} dot={false} name="Brokerage" />
               </LineChart>
             </ResponsiveContainer>

@@ -43,8 +43,8 @@ export default function Cards() {
   return (
     <div className="max-w-5xl mx-auto px-6 py-8 space-y-6">
       <div>
-        <h1 className="text-2xl font-semibold text-[#117ACA]" data-testid="text-page-title">Cards</h1>
-        <p className="text-sm text-gray-400 mt-1">Manage your Heritage Credit Union credit and debit cards.</p>
+        <h1 className="text-2xl font-semibold text-[#1A5C38]" data-testid="text-page-title">Cards</h1>
+        <p className="text-sm text-gray-400 mt-1">Manage your Heritage Bank credit and debit cards.</p>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -70,8 +70,8 @@ export default function Cards() {
                 <div className={`m-5 h-48 rounded-xl p-5 relative overflow-hidden text-white flex flex-col justify-between ${isFrozen
                   ? "bg-gradient-to-br from-gray-400 to-gray-500"
                   : isCredit
-                    ? "bg-gradient-to-br from-[#117ACA] to-[#0a5a9c]"
-                    : "bg-gradient-to-br from-[#0D3460] to-[#0A2240]"
+                    ? "bg-gradient-to-br from-[#1A5C38] to-[#0F3522]"
+                    : "bg-gradient-to-br from-[#2d6a4f] to-[#1b4332]"
                   } shadow-lg`}>
                   <div className="absolute inset-0">
                     <div className="absolute -top-12 -right-12 w-40 h-40 rounded-full bg-white/5" />
@@ -121,12 +121,12 @@ export default function Cards() {
                   </div>
 
                   {isCredit && card.rewardsPoints !== undefined && card.rewardsPoints !== null && (
-                    <div className="flex items-center justify-between bg-gradient-to-r from-[#117ACA]/5 to-[#117ACA]/10 p-3 rounded-xl border border-[#117ACA]/10">
+                    <div className="flex items-center justify-between bg-gradient-to-r from-[#1A5C38]/5 to-[#1A5C38]/10 p-3 rounded-xl border border-[#1A5C38]/10">
                       <div className="flex items-center gap-2">
-                        <Gift className="w-4 h-4 text-[#117ACA]" />
-                        <span className="text-sm font-medium text-[#117ACA]">Rewards Points</span>
+                        <Gift className="w-4 h-4 text-[#1A5C38]" />
+                        <span className="text-sm font-medium text-[#1A5C38]">Rewards Points</span>
                       </div>
-                      <span className="font-bold text-[#117ACA]">{card.rewardsPoints.toLocaleString()} pts</span>
+                      <span className="font-bold text-[#1A5C38]">{card.rewardsPoints.toLocaleString()} pts</span>
                     </div>
                   )}
 

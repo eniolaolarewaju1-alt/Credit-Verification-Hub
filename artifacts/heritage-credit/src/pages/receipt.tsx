@@ -2,7 +2,7 @@ import { useParams, Link } from "wouter";
 import { useGetTransferReceipt, getGetTransferReceiptQueryKey } from "@workspace/api-client-react";
 import { Printer, CheckCircle2, RotateCcw, Clock, Repeat2, Download } from "lucide-react";
 
-const CHASE_BLUE = "#117ACA";
+const CHASE_BLUE = "#1A5C38";
 const CHASE_DARK = "#0E4F8B";
 
 function fmt(n: number) {
@@ -129,7 +129,7 @@ export default function Receipt() {
           <div className="flex items-center gap-3">
             <ChaseOctagon className="w-9 h-9" />
             <div className="leading-tight">
-              <p className="font-bold text-[22px] tracking-tight" style={{ color: CHASE_DARK }}>Heritage Credit Union</p>
+              <p className="font-bold text-[22px] tracking-tight" style={{ color: CHASE_DARK }}>Heritage Bank</p>
               <p className="text-gray-500 text-[11px] tracking-wide">CHARLESTON, SC · MEMBER FDIC</p>
             </div>
           </div>
@@ -218,7 +218,7 @@ export default function Receipt() {
             For questions about this transaction, call <span className="font-semibold text-gray-700">(843) 555-0100</span> Mon–Fri 8 a.m.–6 p.m. ET.
           </p>
           <p className="text-[10px] text-gray-400 text-center mt-2 tracking-wide">
-            © {new Date().getFullYear()} Heritage Credit Union, N.A. Member FDIC. Equal Housing Lender.
+            © {new Date().getFullYear()} Heritage Bank, N.A. Member FDIC. Equal Housing Lender.
           </p>
         </div>
       </div>

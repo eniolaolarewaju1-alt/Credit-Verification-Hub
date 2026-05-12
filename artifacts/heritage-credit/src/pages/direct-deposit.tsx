@@ -50,13 +50,13 @@ export default function DirectDeposit() {
       </div>
 
       {/* Bank info banner */}
-      <div className="bg-[#117ACA] rounded-2xl p-6 text-white">
+      <div className="bg-[#1A5C38] rounded-2xl p-6 text-white">
         <div className="flex items-center gap-3 mb-4">
           <div className="w-10 h-10 rounded-xl bg-white/15 flex items-center justify-center">
             <Building2 className="w-5 h-5 text-white" />
           </div>
           <div>
-            <p className="font-bold text-lg leading-none">Heritage Credit Union</p>
+            <p className="font-bold text-lg leading-none">Heritage Bank</p>
             <p className="text-white/60 text-xs mt-0.5">Charleston, SC 29401 · Member FDIC</p>
           </div>
         </div>
@@ -140,7 +140,7 @@ export default function DirectDeposit() {
               <h3 className="font-semibold text-gray-900">Direct Deposit Authorization Form</h3>
               <p className="text-sm text-gray-400 mt-0.5">Some employers require a signed authorization form. Download and complete ours.</p>
             </div>
-            <button className="flex items-center gap-2 bg-[#117ACA] hover:bg-[#0D6DAD] text-white px-4 py-2.5 rounded-lg text-sm font-medium transition-colors">
+            <button className="flex items-center gap-2 bg-[#1A5C38] hover:bg-[#155A2F] text-white px-4 py-2.5 rounded-lg text-sm font-medium transition-colors">
               <Download className="w-4 h-4" />
               Download Form (PDF)
             </button>
@@ -162,7 +162,7 @@ export default function DirectDeposit() {
               { step: "4", title: "Wait for activation", desc: "Direct deposit typically takes 1–2 pay cycles to activate. Your first deposit may arrive as a paper check." },
             ].map(({ step, title, desc }) => (
               <li key={step} className="flex items-start gap-4">
-                <div className="w-8 h-8 rounded-full bg-[#117ACA] text-white flex items-center justify-center text-sm font-bold flex-shrink-0">{step}</div>
+                <div className="w-8 h-8 rounded-full bg-[#1A5C38] text-white flex items-center justify-center text-sm font-bold flex-shrink-0">{step}</div>
                 <div>
                   <p className="font-medium text-gray-900">{title}</p>
                   <p className="text-sm text-gray-400 mt-0.5">{desc}</p>

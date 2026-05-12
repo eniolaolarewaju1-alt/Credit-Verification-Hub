@@ -69,7 +69,7 @@ export default function CheckOrder() {
           </div>
           <div className="flex justify-between text-sm font-semibold border-t border-gray-200 pt-3">
             <span>Total Charged</span>
-            <span className="text-[#117ACA]">${total}</span>
+            <span className="text-[#1A5C38]">${total}</span>
           </div>
         </div>
         <div className="flex items-center gap-2 justify-center text-sm text-gray-500">
@@ -77,7 +77,7 @@ export default function CheckOrder() {
         </div>
         <button
           onClick={() => setSubmitted(false)}
-          className="mt-6 text-[#117ACA] text-sm hover:underline font-medium"
+          className="mt-6 text-[#1A5C38] text-sm hover:underline font-medium"
         >
           Place another order
         </button>
@@ -89,7 +89,7 @@ export default function CheckOrder() {
     <div className="max-w-4xl mx-auto px-6 py-8 space-y-6">
       <div>
         <h1 className="text-2xl font-semibold text-primary" data-testid="text-page-title">Order Checks</h1>
-        <p className="text-sm text-gray-400 mt-1">Order personal or business checks for your Heritage Credit Union checking account.</p>
+        <p className="text-sm text-gray-400 mt-1">Order personal or business checks for your Heritage Bank checking account.</p>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -107,7 +107,7 @@ export default function CheckOrder() {
                   onClick={() => setSelectedStyle(s.id)}
                   className={`p-4 rounded-xl border-2 text-left transition-all ${
                     selectedStyle === s.id
-                      ? "border-[#117ACA] bg-blue-50"
+                      ? "border-[#1A5C38] bg-blue-50"
                       : "border-gray-100 bg-gray-50 hover:border-gray-200"
                   }`}
                 >
@@ -186,7 +186,7 @@ export default function CheckOrder() {
 
           <button
             type="submit"
-            className="w-full bg-[#117ACA] hover:bg-[#0D6DAD] text-white font-semibold py-3 rounded-xl text-sm transition-colors"
+            className="w-full bg-[#1A5C38] hover:bg-[#155A2F] text-white font-semibold py-3 rounded-xl text-sm transition-colors"
           >
             Place Order — ${total}
           </button>
@@ -213,7 +213,7 @@ export default function CheckOrder() {
               </div>
               <div className="border-t border-gray-100 pt-3 flex justify-between font-semibold">
                 <span>Total</span>
-                <span className="text-[#117ACA]">${total}</span>
+                <span className="text-[#1A5C38]">${total}</span>
               </div>
 
               <div className="pt-3 space-y-2">

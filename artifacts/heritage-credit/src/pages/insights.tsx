@@ -159,7 +159,7 @@ export default function Insights() {
           <Card className="shadow-sm border-border bg-white">
             <CardContent className="p-4">
               <p className="text-xs text-gray-400 uppercase tracking-wide font-medium mb-1">This Month Net</p>
-              <p className={`text-xl font-bold ${(currentMonth.income - currentMonth.spending) >= 0 ? "text-[#117ACA]" : "text-red-500"}`}>
+              <p className={`text-xl font-bold ${(currentMonth.income - currentMonth.spending) >= 0 ? "text-[#1A5C38]" : "text-red-500"}`}>
                 {fmt(currentMonth.income - currentMonth.spending)}
               </p>
               <p className="text-xs text-gray-400 mt-1">Income minus spending</p>
@@ -241,11 +241,11 @@ export default function Insights() {
                   <YAxis tick={{ fontSize: 11, fill: "#9ca3af" }} tickFormatter={v => `$${Math.round(v / 1000)}k`} />
                   <Tooltip formatter={(v: number) => fmt(v)} contentStyle={{ borderRadius: "8px", fontSize: "12px" }} />
                   <Bar dataKey="net" name="Net" radius={[4, 4, 0, 0]}
-                    fill="#117ACA"
+                    fill="#1A5C38"
                     label={false}
                   >
                     {netByMonth.map((entry, i) => (
-                      <Cell key={i} fill={entry.net >= 0 ? "#117ACA" : "#ef4444"} />
+                      <Cell key={i} fill={entry.net >= 0 ? "#1A5C38" : "#ef4444"} />
                     ))}
                   </Bar>
                 </BarChart>
@@ -277,7 +277,7 @@ export default function Insights() {
                         <span className="text-sm font-semibold text-gray-700">{fmt(m.value)}</span>
                       </div>
                       <div className="h-1.5 bg-gray-100 rounded-full overflow-hidden">
-                        <div className="h-full bg-[#117ACA] rounded-full" style={{ width: `${pct}%` }} />
+                        <div className="h-full bg-[#1A5C38] rounded-full" style={{ width: `${pct}%` }} />
                       </div>
                     </div>
                   );

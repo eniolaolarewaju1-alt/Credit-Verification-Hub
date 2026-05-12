@@ -72,15 +72,15 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen bg-[#0A2240] flex flex-col items-center justify-center p-4">
+    <div className="min-h-screen bg-[#0F3522] flex flex-col items-center justify-center p-4">
       <div className="w-full max-w-md">
         {/* Logo */}
         <div className="text-center mb-8">
           <div className="inline-flex items-center justify-center w-16 h-16 bg-white/10 rounded-2xl mb-4 border border-white/20">
             <Building2 className="w-8 h-8 text-white" />
           </div>
-          <h1 className="text-3xl font-bold text-white tracking-tight">Heritage Credit</h1>
-          <p className="text-white/60 text-sm mt-1 tracking-wide uppercase">South Carolina's Trusted Credit Union</p>
+          <h1 className="text-3xl font-bold text-white tracking-tight">Heritage Bank</h1>
+          <p className="text-white/60 text-sm mt-1 tracking-wide uppercase">South Carolina's Trusted Bank</p>
         </div>
 
         <div className="bg-white rounded-2xl shadow-2xl p-8">
@@ -105,7 +105,7 @@ export default function Login() {
                     <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
                     <input id="email" type="email" value={email} onChange={e => setEmail(e.target.value)}
                       placeholder="Enter your email" required autoComplete="email" data-testid="input-email"
-                      className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#117ACA] focus:border-transparent transition-all placeholder:text-gray-400" />
+                      className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#1A5C38] focus:border-transparent transition-all placeholder:text-gray-400" />
                   </div>
                 </div>
                 <div>
@@ -115,14 +115,14 @@ export default function Login() {
                     <input id="password" type={showPassword ? "text" : "password"} value={password}
                       onChange={e => setPassword(e.target.value)} placeholder="Enter your password"
                       required autoComplete="current-password" data-testid="input-password"
-                      className="w-full pl-10 pr-10 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#117ACA] focus:border-transparent transition-all placeholder:text-gray-400" />
+                      className="w-full pl-10 pr-10 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#1A5C38] focus:border-transparent transition-all placeholder:text-gray-400" />
                     <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
                       {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                     </button>
                   </div>
                 </div>
                 <button type="submit" disabled={isLoading} data-testid="button-sign-in"
-                  className="w-full bg-[#117ACA] hover:bg-[#0D6DAD] text-white font-semibold py-2.5 rounded-lg text-sm transition-colors mt-2 disabled:opacity-60 disabled:cursor-not-allowed">
+                  className="w-full bg-[#1A5C38] hover:bg-[#155A2F] text-white font-semibold py-2.5 rounded-lg text-sm transition-colors mt-2 disabled:opacity-60 disabled:cursor-not-allowed">
                   {isLoading ? "Signing in..." : "Sign In"}
                 </button>
               </form>
@@ -135,7 +135,7 @@ export default function Login() {
             <>
               <div className="mb-6 text-center">
                 <div className="inline-flex items-center justify-center w-14 h-14 bg-blue-50 rounded-2xl mb-4">
-                  <KeyRound className="w-7 h-7 text-[#117ACA]" />
+                  <KeyRound className="w-7 h-7 text-[#1A5C38]" />
                 </div>
                 <h2 className="text-xl font-semibold text-gray-900">Verify Your Identity</h2>
                 <p className="text-gray-500 text-sm mt-1">
@@ -156,16 +156,16 @@ export default function Login() {
                   <input id="otp" type="text" inputMode="numeric" value={otp}
                     onChange={e => setOtp(e.target.value.replace(/\D/g, "").slice(0, 6))}
                     placeholder="000000" maxLength={6} autoFocus
-                    className="w-full text-center text-2xl tracking-[0.5em] font-mono py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#117ACA] focus:border-transparent transition-all placeholder:text-gray-300" />
+                    className="w-full text-center text-2xl tracking-[0.5em] font-mono py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#1A5C38] focus:border-transparent transition-all placeholder:text-gray-300" />
                 </div>
                 <button type="submit" disabled={otpLoading || otp.length < 6}
-                  className="w-full bg-[#117ACA] hover:bg-[#0D6DAD] text-white font-semibold py-2.5 rounded-lg text-sm transition-colors disabled:opacity-60 disabled:cursor-not-allowed">
+                  className="w-full bg-[#1A5C38] hover:bg-[#155A2F] text-white font-semibold py-2.5 rounded-lg text-sm transition-colors disabled:opacity-60 disabled:cursor-not-allowed">
                   {otpLoading ? "Verifying..." : "Verify & Sign In"}
                 </button>
               </form>
               <div className="mt-4 flex flex-col items-center gap-3">
                 <button onClick={handleResend} disabled={resendLoading || resendCooldown > 0}
-                  className="flex items-center gap-1.5 text-sm text-[#117ACA] hover:underline disabled:opacity-50 disabled:no-underline">
+                  className="flex items-center gap-1.5 text-sm text-[#1A5C38] hover:underline disabled:opacity-50 disabled:no-underline">
                   <RefreshCw className="w-3.5 h-3.5" />
                   {resendCooldown > 0 ? `Resend in ${resendCooldown}s` : resendLoading ? "Sending..." : "Resend code"}
                 </button>
@@ -182,7 +182,7 @@ export default function Login() {
         </div>
 
         <p className="text-center text-white/40 text-xs mt-6">
-          Member FDIC &nbsp;|&nbsp; Equal Housing Lender &nbsp;|&nbsp; &copy; {new Date().getFullYear()} Heritage Credit Union
+          Member FDIC &nbsp;|&nbsp; Equal Housing Lender &nbsp;|&nbsp; &copy; {new Date().getFullYear()} Heritage Bank
         </p>
       </div>
     </div>

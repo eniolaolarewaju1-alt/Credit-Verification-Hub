@@ -54,7 +54,7 @@ function DisputeModal({ transactionId, description, onClose }: { transactionId: 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1.5">Reason for dispute</label>
             <textarea
-              className="w-full border border-gray-300 rounded-lg p-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#117ACA] resize-none"
+              className="w-full border border-gray-300 rounded-lg p-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#1A5C38] resize-none"
               rows={3} required minLength={10}
               placeholder="Describe why you're disputing this transaction..."
               value={reason} onChange={e => setReason(e.target.value)}

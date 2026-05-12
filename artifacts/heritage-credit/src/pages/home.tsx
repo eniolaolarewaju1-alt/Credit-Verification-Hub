@@ -77,8 +77,8 @@ function AccountDetailsModal({ account, onClose }: { account: Account; onClose: 
       <div className="bg-white rounded-2xl shadow-2xl w-full max-w-sm p-6" onClick={e => e.stopPropagation()}>
         <div className="flex items-center justify-between mb-5">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-[#117ACA]/10 rounded-full flex items-center justify-center">
-              <Building2 className="w-5 h-5 text-[#117ACA]" />
+            <div className="w-10 h-10 bg-[#1A5C38]/10 rounded-full flex items-center justify-center">
+              <Building2 className="w-5 h-5 text-[#1A5C38]" />
             </div>
             <div>
               <h3 className="font-semibold text-gray-900">{account.nickname}</h3>
@@ -122,7 +122,7 @@ function AccountDetailsModal({ account, onClose }: { account: Account; onClose: 
 
         <div className="mt-4 pt-4 border-t border-gray-100 flex items-start gap-2">
           <Info className="w-3.5 h-3.5 text-gray-400 flex-shrink-0 mt-0.5" />
-          <p className="text-[11px] text-gray-400">Heritage Credit Union · Charleston, SC 29401 · Member FDIC</p>
+          <p className="text-[11px] text-gray-400">Heritage Bank · Charleston, SC 29401 · Member FDIC</p>
         </div>
       </div>
     </div>
@@ -159,7 +159,7 @@ function FlipAccountCard({ account, onOpenModal }: { account: Account; onOpenMod
         <div
           className={`absolute inset-0 rounded-2xl p-5 overflow-hidden flex flex-col justify-between ${
             isChecking
-              ? "bg-[#117ACA] text-white shadow-lg shadow-[#117ACA]/30"
+              ? "bg-[#1A5C38] text-white shadow-lg shadow-[#1A5C38]/30"
               : "bg-white text-gray-900 border-2 border-gray-100 shadow-sm"
           }`}
           style={{ backfaceVisibility: "hidden" }}
@@ -191,7 +191,7 @@ function FlipAccountCard({ account, onOpenModal }: { account: Account; onOpenMod
               <p className={`text-xs ${isChecking ? "text-white/60" : "text-gray-400"}`}>
                 Available: {formatCurrency(account.availableBalance)}
               </p>
-              <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${isChecking ? "bg-white/15 text-white/80" : "bg-[#117ACA]/10 text-[#117ACA]"}`}>
+              <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${isChecking ? "bg-white/15 text-white/80" : "bg-[#1A5C38]/10 text-[#1A5C38]"}`}>
                 {(account.interestRate * 100).toFixed(2)}% APY
               </span>
             </div>
@@ -203,7 +203,7 @@ function FlipAccountCard({ account, onOpenModal }: { account: Account; onOpenMod
         <div
           className={`absolute inset-0 rounded-2xl p-5 flex flex-col justify-between ${
             isChecking
-              ? "bg-[#0D6DAD] text-white shadow-lg shadow-[#117ACA]/30"
+              ? "bg-[#155A2F] text-white shadow-lg shadow-[#1A5C38]/30"
               : "bg-gray-50 text-gray-900 border-2 border-gray-100 shadow-sm"
           }`}
           style={{ backfaceVisibility: "hidden", transform: "rotateY(180deg)" }}
@@ -288,7 +288,7 @@ export default function Home() {
           ) : (
             <>
               <p className="text-sm text-gray-400 font-medium">{getGreeting()}, {member?.firstName}.</p>
-              <h1 className="text-2xl font-semibold text-[#117ACA] mt-0.5">
+              <h1 className="text-2xl font-semibold text-[#1A5C38] mt-0.5">
                 Account Overview
               </h1>
             </>
@@ -299,7 +299,7 @@ export default function Home() {
           <Link
             href="/quick-send"
             data-testid="button-quick-send"
-            className="flex items-center gap-1.5 bg-[#117ACA] text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-[#0D6DAD] transition-colors shadow-sm"
+            className="flex items-center gap-1.5 bg-[#1A5C38] text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-[#155A2F] transition-colors shadow-sm"
           >
             <Zap className="w-3.5 h-3.5" /> Quick Send
           </Link>
@@ -399,7 +399,7 @@ export default function Home() {
         <div className="lg:col-span-2 bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
           <div className="flex items-center justify-between px-5 py-4 border-b border-gray-50">
             <h2 className="font-semibold text-gray-900">Recent Activity</h2>
-            <Link href="/transactions" className="flex items-center gap-1 text-xs font-medium text-[#117ACA] hover:underline">
+            <Link href="/transactions" className="flex items-center gap-1 text-xs font-medium text-[#1A5C38] hover:underline">
               View all <ChevronRight className="w-3.5 h-3.5" />
             </Link>
           </div>
@@ -523,9 +523,9 @@ export default function Home() {
                   <p className="text-sm font-medium text-gray-800">{nextLoan.nickname ?? nextLoan.type}</p>
                   <p className="text-xs text-gray-400">Due {new Date(nextLoan.nextPaymentDate).toLocaleDateString("en-US", { month: "short", day: "numeric" })}</p>
                 </div>
-                <p className="text-sm font-bold text-[#117ACA]">{formatCurrency(nextLoan.nextPaymentAmount)}</p>
+                <p className="text-sm font-bold text-[#1A5C38]">{formatCurrency(nextLoan.nextPaymentAmount)}</p>
               </div>
-              <Link href="/loans" className="mt-3 flex items-center gap-1 text-xs text-[#117ACA] font-medium hover:underline">
+              <Link href="/loans" className="mt-3 flex items-center gap-1 text-xs text-[#1A5C38] font-medium hover:underline">
                 Manage loans <ChevronRight className="w-3 h-3" />
               </Link>
             </div>

@@ -40,7 +40,7 @@ const ICONS = [
 ];
 
 const COLORS = [
-  "#117ACA", "#16a34a", "#dc2626", "#d97706",
+  "#1A5C38", "#16a34a", "#dc2626", "#d97706",
   "#7c3aed", "#0891b2", "#db2777", "#65a30d",
 ];
 
@@ -98,7 +98,7 @@ function AddFundsModal({ goalId, goalName, onClose }: { goalId: number; goalName
             <button
               disabled={isPending || !amount || Number(amount) <= 0}
               onClick={() => mutate({ goalId, data: { addAmount: Number(amount) } })}
-              className="flex-1 bg-[#117ACA] hover:bg-[#0D6DAD] disabled:opacity-50 text-white py-2.5 rounded-xl text-sm font-medium transition-colors"
+              className="flex-1 bg-[#1A5C38] hover:bg-[#155A2F] disabled:opacity-50 text-white py-2.5 rounded-xl text-sm font-medium transition-colors"
             >
               {isPending ? "Adding..." : "Add Funds"}
             </button>
@@ -156,7 +156,7 @@ function CreateGoalModal({ onClose }: { onClose: () => void }) {
             <div className="flex gap-2 flex-wrap">
               {ICONS.map(({ key, Icon }) => (
                 <button key={key} type="button" onClick={() => setIcon(key)}
-                  className={`w-9 h-9 rounded-xl flex items-center justify-center transition-all ${icon === key ? "ring-2 ring-[#117ACA] bg-blue-50" : "bg-gray-100 hover:bg-gray-200"}`}>
+                  className={`w-9 h-9 rounded-xl flex items-center justify-center transition-all ${icon === key ? "ring-2 ring-[#1A5C38] bg-blue-50" : "bg-gray-100 hover:bg-gray-200"}`}>
                   <Icon className="w-4 h-4 text-gray-600" />
                 </button>
               ))}
@@ -177,7 +177,7 @@ function CreateGoalModal({ onClose }: { onClose: () => void }) {
             <button
               disabled={isPending || !name || !targetAmount}
               onClick={() => mutate({ data: { name, targetAmount: Number(targetAmount), targetDate: targetDate || undefined, color, icon } })}
-              className="flex-1 bg-[#117ACA] hover:bg-[#0D6DAD] disabled:opacity-50 text-white py-2.5 rounded-xl text-sm font-medium transition-colors"
+              className="flex-1 bg-[#1A5C38] hover:bg-[#155A2F] disabled:opacity-50 text-white py-2.5 rounded-xl text-sm font-medium transition-colors"
             >
               {isPending ? "Creating..." : "Create Goal"}
             </button>
@@ -208,7 +208,7 @@ export default function SavingsGoals() {
         </div>
         <button
           onClick={() => setShowCreate(true)}
-          className="flex items-center gap-2 bg-[#117ACA] hover:bg-[#0D6DAD] text-white px-4 py-2.5 rounded-xl text-sm font-medium transition-colors shadow-sm"
+          className="flex items-center gap-2 bg-[#1A5C38] hover:bg-[#155A2F] text-white px-4 py-2.5 rounded-xl text-sm font-medium transition-colors shadow-sm"
         >
           <Plus className="w-4 h-4" /> New Goal
         </button>
@@ -219,7 +219,7 @@ export default function SavingsGoals() {
         <div className="grid grid-cols-3 gap-4">
           <div className="bg-white rounded-xl border border-gray-100 p-4 shadow-sm text-center">
             <p className="text-xs text-gray-400 font-medium uppercase tracking-wide mb-1">Total Saved</p>
-            <p className="text-xl font-bold text-[#117ACA]">${totalSaved.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
+            <p className="text-xl font-bold text-[#1A5C38]">${totalSaved.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
           </div>
           <div className="bg-white rounded-xl border border-gray-100 p-4 shadow-sm text-center">
             <p className="text-xs text-gray-400 font-medium uppercase tracking-wide mb-1">Total Target</p>
@@ -319,7 +319,7 @@ export default function SavingsGoals() {
           <p className="text-sm text-gray-400 mb-6">Create your first goal to start tracking your progress.</p>
           <button
             onClick={() => setShowCreate(true)}
-            className="bg-[#117ACA] hover:bg-[#0D6DAD] text-white px-6 py-2.5 rounded-xl text-sm font-medium transition-colors"
+            className="bg-[#1A5C38] hover:bg-[#155A2F] text-white px-6 py-2.5 rounded-xl text-sm font-medium transition-colors"
           >
             Create Your First Goal
           </button>

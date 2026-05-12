@@ -90,7 +90,7 @@ export default function Settings() {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
         <div className="md:col-span-1 space-y-2">
           <h2 className="text-lg font-medium text-foreground">Personal Info</h2>
-          <p className="text-sm text-muted-foreground">Your core identity details associated with your Heritage Credit Union membership.</p>
+          <p className="text-sm text-muted-foreground">Your core identity details associated with your Heritage Bank membership.</p>
         </div>
         
         <Card className="md:col-span-2 shadow-sm border-border bg-white">
@@ -166,7 +166,7 @@ export default function Settings() {
 
         <div className="md:col-span-1 space-y-2">
           <h2 className="text-lg font-medium text-foreground">Notification Preferences</h2>
-          <p className="text-sm text-muted-foreground">Control which email alerts you receive from Heritage Credit Union.</p>
+          <p className="text-sm text-muted-foreground">Control which email alerts you receive from Heritage Bank.</p>
         </div>
 
         <Card className="md:col-span-2 shadow-sm border-border bg-white">
@@ -236,7 +236,7 @@ export default function Settings() {
 
         <div className="md:col-span-1 space-y-2">
           <h2 className="text-lg font-medium text-foreground flex items-center gap-2">
-            <Wand2 className="w-4 h-4 text-[#117ACA]" /> Quick Adjust
+            <Wand2 className="w-4 h-4 text-[#1A5C38]" /> Quick Adjust
           </h2>
           <p className="text-sm text-muted-foreground">
             Add or remove funds from any account. Each adjustment writes a matching entry to your transaction history.
@@ -309,7 +309,7 @@ export default function Settings() {
               <Button
                 type="submit"
                 disabled={adjLoading}
-                className="w-full bg-[#117ACA] hover:bg-[#0D6DAD] text-white"
+                className="w-full bg-[#1A5C38] hover:bg-[#155A2F] text-white"
               >
                 {adjLoading ? "Saving…" : adjType === "credit" ? "Add to account" : "Remove from account"}
               </Button>

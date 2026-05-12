@@ -126,7 +126,7 @@ export default function Security() {
             <CardContent className="space-y-4">
               <div className="bg-sidebar-accent/50 p-4 rounded-lg">
                 <h4 className="font-medium text-white mb-1">Beware of Phishing</h4>
-                <p className="text-sm text-sidebar-foreground/80">Heritage Credit Union will never ask for your password via email, text, or phone call.</p>
+                <p className="text-sm text-sidebar-foreground/80">Heritage Bank will never ask for your password via email, text, or phone call.</p>
               </div>
               <div className="bg-sidebar-accent/50 p-4 rounded-lg">
                 <h4 className="font-medium text-white mb-1 flex items-center gap-2"><Fingerprint className="w-4 h-4"/> Use Biometrics</h4>

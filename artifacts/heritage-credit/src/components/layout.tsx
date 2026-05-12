@@ -126,7 +126,7 @@ function NotificationsDropdown() {
             <Link
               href="/transactions"
               onClick={() => setOpen(false)}
-              className="text-xs text-[#117ACA] font-medium hover:underline"
+              className="text-xs text-[#1A5C38] font-medium hover:underline"
             >
               View all transactions →
             </Link>
@@ -175,7 +175,7 @@ function SidebarContent({
         </div>
         <div>
           <div className="font-bold text-base text-white leading-none">Heritage</div>
-          <div className="text-[10px] text-white/50 mt-0.5 tracking-wide">Credit Union</div>
+          <div className="text-[10px] text-white/50 mt-0.5 tracking-wide">Bank</div>
         </div>
       </div>
 
@@ -256,7 +256,7 @@ function SidebarContent({
           Sign Out
         </button>
         <div className="px-3 pt-2 text-[10px] text-white/30 text-center leading-tight">
-          South Carolina's Trusted<br />Credit Union
+          South Carolina's Trusted<br />Bank
         </div>
       </div>
     </>
@@ -362,8 +362,8 @@ export function Layout({ children }: { children: ReactNode }) {
             </button>
 
             <div className="min-w-0">
-              <h2 className="text-base font-semibold text-[#117ACA] truncate">
-                {PAGE_TITLES[location] ?? "Heritage Credit Union"}
+              <h2 className="text-base font-semibold text-[#1A5C38] truncate">
+                {PAGE_TITLES[location] ?? "Heritage Bank"}
               </h2>
               <p className="text-[11px] text-gray-400 mt-0.5 hidden sm:block">{scDateTime()}</p>
             </div>
@@ -382,7 +382,7 @@ export function Layout({ children }: { children: ReactNode }) {
               <div className="flex items-center gap-2 pl-3 border-l border-gray-200">
                 <Avatar className="w-8 h-8">
                   <AvatarImage src="/avatar.jpeg" alt="Dax Brooks" className="object-cover" />
-                  <AvatarFallback className="bg-[#117ACA] text-white text-xs font-semibold">
+                  <AvatarFallback className="bg-[#1A5C38] text-white text-xs font-semibold">
                     {member.firstName[0]}{member.lastName[0]}
                   </AvatarFallback>
                 </Avatar>
@@ -405,10 +405,10 @@ export function Layout({ children }: { children: ReactNode }) {
       <div className="fixed bottom-6 right-6 z-50 flex flex-col items-end gap-3">
         {chatOpen && (
           <div className="bg-white rounded-2xl shadow-2xl border border-gray-200 w-80 overflow-hidden">
-            <div className="bg-[#117ACA] px-4 py-3 flex items-center justify-between">
+            <div className="bg-[#1A5C38] px-4 py-3 flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <div className="w-2 h-2 bg-green-400 rounded-full" />
-                <span className="text-white text-sm font-semibold">Heritage Credit Union Support</span>
+                <span className="text-white text-sm font-semibold">Heritage Bank Support</span>
               </div>
               <button onClick={() => setChatOpen(false)} className="text-white/70 hover:text-white">
                 <X className="w-4 h-4" />
@@ -420,7 +420,7 @@ export function Layout({ children }: { children: ReactNode }) {
               <p className="text-xs text-gray-400 mt-1">Mon – Fri, 8 AM – 6 PM ET</p>
               <a
                 href="tel:+18435550100"
-                className="mt-4 bg-[#117ACA] hover:bg-[#0D6DAD] text-white px-5 py-2 rounded-lg text-sm font-medium transition-colors"
+                className="mt-4 bg-[#1A5C38] hover:bg-[#155A2F] text-white px-5 py-2 rounded-lg text-sm font-medium transition-colors"
               >
                 Call (843) 555-0100
               </a>
@@ -432,7 +432,7 @@ export function Layout({ children }: { children: ReactNode }) {
         )}
         <button
           onClick={() => setChatOpen(c => !c)}
-          className="w-14 h-14 rounded-full bg-[#117ACA] hover:bg-[#0D6DAD] text-white shadow-lg hover:shadow-xl transition-all flex items-center justify-center"
+          className="w-14 h-14 rounded-full bg-[#1A5C38] hover:bg-[#155A2F] text-white shadow-lg hover:shadow-xl transition-all flex items-center justify-center"
           title="Live Support Chat"
         >
           {chatOpen ? <X className="w-5 h-5" /> : <MessageCircle className="w-5 h-5" />}

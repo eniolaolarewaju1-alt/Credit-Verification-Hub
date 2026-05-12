@@ -15,7 +15,7 @@ type Thread = { id: number; subject: string; category: string; preview: string; 
 const INITIAL_THREADS: Thread[] = [
   {
     id: 1,
-    subject: "Welcome to Heritage Credit Union Online Banking",
+    subject: "Welcome to Heritage Bank Online Banking",
     category: "General",
     preview: "We're glad you're here. This secure inbox lets you contact us anytime.",
     date: "Jan 3, 2026",
@@ -23,7 +23,7 @@ const INITIAL_THREADS: Thread[] = [
     messages: [
       {
         from: "bank",
-        text: "Welcome to Heritage Credit Union's secure online banking portal!\n\nThis inbox lets you send and receive messages directly with our member services team. All messages are encrypted and remain private.\n\nFeel free to reach out with any questions about your accounts, cards, loans, or any other banking needs. We typically respond within 1 business day.\n\nThank you for being a valued Heritage Credit Union member.\n\n— Heritage Credit Union Member Services",
+        text: "Welcome to Heritage Bank's secure online banking portal!\n\nThis inbox lets you send and receive messages directly with our member services team. All messages are encrypted and remain private.\n\nFeel free to reach out with any questions about your accounts, cards, loans, or any other banking needs. We typically respond within 1 business day.\n\nThank you for being a valued Heritage Bank member.\n\n— Heritage Bank Member Services",
         time: "Jan 3, 2026 · 9:00 AM",
       },
     ],
@@ -53,7 +53,7 @@ const INITIAL_THREADS: Thread[] = [
     unread: false,
     messages: [
       { from: "member", text: "Can you send me a copy of my January 2026 statement for my checking account?", time: "Feb 3, 2026 · 11:30 AM" },
-      { from: "bank", text: "Hi Dax,\n\nYour January 2026 statement for Heritage Checking ••••7842 is now available in the Statements section of your online portal.\n\nYou can download it directly as a PDF at any time.\n\n— Heritage Credit Union", time: "Feb 4, 2026 · 8:45 AM" },
+      { from: "bank", text: "Hi Dax,\n\nYour January 2026 statement for Heritage Checking ••••7842 is now available in the Statements section of your online portal.\n\nYou can download it directly as a PDF at any time.\n\n— Heritage Bank", time: "Feb 4, 2026 · 8:45 AM" },
     ],
   },
   {
@@ -206,7 +206,7 @@ export default function Messages() {
             <Send className="w-4 h-4" />
           </Button>
         </form>
-        <p className="text-xs text-muted-foreground flex items-center gap-1"><Lock className="w-3 h-3" />Messages are encrypted and visible only to you and Heritage Credit Union.</p>
+        <p className="text-xs text-muted-foreground flex items-center gap-1"><Lock className="w-3 h-3" />Messages are encrypted and visible only to you and Heritage Bank.</p>
       </div>
     );
   }
@@ -219,7 +219,7 @@ export default function Messages() {
             Secure Messages
             {unreadCount > 0 && <Badge className="bg-primary text-white text-xs">{unreadCount} new</Badge>}
           </h1>
-          <p className="text-muted-foreground mt-1">Communicate directly with Heritage Credit Union.</p>
+          <p className="text-muted-foreground mt-1">Communicate directly with Heritage Bank.</p>
         </div>
         <Button onClick={() => setComposing(true)} className="bg-primary hover:bg-primary/90 gap-2">
           <Pencil className="w-4 h-4" /> New Message

@@ -150,7 +150,7 @@ export default function CreditScore() {
       <div className="flex items-start justify-between flex-wrap gap-3">
         <div>
           <h1 className="text-3xl font-semibold text-primary">Credit Score</h1>
-          <p className="text-muted-foreground mt-1">Monitoring provided free by Heritage Credit Union.</p>
+          <p className="text-muted-foreground mt-1">Monitoring provided free by Heritage Bank.</p>
         </div>
         <Button variant="outline" onClick={handleRefresh} disabled={refreshing} className="gap-2">
           <RefreshCw className={`w-4 h-4 ${refreshing ? "animate-spin" : ""}`} />
@@ -186,7 +186,7 @@ export default function CreditScore() {
                   formatter={(v: number) => [v, "Score"]}
                   contentStyle={{ fontSize: 12, borderRadius: 8 }}
                 />
-                <Line type="monotone" dataKey="score" stroke="#1a2b5e" strokeWidth={2} dot={{ r: 3, fill: "#1a2b5e" }} />
+                <Line type="monotone" dataKey="score" stroke="#1A5C38" strokeWidth={2} dot={{ r: 3, fill: "#1A5C38" }} />
               </LineChart>
             </ResponsiveContainer>
           </CardContent>

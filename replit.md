@@ -1,6 +1,6 @@
-# Heritage Credit Union Banking Portal
+# Heritage Bank Banking Portal
 
-A private, single-owner online banking portal for Dax Emry Brooks at Heritage Credit Union (Charleston, SC). Accessible only with the registered member email and personal password.
+A private, single-owner online banking portal for Dax Emry Brooks at Heritage Bank (Charleston, SC). Accessible only with the registered member email and personal password.
 
 ## Run & Operate
 
@@ -68,7 +68,7 @@ A private, single-owner online banking portal for Dax Emry Brooks at Heritage Cr
 - Portal is private to Dax Emry Brooks only — no public sign-up
 - Email: `daxemry5855@gmail.com`
 - Password is stored as a bcrypt hash in the `ADMIN_PASSWORD_HASH` Replit Secret — never stored in source or docs
-- Heritage Credit Union branding: deep navy `#1a2b5e`, serif font for headings
+- Heritage Bank branding: forest green `#1A5C38`, dark green sidebar `#0F3522`
 - Charleston, SC 29401 · Member FDIC
 - All dates/times displayed in South Carolina time (America/New_York / Eastern Time)
 

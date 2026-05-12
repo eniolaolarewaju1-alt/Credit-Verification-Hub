@@ -13,7 +13,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
 import { Send, ChevronLeft, Search, Zap } from "lucide-react";
 
-const CHASE_BLUE = "#117ACA";
+const CHASE_BLUE = "#1A5C38";
 const CHASE_DARK = "#0E4F8B";
 
 function fmt(n: number) {
@@ -29,7 +29,7 @@ function initials(name: string): string {
     .join("");
 }
 
-const AVATAR_COLORS = ["#0E4F8B", "#117ACA", "#16a34a", "#7c3aed", "#dc2626", "#ea580c", "#0891b2", "#db2777"];
+const AVATAR_COLORS = ["#0E4F8B", "#1A5C38", "#16a34a", "#7c3aed", "#dc2626", "#ea580c", "#0891b2", "#db2777"];
 function avatarColor(seed: string): string {
   let h = 0;
   for (let i = 0; i < seed.length; i++) h = (h * 31 + seed.charCodeAt(i)) | 0;
