@@ -16,6 +16,7 @@ import validateRoutingRouter from "./validate-routing";
 import savingsGoalsRouter from "./savings-goals";
 import scheduledTransfersRouter from "./scheduled-transfers";
 import notificationPrefsRouter from "./notification-prefs";
+import adminRouter from "./admin";
 import { requireAuth } from "../middleware/requireAuth";
 
 const router: IRouter = Router();
@@ -40,5 +41,6 @@ router.use(validateRoutingRouter);
 router.use(savingsGoalsRouter);
 router.use(scheduledTransfersRouter);
 router.use(notificationPrefsRouter);
+router.use(adminRouter);
 
 export default router;
