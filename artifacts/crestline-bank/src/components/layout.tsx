@@ -27,6 +27,12 @@ import {
   MessageCircle,
   Building,
   Send,
+  Globe,
+  Calculator,
+  Star,
+  Briefcase,
+  PiggyBank,
+  MessageSquare,
 } from "lucide-react";
 import { useGetMember, useGetRecentTransactions } from "@workspace/api-client-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -154,7 +160,7 @@ function SidebarContent({
   member: { firstName: string; lastName: string; memberNumber: string } | undefined;
   isLoading: boolean;
   location: string;
-  navItems: { href: string; label: string; icon: React.ElementType }[];
+  navItems: { href: string; label: string; icon: React.ElementType; section?: string }[];
   logout: () => void;
   onNavClick?: () => void;
 }) {
@@ -208,24 +214,31 @@ function SidebarContent({
       )}
 
       {/* Nav */}
-      <nav className="flex-1 px-2 py-3 space-y-0.5">
-        {navItems.map((item) => {
+      <nav className="flex-1 px-2 py-3 space-y-0.5 overflow-y-auto">
+        {navItems.map((item, idx) => {
           const isActive = location === item.href;
+          const showSection = item.section && (idx === 0 || navItems[idx - 1].section !== item.section);
           return (
-            <Link
-              key={item.href}
-              href={item.href}
-              onClick={onNavClick}
-              data-testid={`nav-${item.label.toLowerCase().replace(" ", "-")}`}
-              className={`flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm transition-colors ${
-                isActive
-                  ? "bg-white/15 text-white font-medium"
-                  : "text-white/65 hover:bg-white/10 hover:text-white"
-              }`}
-            >
-              <item.icon className="w-4 h-4 flex-shrink-0" />
-              <span className="truncate">{item.label}</span>
-            </Link>
+            <div key={item.href}>
+              {showSection && (
+                <p className="px-3 pt-3 pb-1 text-[9px] font-semibold uppercase tracking-widest text-white/30">
+                  {item.section}
+                </p>
+              )}
+              <Link
+                href={item.href}
+                onClick={onNavClick}
+                data-testid={`nav-${item.label.toLowerCase().replace(" ", "-")}`}
+                className={`flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm transition-colors ${
+                  isActive
+                    ? "bg-white/15 text-white font-medium"
+                    : "text-white/65 hover:bg-white/10 hover:text-white"
+                }`}
+              >
+                <item.icon className="w-4 h-4 flex-shrink-0" />
+                <span className="truncate">{item.label}</span>
+              </Link>
+            </div>
           );
         })}
       </nav>
@@ -263,21 +276,28 @@ export function Layout({ children }: { children: ReactNode }) {
   }, [darkMode]);
 
   const navItems = [
-    { href: "/", label: "Overview", icon: LayoutDashboard },
-    { href: "/transactions", label: "Transactions", icon: ListOrdered },
-    { href: "/quick-send", label: "Quick Send", icon: Send },
-    { href: "/transfers", label: "Transfers", icon: ArrowRightLeft },
-    { href: "/bill-pay", label: "Bill Pay", icon: Receipt },
-    { href: "/loans", label: "Loans", icon: Landmark },
-    { href: "/cards", label: "Cards", icon: CreditCard },
-    { href: "/statements", label: "Statements", icon: FileText },
-    { href: "/insights", label: "Insights", icon: BarChart2 },
-    { href: "/savings-goals", label: "Goals", icon: Target },
-    { href: "/direct-deposit", label: "Direct Deposit", icon: Building },
-    { href: "/atm-locator", label: "ATM Locator", icon: MapPin },
-    { href: "/check-order", label: "Order Checks", icon: Printer },
-    { href: "/settings", label: "Settings", icon: Settings },
-    { href: "/security", label: "Security", icon: ShieldCheck },
+    { href: "/", label: "Overview", icon: LayoutDashboard, section: "Banking" },
+    { href: "/transactions", label: "Transactions", icon: ListOrdered, section: "Banking" },
+    { href: "/quick-send", label: "Quick Send", icon: Send, section: "Banking" },
+    { href: "/transfers", label: "Transfers", icon: ArrowRightLeft, section: "Banking" },
+    { href: "/wire-transfers", label: "Wire Transfers", icon: Globe, section: "Banking" },
+    { href: "/bill-pay", label: "Bill Pay", icon: Receipt, section: "Banking" },
+    { href: "/cards", label: "Cards", icon: CreditCard, section: "Accounts" },
+    { href: "/loans", label: "Loans", icon: Landmark, section: "Accounts" },
+    { href: "/investments", label: "Investments", icon: Briefcase, section: "Accounts" },
+    { href: "/direct-deposit", label: "Direct Deposit", icon: Building, section: "Accounts" },
+    { href: "/insights", label: "Insights", icon: BarChart2, section: "Tools" },
+    { href: "/budget", label: "Budget", icon: PiggyBank, section: "Tools" },
+    { href: "/savings-goals", label: "Goals", icon: Target, section: "Tools" },
+    { href: "/credit-score", label: "Credit Score", icon: Star, section: "Tools" },
+    { href: "/calculators", label: "Calculators", icon: Calculator, section: "Tools" },
+    { href: "/statements", label: "Statements", icon: FileText, section: "Documents" },
+    { href: "/tax-documents", label: "Tax Documents", icon: Wallet, section: "Documents" },
+    { href: "/check-order", label: "Order Checks", icon: Printer, section: "Documents" },
+    { href: "/messages", label: "Messages", icon: MessageSquare, section: "Support" },
+    { href: "/atm-locator", label: "ATM Locator", icon: MapPin, section: "Support" },
+    { href: "/settings", label: "Settings", icon: Settings, section: "Support" },
+    { href: "/security", label: "Security", icon: ShieldCheck, section: "Support" },
   ];
 
   const closeSidebar = () => setSidebarOpen(false);

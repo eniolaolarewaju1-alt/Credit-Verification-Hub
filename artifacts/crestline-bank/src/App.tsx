@@ -25,6 +25,13 @@ import DirectDeposit from "@/pages/direct-deposit";
 import AtmLocator from "@/pages/atm-locator";
 import CheckOrder from "@/pages/check-order";
 import QuickSend from "@/pages/quick-send";
+import CreditScore from "@/pages/credit-score";
+import WireTransfers from "@/pages/wire-transfers";
+import Calculators from "@/pages/calculators";
+import TaxDocuments from "@/pages/tax-documents";
+import Messages from "@/pages/messages";
+import Budget from "@/pages/budget";
+import Investments from "@/pages/investments";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -135,6 +142,13 @@ function Router() {
                   <Route path="/atm-locator" component={AtmLocator} />
                   <Route path="/check-order" component={CheckOrder} />
                   <Route path="/quick-send" component={QuickSend} />
+                  <Route path="/credit-score" component={CreditScore} />
+                  <Route path="/wire-transfers" component={WireTransfers} />
+                  <Route path="/calculators" component={Calculators} />
+                  <Route path="/tax-documents" component={TaxDocuments} />
+                  <Route path="/messages" component={Messages} />
+                  <Route path="/budget" component={Budget} />
+                  <Route path="/investments" component={Investments} />
                   <Route component={NotFound} />
                 </Switch>
               </Layout>
