@@ -1,6 +1,6 @@
-import { useParams } from "wouter";
+import { useParams, Link } from "wouter";
 import { useGetTransferReceipt, getGetTransferReceiptQueryKey } from "@workspace/api-client-react";
-import { Printer, CheckCircle2, RotateCcw, Clock } from "lucide-react";
+import { Printer, CheckCircle2, RotateCcw, Clock, Repeat2, Download } from "lucide-react";
 
 const CHASE_BLUE = "#117ACA";
 const CHASE_DARK = "#0E4F8B";
@@ -178,6 +178,39 @@ export default function Receipt() {
             </p>
           </div>
         )}
+
+        {/* QR + actions block */}
+        <div className="px-8 py-6 border-t border-gray-100 grid grid-cols-[auto_1fr] gap-5 items-center">
+          <div className="bg-white border border-gray-200 rounded-md p-2 shadow-sm">
+            <img
+              src={`https://api.qrserver.com/v1/create-qr-code/?size=110x110&margin=0&data=${encodeURIComponent(`HCU-RECEIPT:${receipt.referenceNumber}|amount:${receipt.amount}|id:${receipt.id}`)}`}
+              alt="Receipt QR code"
+              width={110}
+              height={110}
+              className="block"
+            />
+          </div>
+          <div>
+            <p className="text-xs uppercase tracking-widest text-gray-500 font-semibold mb-2">Quick actions</p>
+            <Link
+              href="/transfers"
+              className="flex items-center gap-2 text-sm font-semibold mb-2 hover:underline print:hidden"
+              style={{ color: CHASE_BLUE }}
+            >
+              <Repeat2 className="w-4 h-4" /> Repeat this transfer
+            </Link>
+            <button
+              onClick={() => window.print()}
+              className="flex items-center gap-2 text-sm font-semibold text-gray-700 hover:underline print:hidden"
+            >
+              <Download className="w-4 h-4" /> Save as PDF
+            </button>
+            <p className="text-[10px] text-gray-400 mt-2 leading-snug">
+              Scan the code to verify this receipt's reference number.
+            </p>
+          </div>
+        </div>
+
 
         {/* Footer — Chase style fine print */}
         <div className="px-8 py-5 border-t border-gray-200 bg-gray-50">

@@ -297,9 +297,16 @@ export default function Home() {
         </div>
         <div className="flex gap-2">
           <Link
+            href="/quick-send"
+            data-testid="button-quick-send"
+            className="flex items-center gap-1.5 bg-[#117ACA] text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-[#0D6DAD] transition-colors shadow-sm"
+          >
+            <Zap className="w-3.5 h-3.5" /> Quick Send
+          </Link>
+          <Link
             href="/transfers"
             data-testid="button-transfer"
-            className="flex items-center gap-1.5 bg-[#117ACA] text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-[#0D6DAD] transition-colors shadow-sm"
+            className="flex items-center gap-1.5 border border-gray-200 text-gray-700 px-4 py-2 rounded-lg text-sm font-medium hover:bg-gray-50 transition-colors"
           >
             <ArrowRightLeft className="w-3.5 h-3.5" /> Transfer
           </Link>

@@ -24,6 +24,7 @@ import Insights from "@/pages/insights";
 import DirectDeposit from "@/pages/direct-deposit";
 import AtmLocator from "@/pages/atm-locator";
 import CheckOrder from "@/pages/check-order";
+import QuickSend from "@/pages/quick-send";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -133,6 +134,7 @@ function Router() {
                   <Route path="/direct-deposit" component={DirectDeposit} />
                   <Route path="/atm-locator" component={AtmLocator} />
                   <Route path="/check-order" component={CheckOrder} />
+                  <Route path="/quick-send" component={QuickSend} />
                   <Route component={NotFound} />
                 </Switch>
               </Layout>

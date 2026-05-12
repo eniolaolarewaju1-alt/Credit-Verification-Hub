@@ -39,43 +39,53 @@ function htmlWrapper(title: string, body: string): string {
 <head>
   <meta charset="utf-8" />
   <style>
-    body { font-family: Georgia, 'Times New Roman', serif; background: #f4f6fa; margin: 0; padding: 24px; color: #1a1a2e; }
-    .card { background: #ffffff; border-radius: 12px; max-width: 540px; margin: 0 auto; overflow: hidden; box-shadow: 0 2px 12px rgba(0,0,0,0.08); }
-    .header { background: #1a2b5e; padding: 24px 28px; }
-    .header h1 { color: #ffffff; margin: 0; font-size: 20px; font-weight: 700; letter-spacing: 0.3px; }
-    .header p { color: rgba(255,255,255,0.6); margin: 4px 0 0; font-size: 12px; font-family: Arial, sans-serif; }
+    body { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; background: #f4f6f9; margin: 0; padding: 24px; color: #111; }
+    .card { background: #ffffff; border-radius: 6px; max-width: 560px; margin: 0 auto; overflow: hidden; box-shadow: 0 1px 4px rgba(0,0,0,0.06); border: 1px solid #e5e7eb; }
+    .topbar { height: 6px; background: #0E4F8B; }
+    .header { background: #ffffff; padding: 22px 28px; border-bottom: 1px solid #f0f0f0; display: flex; align-items: center; }
+    .logo { width: 38px; height: 38px; background: #117ACA; display: inline-block; vertical-align: middle; margin-right: 12px; position: relative; }
+    .logo::before, .logo::after { content: ''; position: absolute; background: #ffffff; }
+    .logo::before { top: 4px; bottom: 4px; left: 18px; width: 2px; }
+    .logo::after { left: 4px; right: 4px; top: 18px; height: 2px; }
+    .header h1 { color: #0E4F8B; margin: 0; font-size: 20px; font-weight: 700; letter-spacing: -0.2px; display: inline-block; vertical-align: middle; }
+    .header p { color: #6b7280; margin: 2px 0 0; font-size: 11px; letter-spacing: 0.5px; text-transform: uppercase; display: block; }
     .body { padding: 28px; }
-    .body h2 { margin: 0 0 16px; font-size: 17px; color: #1a2b5e; }
-    .row { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #f0f0f0; font-size: 14px; font-family: Arial, sans-serif; }
+    .body h2 { margin: 0 0 4px; font-size: 12px; color: #6b7280; text-transform: uppercase; letter-spacing: 1.5px; font-weight: 600; }
+    .amount { color: #0E4F8B; font-size: 36px; font-weight: 700; margin: 4px 0 18px; letter-spacing: -1px; }
+    .row { display: flex; justify-content: space-between; padding: 11px 0; border-bottom: 1px solid #f3f4f6; font-size: 14px; }
     .row:last-of-type { border-bottom: none; }
-    .label { color: #888; }
-    .value { color: #111; font-weight: 600; }
-    .amount { color: #1a2b5e; font-size: 24px; font-weight: 700; margin: 16px 0 20px; font-family: Arial, sans-serif; }
-    .ref { font-family: monospace; background: #f0f4ff; border: 1px solid #c7d4ff; padding: 8px 14px; border-radius: 6px; font-size: 15px; color: #1a2b5e; font-weight: 700; display: inline-block; margin: 4px 0 16px; }
-    .footer { padding: 16px 28px; background: #f8f9fc; font-family: Arial, sans-serif; font-size: 11px; color: #aaa; border-top: 1px solid #ececec; }
-    .badge { display: inline-block; padding: 3px 10px; border-radius: 20px; font-size: 12px; font-family: Arial, sans-serif; font-weight: 600; }
-    .badge-success { background: #dcfce7; color: #166534; }
-    .badge-pending { background: #fef9c3; color: #854d0e; }
-    .badge-reversed { background: #dbeafe; color: #1e40af; }
-    .alert { background: #fff7ed; border-left: 4px solid #ea580c; padding: 12px 16px; border-radius: 6px; font-size: 13px; font-family: Arial, sans-serif; margin-top: 12px; color: #7c2d12; }
-    .note { background: #f0f9ff; border-left: 4px solid #0284c7; padding: 12px 16px; border-radius: 6px; font-size: 13px; font-family: Arial, sans-serif; margin-top: 12px; color: #0c4a6e; }
-    .reversal-banner { background: #dbeafe; border-radius: 8px; padding: 14px 18px; margin-bottom: 16px; font-family: Arial, sans-serif; font-size: 14px; color: #1e40af; font-weight: 600; }
+    .label { color: #6b7280; }
+    .value { color: #111827; font-weight: 600; }
+    .ref-row { background: #f9fafb; border-top: 1px solid #f0f0f0; border-bottom: 1px solid #f0f0f0; padding: 14px 28px; margin: 16px -28px; display: flex; justify-content: space-between; align-items: center; }
+    .ref-label { color: #6b7280; font-size: 11px; text-transform: uppercase; letter-spacing: 1px; font-weight: 600; }
+    .ref { font-family: 'Courier New', monospace; color: #0E4F8B; font-weight: 700; font-size: 14px; }
+    .footer { padding: 18px 28px; background: #f9fafb; font-size: 11px; color: #9ca3af; border-top: 1px solid #f0f0f0; text-align: center; line-height: 1.6; }
+    .badge { display: inline-block; padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 600; border: 1px solid; }
+    .badge-success { background: #f0fdf4; color: #166534; border-color: #bbf7d0; }
+    .badge-pending { background: #fffbeb; color: #854d0e; border-color: #fde68a; }
+    .badge-reversed { background: #eff6ff; color: #1e40af; border-color: #bfdbfe; }
+    .alert { background: #fffbeb; border-left: 3px solid #f59e0b; padding: 12px 16px; font-size: 13px; margin-top: 12px; color: #78350f; border-radius: 0 4px 4px 0; }
+    .note { background: #eff6ff; border-left: 3px solid #117ACA; padding: 12px 16px; font-size: 13px; margin-top: 12px; color: #1e3a8a; border-radius: 0 4px 4px 0; }
+    .reversal-banner { background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 4px; padding: 12px 16px; margin-bottom: 16px; font-size: 14px; color: #1e40af; font-weight: 600; }
   </style>
 </head>
 <body>
   <div class="card">
+    <div class="topbar"></div>
     <div class="header">
-      <h1>Heritage Credit Union</h1>
-      <p>Charleston, SC 29401 · Member FDIC</p>
+      <span class="logo"></span>
+      <span>
+        <h1 style="display:block;">Heritage Credit Union</h1>
+        <p>Charleston, SC · Member FDIC</p>
+      </span>
     </div>
     <div class="body">
       <h2>${title}</h2>
       ${body}
     </div>
     <div class="footer">
-      This is an automated alert from your Heritage Credit Union online banking portal.<br/>
-      If you did not initiate this action, please contact us immediately at (843) 555-0100.<br/>
-      &copy; ${new Date().getFullYear()} Heritage Credit Union. All rights reserved.
+      This is an automated message from Heritage Credit Union. For questions, call <strong>(843) 555-0100</strong>.<br/>
+      &copy; ${new Date().getFullYear()} Heritage Credit Union, N.A. Member FDIC. Equal Housing Lender.
     </div>
   </div>
 </body>

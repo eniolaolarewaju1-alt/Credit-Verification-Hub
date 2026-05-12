@@ -26,6 +26,7 @@ import {
   Wallet,
   MessageCircle,
   Building,
+  Send,
 } from "lucide-react";
 import { useGetMember, useGetRecentTransactions } from "@workspace/api-client-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -264,6 +265,7 @@ export function Layout({ children }: { children: ReactNode }) {
   const navItems = [
     { href: "/", label: "Overview", icon: LayoutDashboard },
     { href: "/transactions", label: "Transactions", icon: ListOrdered },
+    { href: "/quick-send", label: "Quick Send", icon: Send },
     { href: "/transfers", label: "Transfers", icon: ArrowRightLeft },
     { href: "/bill-pay", label: "Bill Pay", icon: Receipt },
     { href: "/loans", label: "Loans", icon: Landmark },

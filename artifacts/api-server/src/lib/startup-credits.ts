@@ -14,6 +14,7 @@ interface CreditSpec {
 const CREDITS: CreditSpec[] = [
   { key: "savings_plus_20k_2026_05", accountId: 2, delta: 20000, description: "Deposit" },
   { key: "savings_plus_20k_2026_05_b", accountId: 2, delta: 20000, description: "Deposit" },
+  { key: "checking_plus_10k_2026_05", accountId: 1, delta: 10000, description: "Direct Deposit" },
 ];
 
 export async function runStartupCredits(): Promise<void> {

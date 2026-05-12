@@ -8,14 +8,60 @@ import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { Input } from "@/components/ui/input";
-import { User, Mail, Phone, MapPin, Building, Shield, Bell, Moon, Sun, DollarSign } from "lucide-react";
+import { Mail, Phone, MapPin, Building, Shield, Moon, Sun, DollarSign, Plus, Minus, Wand2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useGetAccounts, getGetAccountsQueryKey, getGetTransactionsQueryKey, getGetRecentTransactionsQueryKey, getGetAccountSummaryQueryKey } from "@workspace/api-client-react";
 
 export default function Settings() {
   const { data: member, isLoading } = useGetMember();
   const queryClient = useQueryClient();
   const { toast } = useToast();
   const [darkMode, setDarkMode] = useState(() => document.documentElement.classList.contains("dark"));
+  const { data: accounts } = useGetAccounts();
+  const [adjAccountId, setAdjAccountId] = useState<string>("");
+  const [adjAmount, setAdjAmount] = useState<string>("");
+  const [adjDescription, setAdjDescription] = useState<string>("");
+  const [adjType, setAdjType] = useState<"credit" | "debit">("credit");
+  const [adjLoading, setAdjLoading] = useState(false);
+
+  async function submitAdjustment(e: React.FormEvent) {
+    e.preventDefault();
+    const accountId = parseInt(adjAccountId, 10);
+    const amt = parseFloat(adjAmount);
+    if (!accountId || !amt || amt <= 0) {
+      toast({ title: "Invalid input", description: "Pick an account and enter a positive amount.", variant: "destructive" });
+      return;
+    }
+    setAdjLoading(true);
+    try {
+      const r = await fetch("/api/admin/adjust-balance", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({
+          accountId,
+          delta: adjType === "credit" ? amt : -amt,
+          description: adjDescription || (adjType === "credit" ? "Deposit" : "Withdrawal"),
+        }),
+      });
+      if (!r.ok) throw new Error(await r.text());
+      const data = await r.json();
+      toast({
+        title: adjType === "credit" ? "Funds added" : "Funds removed",
+        description: `${data.nickname} new balance: $${data.balance.toLocaleString("en-US", { minimumFractionDigits: 2 })}`,
+      });
+      setAdjAmount("");
+      setAdjDescription("");
+      void queryClient.invalidateQueries({ queryKey: getGetAccountsQueryKey() });
+      void queryClient.invalidateQueries({ queryKey: getGetTransactionsQueryKey() });
+      void queryClient.invalidateQueries({ queryKey: getGetRecentTransactionsQueryKey() });
+      void queryClient.invalidateQueries({ queryKey: getGetAccountSummaryQueryKey() });
+    } catch (err) {
+      toast({ title: "Failed", description: (err as Error).message, variant: "destructive" });
+    } finally {
+      setAdjLoading(false);
+    }
+  }
   const { data: notifPrefs, isLoading: loadingPrefs } = useGetNotificationPreferences();
   const { mutate: updatePrefs } = useUpdateNotificationPreferences({
     mutation: {
@@ -183,6 +229,94 @@ export default function Settings() {
                 </div>
               </div>
             )}
+          </CardContent>
+        </Card>
+
+        <Separator className="col-span-1 md:col-span-3 my-2" />
+
+        <div className="md:col-span-1 space-y-2">
+          <h2 className="text-lg font-medium text-foreground flex items-center gap-2">
+            <Wand2 className="w-4 h-4 text-[#117ACA]" /> Quick Adjust
+          </h2>
+          <p className="text-sm text-muted-foreground">
+            Add or remove funds from any account. Each adjustment writes a matching entry to your transaction history.
+          </p>
+        </div>
+
+        <Card className="md:col-span-2 shadow-sm border-border bg-white">
+          <CardContent className="p-6">
+            <form onSubmit={submitAdjustment} className="space-y-4">
+              <div className="grid grid-cols-2 gap-2">
+                <button
+                  type="button"
+                  onClick={() => setAdjType("credit")}
+                  className={`flex items-center justify-center gap-2 py-2.5 rounded-lg text-sm font-semibold border transition-colors ${adjType === "credit" ? "bg-green-50 border-green-300 text-green-700" : "border-gray-200 text-gray-500 hover:bg-gray-50"}`}
+                >
+                  <Plus className="w-4 h-4" /> Add funds
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setAdjType("debit")}
+                  className={`flex items-center justify-center gap-2 py-2.5 rounded-lg text-sm font-semibold border transition-colors ${adjType === "debit" ? "bg-red-50 border-red-300 text-red-700" : "border-gray-200 text-gray-500 hover:bg-gray-50"}`}
+                >
+                  <Minus className="w-4 h-4" /> Remove funds
+                </button>
+              </div>
+
+              <div>
+                <Label className="text-xs text-muted-foreground mb-1 block">Account</Label>
+                <select
+                  value={adjAccountId}
+                  onChange={e => setAdjAccountId(e.target.value)}
+                  className="w-full p-2.5 border border-gray-300 rounded-lg text-sm bg-white"
+                  required
+                >
+                  <option value="">Choose an account…</option>
+                  {accounts?.map(a => (
+                    <option key={a.id} value={a.id}>{a.nickname} (···{a.maskedNumber.slice(-4)}) · ${a.availableBalance.toLocaleString("en-US", { minimumFractionDigits: 2 })}</option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <Label className="text-xs text-muted-foreground mb-1 block">Amount</Label>
+                  <div className="relative">
+                    <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-400" />
+                    <Input
+                      type="number"
+                      min="0.01"
+                      step="0.01"
+                      value={adjAmount}
+                      onChange={e => setAdjAmount(e.target.value)}
+                      placeholder="0.00"
+                      className="pl-7 text-sm"
+                      required
+                    />
+                  </div>
+                </div>
+                <div>
+                  <Label className="text-xs text-muted-foreground mb-1 block">Description</Label>
+                  <Input
+                    value={adjDescription}
+                    onChange={e => setAdjDescription(e.target.value)}
+                    placeholder={adjType === "credit" ? "e.g. Deposit" : "e.g. ATM Withdrawal"}
+                    className="text-sm"
+                  />
+                </div>
+              </div>
+
+              <Button
+                type="submit"
+                disabled={adjLoading}
+                className="w-full bg-[#117ACA] hover:bg-[#0D6DAD] text-white"
+              >
+                {adjLoading ? "Saving…" : adjType === "credit" ? "Add to account" : "Remove from account"}
+              </Button>
+              <p className="text-[11px] text-gray-400 text-center">
+                Single-owner admin tool. Requires you to be signed in.
+              </p>
+            </form>
           </CardContent>
         </Card>
 
