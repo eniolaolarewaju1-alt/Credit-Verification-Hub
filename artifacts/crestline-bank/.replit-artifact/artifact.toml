@@ -1,0 +1,31 @@
+kind = "web"
+previewPath = "/crestline-bank/"
+title = "Crestline Bank"
+version = "1.0.0"
+id = "artifacts/crestline-bank"
+router = "path"
+
+[[integratedSkills]]
+name = "react-vite"
+version = "1.0.0"
+
+[[services]]
+name = "web"
+paths = [ "/crestline-bank/" ]
+localPort = 20089
+
+[services.development]
+run = "pnpm --filter @workspace/crestline-bank run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/crestline-bank", "run", "build" ]
+publicDir = "artifacts/crestline-bank/dist/public"
+serve = "static"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "20089"
+BASE_PATH = "/crestline-bank/"
