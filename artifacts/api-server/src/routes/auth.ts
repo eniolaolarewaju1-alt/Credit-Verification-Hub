@@ -1,9 +1,7 @@
 import { Router, type IRouter } from "express";
 import bcrypt from "bcryptjs";
-import { lt } from "drizzle-orm";
 import { logger } from "../lib/logger";
-import { sendLoginAlert, sendOtpEmail } from "../lib/email";
-import { db, otpCodesTable } from "@workspace/db";
+import { sendLoginAlert } from "../lib/email";
 
 const router: IRouter = Router();
 
@@ -57,25 +55,13 @@ router.post("/auth/login", async (req, res): Promise<void> => {
     return;
   }
 
-  const hasEmail = !!process.env.GMAIL_APP_PASSWORD;
-
-  if (hasEmail) {
-    const code = generateOtp();
-    const expiresAt = new Date(Date.now() + 10 * 60 * 1000);
-    await db.delete(otpCodesTable).where(lt(otpCodesTable.expiresAt, new Date()));
-    await db.insert(otpCodesTable).values({ code, expiresAt });
-    await sendOtpEmail({ code, expiresAt });
-    req.log.info({ email }, "2FA OTP sent");
-    res.json({ email, requiresOtp: true });
-  } else {
-    (req.session as { userId?: string }).userId = email;
-    req.log.info({ email }, "User logged in (2FA skipped — email not configured)");
-    const ip =
-      (req.headers["x-forwarded-for"] as string | undefined)?.split(",")[0]?.trim() ??
-      req.socket.remoteAddress;
-    void sendLoginAlert({ ip });
-    res.json({ email, requiresOtp: false });
-  }
+  (req.session as { userId?: string }).userId = email;
+  req.log.info({ email }, "User logged in");
+  const ip =
+    (req.headers["x-forwarded-for"] as string | undefined)?.split(",")[0]?.trim() ??
+    req.socket.remoteAddress;
+  void sendLoginAlert({ ip });
+  res.json({ email, requiresOtp: false });
 });
 
 router.get("/auth/me", (req, res): void => {
