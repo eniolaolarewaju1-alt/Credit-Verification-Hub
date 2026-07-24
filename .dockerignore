@@ -1,0 +1,8 @@
+.git
+**/.git
+.local
+attached_assets
+artifacts/heritage-credit/dist
+artifacts/api-server/dist
+artifacts/mockup-sandbox/dist
+**/node_modules
